@@ -9,7 +9,8 @@ const {
   USER_ADDRESS,
   USER_ADDRESS_PRIVATE_KEY,
   HOME_BRIDGE_ADDRESS,
-  HOME_RPC_URL
+  HOME_RPC_URL,
+  HOME_MIN_AMOUNT_PER_TX
 } = process.env;
 
 async function main(){
@@ -28,7 +29,7 @@ async function main(){
       data: '0x',
       nonce,
       gasPrice: '1',
-      amount: '0.001',
+      amount: HOME_MIN_AMOUNT_PER_TX,
       gasLimit: '50000',
       to: HOME_BRIDGE_ADDRESS
     })
