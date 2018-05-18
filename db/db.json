@@ -1,0 +1,15 @@
+{
+    "home": {
+        "deposits": {
+            "processedBlock": 0
+        }
+    },
+    "foreign": {
+        "deposits": {
+            "processedBlock": 0
+        },
+        "withdrawals": {
+            "processedBlock": 0
+        }
+    }
+}
