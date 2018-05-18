@@ -22,8 +22,8 @@ const homeProvider = new Web3.providers.HttpProvider(HOME_RPC_URL);
 const web3Home = new Web3(homeProvider);
 const HomeABI = require('../abis/HomeBridge.abi');
 const homeBridge =  new web3Home.eth.Contract(HomeABI, HOME_BRIDGE_ADDRESS);
-
-let db = require('../db/db.json')
+const DB_FILE_NAME = 'home_deposits.json'
+let db = require(`../db/${DB_FILE_NAME}`)
 
 async function processDeposits(){
   try {
@@ -36,20 +36,20 @@ async function processDeposits(){
       return;
     }
     homeBlockNumber = Web3Utils.hexToNumber(homeBlockNumber);
-    if(homeBlockNumber === db.home.deposits.processedBlock){
+    if(homeBlockNumber === db.processedBlock){
       return;
     }
     
-    const deposits = await homeBridge.getPastEvents('Deposit', {fromBlock: db.home.deposits.processedBlock + 1, toBlock: homeBlockNumber});
+    const deposits = await homeBridge.getPastEvents('Deposit', {fromBlock: db.processedBlock + 1, toBlock: homeBlockNumber});
     console.log(`Found ${deposits.length} on Home Network`);
     
     if(deposits.length > 0){
       await processHomeDeposits(deposits);
     }
 
-    db.home.deposits.processedBlock = homeBlockNumber;
+    db.processedBlock = homeBlockNumber;
     console.log('writing db', homeBlockNumber)
-    fs.writeFileSync(__dirname + '/../db/db.json', JSON.stringify(db,null,4));
+    fs.writeFileSync(`${__dirname}/../db/${DB_FILE_NAME}`, JSON.stringify(db,null,4));
   } catch(e) {
     console.error(e);
   }
