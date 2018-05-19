@@ -23,6 +23,7 @@ const HomeABI = require('../abis/HomeBridge.abi');
 const homeBridge =  new web3Home.eth.Contract(HomeABI, HOME_BRIDGE_ADDRESS);
 const DB_FILE_NAME = 'home_deposits.json'
 let db = require(`../db/${DB_FILE_NAME}`)
+let dbNonce = require(`../db/nonce.json`)
 
 async function processDeposits(homeChainId){
   if(!homeChainId){
@@ -60,6 +61,7 @@ async function processDeposits(homeChainId){
 async function processHomeDeposits(deposits, homeChainId){
   try{
     let nonce = await getNonce(web3Home, VALIDATOR_ADDRESS);
+    nonce = Math.max(dbNonce.home, nonce);
     await asyncForEach(deposits, async (deposit, index) => {
       const {recipient, value} = deposit.returnValues;
       
@@ -82,7 +84,7 @@ async function processHomeDeposits(deposits, homeChainId){
         nonce,
         gasPrice: gasPrice.toString(10),
         amount: '0',
-        gasLimit: gasEstimate,
+        gasLimit: gasEstimate + 200000,
         privateKey: VALIDATOR_ADDRESS_PRIVATE_KEY,
         to: HOME_BRIDGE_ADDRESS,
         chainId: homeChainId,
@@ -91,6 +93,8 @@ async function processHomeDeposits(deposits, homeChainId){
       console.log(index+1, '# processing deposit', deposit.transactionHash, txHash);
       nonce += 1;
     })
+    dbNonce.home = nonce;
+    fs.writeFileSync(`${__dirname}/../db/nonce.json`, JSON.stringify(dbNonce,null,4));
   } catch(e) {
     throw new Error(e);
     console.error(e)

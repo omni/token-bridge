@@ -27,10 +27,11 @@ const homeBridge =  new web3Home.eth.Contract(HomeABI, HOME_BRIDGE_ADDRESS);
 const foreignProvider = new Web3.providers.HttpProvider(FOREIGN_RPC_URL);
 const web3Foreign = new Web3(foreignProvider);
 const ForeignABI = require('../abis/ForeignBridge.abi');
-const foreignBridge =  new web3Home.eth.Contract(ForeignABI, FOREIGN_BRIDGE_ADDRESS);
+const foreignBridge =  new web3Foreign.eth.Contract(ForeignABI, FOREIGN_BRIDGE_ADDRESS);
 
 const DB_FILE_NAME = 'home_collected_signatures.json'
 let db = require(`../db/${DB_FILE_NAME}`)
+let dbNonce = require(`../db/nonce.json`)
 
 async function processCollectedSignatures(foreignChainId){
   try {
@@ -65,6 +66,7 @@ async function processCollectedSignatures(foreignChainId){
 async function processCollSignatures(signatures, foreignChainId){
   try{
     let nonce = await getNonce(web3Foreign, VALIDATOR_ADDRESS);
+    nonce = Math.max(dbNonce.foreign, nonce);
     await asyncForEach(signatures, async (colSignature, indexSig) => {
       const {authorityResponsibleForRelay, messageHash} = colSignature.returnValues;
       if(authorityResponsibleForRelay === VALIDATOR_ADDRESS){
@@ -96,7 +98,7 @@ async function processCollSignatures(signatures, foreignChainId){
           nonce,
           gasPrice: gasPrice.toString(10),
           amount: '0',
-          gasLimit: gasEstimate,
+          gasLimit: gasEstimate + 200000,
           privateKey: VALIDATOR_ADDRESS_PRIVATE_KEY,
           to: FOREIGN_BRIDGE_ADDRESS,
           chainId: foreignChainId,
@@ -106,6 +108,8 @@ async function processCollSignatures(signatures, foreignChainId){
         nonce += 1;
       }
     })
+    dbNonce.foreign = nonce;
+    fs.writeFileSync(`${__dirname}/../db/nonce.json`, JSON.stringify(dbNonce,null,4));
   } catch(e) {
     throw new Error(e);
     console.error(e)

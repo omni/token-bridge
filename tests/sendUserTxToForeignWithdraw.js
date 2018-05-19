@@ -85,7 +85,6 @@ async function main(){
       web3: web3Foreign,
       chainId: foreignChaindId
     })
-    console.log(txHash)
     if(txHash !== undefined) {
       nonce++;
       actualSent++;
