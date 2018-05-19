@@ -10,13 +10,19 @@ const {
   USER_ADDRESS_PRIVATE_KEY,
   HOME_BRIDGE_ADDRESS,
   HOME_RPC_URL,
-  HOME_MIN_AMOUNT_PER_TX
+  HOME_MIN_AMOUNT_PER_TX,
+  NUMBER_OF_DEPOSITS_TO_SEND
 } = process.env;
 
 const homeProvider = new Web3.providers.HttpProvider(HOME_RPC_URL);
 const web3Home = new Web3(homeProvider);
 
 async function main(){
+  let homeChaindId = await sendRawTx({
+    url: HOME_RPC_URL,
+    params: [],
+    method: 'net_version'
+  })
   let nonce = await sendRawTx({
     url: HOME_RPC_URL,
     method: "eth_getTransactionCount",
@@ -24,7 +30,7 @@ async function main(){
   })
   nonce = Web3Utils.hexToNumber(nonce);
   let actualSent = 0;
-  for(let i =0 ; i< 1; i++){
+  for(let i =0 ; i< Number(NUMBER_OF_DEPOSITS_TO_SEND); i++){
     const txHash = await sendTx({
       rpcUrl: HOME_RPC_URL,
       privateKey: USER_ADDRESS_PRIVATE_KEY,
@@ -35,7 +41,7 @@ async function main(){
       gasLimit: 50000,
       to: HOME_BRIDGE_ADDRESS,
       web3: web3Home,
-      chainId: 42
+      chainId: homeChaindId
     })
     if(txHash !== undefined) {
       nonce++;
