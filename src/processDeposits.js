@@ -63,11 +63,9 @@ async function processHomeDeposits(deposits, homeChainId){
     await asyncForEach(deposits, async (deposit, index) => {
       const {recipient, value} = deposit.returnValues;
       
-
       const message = createMessage({
         recipient, value, transactionHash: deposit.transactionHash
       })
-      console.log(message)
       const signature = web3Home.eth.accounts.sign(message, '0x'+ VALIDATOR_ADDRESS_PRIVATE_KEY);
       let gasEstimate;
       try {

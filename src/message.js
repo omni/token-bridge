@@ -1,4 +1,5 @@
 const assert = require('assert');
+const Web3Utils = require('web3-utils');
 // strips leading "0x" if present
 function strip0x(input) {
   return input.replace(/^0x/, "");
@@ -16,7 +17,10 @@ function createMessage({recipient, value, transactionHash}) {
   recipient = strip0x(recipient);
   assert.equal(recipient.length, 20 * 2);
 
-  value = strip0x(bigNumberToPaddedBytes32(value));
+  value = Web3Utils.numberToHex(value);
+  value = Web3Utils.padLeft(value, 32 * 2);
+
+  value = strip0x(value);
   assert.equal(value.length, 64);
 
   transactionHash = strip0x(transactionHash);
