@@ -77,6 +77,20 @@
   {
     "constant": true,
     "inputs": [],
+    "name": "requiredSignatures",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
     "name": "validatorContract",
     "outputs": [
       {
@@ -266,11 +280,6 @@
       {
         "indexed": false,
         "name": "value",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "name": "homeGasPrice",
         "type": "uint256"
       }
     ],
@@ -539,20 +548,6 @@
     ],
     "payable": false,
     "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "gasPriceForCompensationAtHomeSide",
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "pure",
     "type": "function"
   }
 ]

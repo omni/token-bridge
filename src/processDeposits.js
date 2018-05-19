@@ -60,18 +60,20 @@ async function processDeposits(homeChainId){
 async function processHomeDeposits(deposits, homeChainId){
   try{
     let nonce = await getNonce(web3Home, VALIDATOR_ADDRESS);
-    await asyncForEach(deposits, async (deposit) => {
+    await asyncForEach(deposits, async (deposit, index) => {
       const {recipient, value} = deposit.returnValues;
+      
 
       const message = createMessage({
         recipient, value, transactionHash: deposit.transactionHash
       })
+      console.log(message)
       const signature = web3Home.eth.accounts.sign(message, '0x'+ VALIDATOR_ADDRESS_PRIVATE_KEY);
       let gasEstimate;
       try {
         gasEstimate = await homeBridge.methods.submitSignature(signature.signature, message).estimateGas({from: VALIDATOR_ADDRESS});
       } catch(e) {
-        console.log('already processed deposit', deposit.transactionHash)
+        console.log(index+1, '# already processed deposit ', deposit.transactionHash)
         return;
       }
       const data = await homeBridge.methods.submitSignature(signature.signature, message).encodeABI({from: VALIDATOR_ADDRESS});
@@ -88,7 +90,7 @@ async function processHomeDeposits(deposits, homeChainId){
         chainId: homeChainId,
         web3: web3Home
       })
-      console.log('processing deposit', deposit.transactionHash, txHash);
+      console.log(index+1, '# processing deposit', deposit.transactionHash, txHash);
       nonce += 1;
     })
   } catch(e) {

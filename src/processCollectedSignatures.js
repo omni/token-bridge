@@ -65,7 +65,7 @@ async function processCollectedSignatures(foreignChainId){
 async function processCollSignatures(signatures, foreignChainId){
   try{
     let nonce = await getNonce(web3Foreign, VALIDATOR_ADDRESS);
-    await asyncForEach(signatures, async (colSignature) => {
+    await asyncForEach(signatures, async (colSignature, indexSig) => {
       const {authorityResponsibleForRelay, messageHash} = colSignature.returnValues;
       if(authorityResponsibleForRelay === VALIDATOR_ADDRESS){
         const message = await homeBridge.methods.message(messageHash).call();
@@ -83,9 +83,9 @@ async function processCollSignatures(signatures, foreignChainId){
         })
         let gasEstimate;
         try {
-          gasEstimate = await await foreignBridge.methods.deposit(v,r,s,message).estimateGas();
+          gasEstimate = await foreignBridge.methods.deposit(v,r,s,message).estimateGas();
         } catch(e) {
-          console.log('already processed col sig', colSignature.transactionHash)
+          console.log(indexSig+1,' # already processed col sig', colSignature.transactionHash)
           return;
         }
         const data = await foreignBridge.methods.deposit(v,r,s,message).encodeABI();
@@ -102,7 +102,7 @@ async function processCollSignatures(signatures, foreignChainId){
           chainId: foreignChainId,
           web3: web3Foreign
         })
-        console.log('processing collected signature', colSignature.transactionHash, txHash);
+        console.log(indexSig+1,'# processing collected signature', colSignature.transactionHash, txHash);
         nonce += 1;
       }
     })
