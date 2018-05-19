@@ -28,6 +28,16 @@ function createMessage({recipient, value, transactionHash}) {
   return message;
 }
 
+function signatureToVRS(signature) {
+  assert.equal(signature.length, 2 + 32 * 2 + 32 * 2 + 2);
+  signature = strip0x(signature);
+  var v = parseInt(signature.substr(64 * 2), 16);
+  var r = "0x" + signature.substr(0, 32 * 2);
+  var s = "0x" + signature.substr(32 * 2, 32 * 2);
+  return {v: v, r: r, s: s};
+}
+
 module.exports = {
-  createMessage
+  createMessage,
+  signatureToVRS
 }

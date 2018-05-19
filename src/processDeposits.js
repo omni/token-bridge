@@ -2,7 +2,6 @@ require('dotenv').config();
 const fs = require('fs')
 const Web3 = require('web3');
 const Web3Utils = require('web3-utils')
-const Tx = require('ethereumjs-tx');
 const fetch = require('node-fetch');
 const {sendRawTx, sendTx} = require('./tx/sendTx');
 const {createMessage} = require('./message');
@@ -25,7 +24,10 @@ const homeBridge =  new web3Home.eth.Contract(HomeABI, HOME_BRIDGE_ADDRESS);
 const DB_FILE_NAME = 'home_deposits.json'
 let db = require(`../db/${DB_FILE_NAME}`)
 
-async function processDeposits(){
+async function processDeposits(homeChainId){
+  if(!homeChainId){
+    throw new Error('Chain id is not specified');
+  }
   try {
     let homeBlockNumber = await sendRawTx({
       url: HOME_RPC_URL,
@@ -41,21 +43,21 @@ async function processDeposits(){
     }
     
     const deposits = await homeBridge.getPastEvents('Deposit', {fromBlock: db.processedBlock + 1, toBlock: homeBlockNumber});
-    console.log(`Found ${deposits.length} on Home Network`);
+    console.log(`Found ${deposits.length} Deposits on Home Network`);
     
     if(deposits.length > 0){
-      await processHomeDeposits(deposits);
+      await processHomeDeposits(deposits, homeChainId);
     }
 
     db.processedBlock = homeBlockNumber;
-    console.log('writing db', homeBlockNumber)
+    console.log('writing db deposits', homeBlockNumber)
     fs.writeFileSync(`${__dirname}/../db/${DB_FILE_NAME}`, JSON.stringify(db,null,4));
   } catch(e) {
     console.error(e);
   }
 }
 
-async function processHomeDeposits(deposits){
+async function processHomeDeposits(deposits, homeChainId){
   try{
     let nonce = await getNonce(web3Home, VALIDATOR_ADDRESS);
     await asyncForEach(deposits, async (deposit) => {
@@ -69,7 +71,7 @@ async function processHomeDeposits(deposits){
       try {
         gasEstimate = await homeBridge.methods.submitSignature(signature.signature, message).estimateGas({from: VALIDATOR_ADDRESS});
       } catch(e) {
-        console.log('already processed', deposit.transactionHash)
+        console.log('already processed deposit', deposit.transactionHash)
         return;
       }
       const data = await homeBridge.methods.submitSignature(signature.signature, message).encodeABI({from: VALIDATOR_ADDRESS});
@@ -82,7 +84,9 @@ async function processHomeDeposits(deposits){
         amount: '0',
         gasLimit: gasEstimate,
         privateKey: VALIDATOR_ADDRESS_PRIVATE_KEY,
-        to: HOME_BRIDGE_ADDRESS
+        to: HOME_BRIDGE_ADDRESS,
+        chainId: homeChainId,
+        web3: web3Home
       })
       console.log('processing deposit', deposit.transactionHash, txHash);
       nonce += 1;

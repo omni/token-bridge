@@ -1,5 +1,4 @@
 const Web3Utils = require('web3-utils');
-const Tx = require('ethereumjs-tx');
 const fetch = require('node-fetch');
 
 async function sendTx({
@@ -10,25 +9,25 @@ async function sendTx({
   gasPrice,
   amount,
   gasLimit,
-  to
+  to,
+  chainId,
+  web3
 }){
   try {
-    privateKey = Buffer.from(privateKey, 'hex')
-    const rawTx = {
-      data,
+    const serializedTx = await web3.eth.accounts.signTransaction({
+      nonce: Number(nonce),
+      chainId,
       to,
-      nonce: Web3Utils.toHex(nonce),
-      value: Web3Utils.toHex(Web3Utils.toWei(amount)),
-      gasPrice: Web3Utils.toHex(Web3Utils.toWei(gasPrice, 'gwei')),
-      gasLimit:  Web3Utils.toHex(gasLimit),
-    }
-    const tx = new Tx(rawTx);
-    tx.sign(privateKey);
-    const serializedTx = tx.serialize();
+      data,
+      value: Web3Utils.toWei(amount),
+      gasPrice: Web3Utils.toWei(gasPrice, 'gwei'),
+      gas: gasLimit,
+    }, '0x' + privateKey);
+    
     return await sendRawTx({
       url: rpcUrl,
       method: 'eth_sendRawTransaction',
-      params: ['0x' + serializedTx.toString('hex')]
+      params: [serializedTx.rawTransaction]
     });
   } catch(e) {
     console.error(e)
