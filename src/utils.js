@@ -5,7 +5,46 @@ async function asyncForEach(array, callback) {
   }
 }
 
+function getRequiredBlockConfirmations(contract) {
+  return contract.methods.requiredBlockConfirmations().call();
+}
+
+function waitForBlockConfirmations(web3, txId, requiredBlockConfirmations) {
+  const transactionReceiptAsync = function(txId, resolve, reject) {
+    web3.eth.getTransactionReceipt(txId, async (err, receipt) => {
+      if (err) {
+        reject(err)
+      } else if (receipt == null) {
+        setTimeout(function () {
+          transactionReceiptAsync(txId, resolve, reject);
+        }, 500);
+      } else if (receipt && receipt.blockNumber) {
+        const latestBlockNumber = await getBlockNumber(web3)
+        const blockConfirmations = latestBlockNumber - receipt.blockNumber + 1
+        if(blockConfirmations >= requiredBlockConfirmations) {
+          resolve(receipt);
+        } else {
+          setTimeout(function () {
+            transactionReceiptAsync(txId, resolve, reject);
+          }, 500);
+        }
+      }
+    });
+  };
+
+  return new Promise(function (resolve, reject) {
+    transactionReceiptAsync(txId, resolve, reject);
+  });
+}
+
+function getBlockNumber(web3) {
+  return web3.eth.getBlockNumber();
+}
+
 
 module.exports = {
-  asyncForEach
+  asyncForEach,
+  getRequiredBlockConfirmations,
+  waitForBlockConfirmations,
+  getBlockNumber
 }

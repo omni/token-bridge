@@ -7,7 +7,7 @@ const {sendRawTx, sendTx} = require('./tx/sendTx');
 const {createMessage, signatureToVRS} = require('./message');
 const {getNonce} = require('./tx/web3');
 const {getGasPrices} = require('./gasPrice');
-const {asyncForEach} = require('./utils');
+const {asyncForEach, getRequiredBlockConfirmations, waitForBlockConfirmations} = require('./utils');
 
 const {
   HOME_RPC_URL,
@@ -32,6 +32,11 @@ const foreignBridge =  new web3Foreign.eth.Contract(ForeignABI, FOREIGN_BRIDGE_A
 const DB_FILE_NAME = 'home_collected_signatures.json'
 let db = require(`../db/${DB_FILE_NAME}`)
 let dbNonce = require(`../db/nonce.json`)
+let requiredBlockConfirmations = 1;
+
+async function initialize() {
+  requiredBlockConfirmations = await getRequiredBlockConfirmations(homeBridge);
+}
 
 async function processCollectedSignatures(foreignChainId){
   try {
@@ -68,6 +73,10 @@ async function processCollSignatures(signatures, foreignChainId){
     let nonce = await getNonce(web3Foreign, VALIDATOR_ADDRESS);
     nonce = Math.max(dbNonce.foreign, nonce);
     await asyncForEach(signatures, async (colSignature, indexSig) => {
+      if(requiredBlockConfirmations > 1) {
+        await waitForBlockConfirmations(web3Home, colSignature.transactionHash, requiredBlockConfirmations);
+      }
+
       const {authorityResponsibleForRelay, messageHash} = colSignature.returnValues;
       if(authorityResponsibleForRelay === VALIDATOR_ADDRESS){
         const message = await homeBridge.methods.message(messageHash).call();
@@ -115,5 +124,7 @@ async function processCollSignatures(signatures, foreignChainId){
     console.error(e)
   }
 }
+
+initialize();
 
 module.exports = processCollectedSignatures;
