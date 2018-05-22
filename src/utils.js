@@ -14,10 +14,6 @@ function waitForBlockConfirmations(web3, txId, requiredBlockConfirmations) {
     web3.eth.getTransactionReceipt(txId, async (err, receipt) => {
       if (err) {
         reject(err)
-      } else if (receipt == null) {
-        setTimeout(function () {
-          transactionReceiptAsync(txId, resolve, reject);
-        }, 500);
       } else if (receipt && receipt.blockNumber) {
         const latestBlockNumber = await getBlockNumber(web3)
         const blockConfirmations = latestBlockNumber - receipt.blockNumber + 1
@@ -28,6 +24,10 @@ function waitForBlockConfirmations(web3, txId, requiredBlockConfirmations) {
             transactionReceiptAsync(txId, resolve, reject);
           }, 500);
         }
+      } else {
+        setTimeout(function () {
+          transactionReceiptAsync(txId, resolve, reject);
+        }, 500);
       }
     });
   };
