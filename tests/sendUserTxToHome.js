@@ -1,9 +1,7 @@
-require('dotenv').config();
-const Web3 = require('web3');
-const Web3Utils = require('web3-utils');
-const fetch = require('node-fetch');
-const assert = require('assert')
-const {sendTx, sendRawTx} = require('../src/tx/sendTx');
+require('dotenv').config()
+const Web3 = require('web3')
+const Web3Utils = require('web3-utils')
+const { sendTx, sendRawTx } = require('../src/tx/sendTx')
 
 const {
   USER_ADDRESS,
@@ -12,25 +10,25 @@ const {
   HOME_RPC_URL,
   HOME_MIN_AMOUNT_PER_TX,
   NUMBER_OF_DEPOSITS_TO_SEND
-} = process.env;
+} = process.env
 
-const homeProvider = new Web3.providers.HttpProvider(HOME_RPC_URL);
-const web3Home = new Web3(homeProvider);
+const homeProvider = new Web3.providers.HttpProvider(HOME_RPC_URL)
+const web3Home = new Web3(homeProvider)
 
-async function main(){
-  let homeChaindId = await sendRawTx({
+async function main() {
+  const homeChaindId = await sendRawTx({
     url: HOME_RPC_URL,
     params: [],
     method: 'net_version'
   })
   let nonce = await sendRawTx({
     url: HOME_RPC_URL,
-    method: "eth_getTransactionCount",
-    params: [ USER_ADDRESS, "latest"]
+    method: 'eth_getTransactionCount',
+    params: [USER_ADDRESS, 'latest']
   })
-  nonce = Web3Utils.hexToNumber(nonce);
-  let actualSent = 0;
-  for(let i =0 ; i< Number(NUMBER_OF_DEPOSITS_TO_SEND); i++){
+  nonce = Web3Utils.hexToNumber(nonce)
+  let actualSent = 0
+  for (let i = 0; i < Number(NUMBER_OF_DEPOSITS_TO_SEND); i++) {
     const txHash = await sendTx({
       rpcUrl: HOME_RPC_URL,
       privateKey: USER_ADDRESS_PRIVATE_KEY,
@@ -43,11 +41,11 @@ async function main(){
       web3: web3Home,
       chainId: homeChaindId
     })
-    if(txHash !== undefined) {
-      nonce++;
-      actualSent++;
-      console.log(actualSent,' # ',txHash);
-    } 
+    if (txHash !== undefined) {
+      nonce++
+      actualSent++
+      console.log(actualSent, ' # ', txHash)
+    }
   }
 }
 main()

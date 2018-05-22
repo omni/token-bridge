@@ -1,0 +1,18 @@
+{
+  "extends": [
+    "plugin:node/recommended",
+    "airbnb-base",
+    "plugin:prettier/recommended"
+  ],
+  "plugins": ["node"],
+  "rules": {
+    "func-names": "off",
+    "no-await-in-loop": "off",
+    "no-console": "off",
+    "no-param-reassign": "off",
+    "no-plusplus": "off",
+    "no-shadow": "off",
+    "no-use-before-define": ["error", { "functions": false }],
+    "import/no-dynamic-require": "off"
+  }
+}
