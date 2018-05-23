@@ -8,31 +8,30 @@ function getRequiredBlockConfirmations(contract) {
   return contract.methods.requiredBlockConfirmations().call()
 }
 
-function waitForBlockConfirmations(web3, txId, requiredBlockConfirmations) {
-  const transactionReceiptAsync = function(txId, resolve, reject) {
-    web3.eth.getTransactionReceipt(txId, async (err, receipt) => {
-      if (err) {
-        reject(err)
-      } else if (receipt && receipt.blockNumber) {
-        const latestBlockNumber = await getBlockNumber(web3)
-        const blockConfirmations = latestBlockNumber - receipt.blockNumber + 1
-        if (blockConfirmations >= requiredBlockConfirmations) {
+function waitForBlockConfirmations(web3, event, requiredBlockConfirmations, blockNumberProvider) {
+  const transactionReceiptAsync = async function(event, resolve, reject) {
+    const latestBlockNumber = blockNumberProvider.getLatestBlockNumber()
+    const blockConfirmations = latestBlockNumber - event.blockNumber + 1
+    if (blockConfirmations >= requiredBlockConfirmations) {
+      try {
+        const receipt = await web3.eth.getTransactionReceipt(event.transactionHash)
+        if (receipt && receipt.blockNumber) {
           resolve(receipt)
         } else {
-          setTimeout(() => {
-            transactionReceiptAsync(txId, resolve, reject)
-          }, 500)
+          reject('Tx not found')
         }
-      } else {
-        setTimeout(() => {
-          transactionReceiptAsync(txId, resolve, reject)
-        }, 500)
+      } catch (e) {
+        reject(e)
       }
-    })
+    } else {
+      setTimeout(() => {
+        transactionReceiptAsync(event, resolve, reject)
+      }, 5000)
+    }
   }
 
   return new Promise((resolve, reject) => {
-    transactionReceiptAsync(txId, resolve, reject)
+    transactionReceiptAsync(event, resolve, reject)
   })
 }
 

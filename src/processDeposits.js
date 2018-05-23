@@ -1,8 +1,7 @@
 require('dotenv').config()
 const fs = require('fs')
 const Web3 = require('web3')
-const Web3Utils = require('web3-utils')
-const { sendRawTx, sendTx } = require('./tx/sendTx')
+const { sendTx } = require('./tx/sendTx')
 const { createMessage } = require('./message')
 const { getNonce } = require('./tx/web3')
 const { getGasPrices } = require('./gasPrice')
@@ -11,6 +10,7 @@ const {
   getRequiredBlockConfirmations,
   waitForBlockConfirmations
 } = require('./utils')
+const BlockNumberProvider = require('./blockNumberProvider')
 
 const {
   HOME_RPC_URL,
@@ -28,6 +28,7 @@ const DB_FILE_NAME = 'home_deposits.json'
 const db = require(`../db/${DB_FILE_NAME}`)
 const dbNonce = require(`../db/nonce.json`)
 let requiredBlockConfirmations = 1
+const blockNumberProvider = new BlockNumberProvider(web3Home, 5000)
 
 async function initialize() {
   requiredBlockConfirmations = await getRequiredBlockConfirmations(homeBridge)
@@ -38,16 +39,9 @@ async function processDeposits(homeChainId) {
     throw new Error('Chain id is not specified')
   }
   try {
-    let homeBlockNumber = await sendRawTx({
-      url: HOME_RPC_URL,
-      params: [],
-      method: 'eth_blockNumber'
-    })
-    if (homeBlockNumber === undefined) {
-      return
-    }
-    homeBlockNumber = Web3Utils.hexToNumber(homeBlockNumber)
-    if (homeBlockNumber === db.processedBlock) {
+    const homeBlockNumber = blockNumberProvider.getLatestBlockNumber()
+
+    if (homeBlockNumber === undefined || homeBlockNumber === db.processedBlock) {
       return
     }
 
@@ -77,8 +71,9 @@ async function processHomeDeposits(deposits, homeChainId) {
       if (requiredBlockConfirmations > 1) {
         await waitForBlockConfirmations(
           web3Home,
-          deposit.transactionHash,
-          requiredBlockConfirmations
+          deposit,
+          requiredBlockConfirmations,
+          blockNumberProvider
         )
       }
 

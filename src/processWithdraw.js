@@ -1,8 +1,7 @@
 require('dotenv').config()
 const fs = require('fs')
 const Web3 = require('web3')
-const Web3Utils = require('web3-utils')
-const { sendRawTx, sendTx } = require('./tx/sendTx')
+const { sendTx } = require('./tx/sendTx')
 const { getNonce } = require('./tx/web3')
 const { getGasPrices } = require('./gasPrice')
 const {
@@ -10,6 +9,7 @@ const {
   getRequiredBlockConfirmations,
   waitForBlockConfirmations
 } = require('./utils')
+const BlockNumberProvider = require('./blockNumberProvider')
 
 const {
   HOME_RPC_URL,
@@ -36,6 +36,7 @@ const DB_FILE_NAME = 'foreign_withdrawals.json'
 const db = require(`../db/${DB_FILE_NAME}`)
 const dbNonce = require(`../db/nonce.json`)
 let requiredBlockConfirmations = 1
+const blockNumberProvider = new BlockNumberProvider(web3Foreign, 5000)
 
 async function initialize() {
   requiredBlockConfirmations = await getRequiredBlockConfirmations(foreignBridge)
@@ -43,16 +44,9 @@ async function initialize() {
 
 async function processWithdraw(homeChainId) {
   try {
-    let foreignBlockNumber = await sendRawTx({
-      url: FOREIGN_RPC_URL,
-      params: [],
-      method: 'eth_blockNumber'
-    })
-    if (foreignBlockNumber === undefined) {
-      return
-    }
-    foreignBlockNumber = Web3Utils.hexToNumber(foreignBlockNumber)
-    if (foreignBlockNumber === db.processedBlock) {
+    const foreignBlockNumber = blockNumberProvider.getLatestBlockNumber()
+
+    if (foreignBlockNumber === undefined || foreignBlockNumber === db.processedBlock) {
       return
     }
 
@@ -82,8 +76,9 @@ async function processWithdrawals(withdrawals, homeChainId) {
       if (requiredBlockConfirmations > 1) {
         await waitForBlockConfirmations(
           web3Foreign,
-          withdrawal.transactionHash,
-          requiredBlockConfirmations
+          withdrawal,
+          requiredBlockConfirmations,
+          blockNumberProvider
         )
       }
 
