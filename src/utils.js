@@ -4,45 +4,6 @@ async function asyncForEach(array, callback) {
   }
 }
 
-function getRequiredBlockConfirmations(contract) {
-  return contract.methods.requiredBlockConfirmations().call()
-}
-
-function waitForBlockConfirmations(web3, txId, requiredBlockConfirmations) {
-  const transactionReceiptAsync = function(txId, resolve, reject) {
-    web3.eth.getTransactionReceipt(txId, async (err, receipt) => {
-      if (err) {
-        reject(err)
-      } else if (receipt && receipt.blockNumber) {
-        const latestBlockNumber = await getBlockNumber(web3)
-        const blockConfirmations = latestBlockNumber - receipt.blockNumber + 1
-        if (blockConfirmations >= requiredBlockConfirmations) {
-          resolve(receipt)
-        } else {
-          setTimeout(() => {
-            transactionReceiptAsync(txId, resolve, reject)
-          }, 500)
-        }
-      } else {
-        setTimeout(() => {
-          transactionReceiptAsync(txId, resolve, reject)
-        }, 500)
-      }
-    })
-  }
-
-  return new Promise((resolve, reject) => {
-    transactionReceiptAsync(txId, resolve, reject)
-  })
-}
-
-function getBlockNumber(web3) {
-  return web3.eth.getBlockNumber()
-}
-
 module.exports = {
-  asyncForEach,
-  getRequiredBlockConfirmations,
-  waitForBlockConfirmations,
-  getBlockNumber
+  asyncForEach
 }
