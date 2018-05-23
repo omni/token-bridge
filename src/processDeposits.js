@@ -6,7 +6,11 @@ const { sendRawTx, sendTx } = require('./tx/sendTx')
 const { createMessage } = require('./message')
 const { getNonce } = require('./tx/web3')
 const { getGasPrices } = require('./gasPrice')
-const { asyncForEach } = require('./utils')
+const {
+  asyncForEach,
+  getRequiredBlockConfirmations,
+  waitForBlockConfirmations
+} = require('./utils')
 
 const {
   HOME_RPC_URL,
@@ -23,6 +27,11 @@ const homeBridge = new web3Home.eth.Contract(HomeABI, HOME_BRIDGE_ADDRESS)
 const DB_FILE_NAME = 'home_deposits.json'
 const db = require(`../db/${DB_FILE_NAME}`)
 const dbNonce = require(`../db/nonce.json`)
+let requiredBlockConfirmations = 1
+
+async function initialize() {
+  requiredBlockConfirmations = await getRequiredBlockConfirmations(homeBridge)
+}
 
 async function processDeposits(homeChainId) {
   if (!homeChainId) {
@@ -65,6 +74,14 @@ async function processHomeDeposits(deposits, homeChainId) {
     let nonce = await getNonce(web3Home, VALIDATOR_ADDRESS)
     nonce = Math.max(dbNonce.home, nonce)
     await asyncForEach(deposits, async (deposit, index) => {
+      if (requiredBlockConfirmations > 1) {
+        await waitForBlockConfirmations(
+          web3Home,
+          deposit.transactionHash,
+          requiredBlockConfirmations
+        )
+      }
+
       const { recipient, value } = deposit.returnValues
 
       const message = createMessage({
@@ -108,5 +125,7 @@ async function processHomeDeposits(deposits, homeChainId) {
     throw new Error(e)
   }
 }
+
+initialize()
 
 module.exports = processDeposits
