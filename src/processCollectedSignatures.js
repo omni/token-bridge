@@ -75,12 +75,12 @@ async function processCollSignatures(signatures, foreignChainId) {
     nonce = Math.max(dbNonce.foreign, nonce)
     await asyncForEach(signatures, async (colSignature, indexSig) => {
       if (requiredBlockConfirmations > 1) {
-        await waitForBlockConfirmations(
-          web3Home,
-          colSignature,
+        await waitForBlockConfirmations({
+          web3: web3Home,
+          event: colSignature,
           requiredBlockConfirmations,
           blockNumberProvider
-        )
+        })
       }
 
       const { authorityResponsibleForRelay, messageHash } = colSignature.returnValues

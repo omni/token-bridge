@@ -69,12 +69,12 @@ async function processHomeDeposits(deposits, homeChainId) {
     nonce = Math.max(dbNonce.home, nonce)
     await asyncForEach(deposits, async (deposit, index) => {
       if (requiredBlockConfirmations > 1) {
-        await waitForBlockConfirmations(
-          web3Home,
-          deposit,
+        await waitForBlockConfirmations({
+          web3: web3Home,
+          event: deposit,
           requiredBlockConfirmations,
           blockNumberProvider
-        )
+        })
       }
 
       const { recipient, value } = deposit.returnValues

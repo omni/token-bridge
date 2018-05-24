@@ -74,12 +74,12 @@ async function processWithdrawals(withdrawals, homeChainId) {
     nonce = Math.max(dbNonce.home, nonce)
     await asyncForEach(withdrawals, async (withdrawal, index) => {
       if (requiredBlockConfirmations > 1) {
-        await waitForBlockConfirmations(
-          web3Foreign,
-          withdrawal,
+        await waitForBlockConfirmations({
+          web3: web3Foreign,
+          event: withdrawal,
           requiredBlockConfirmations,
           blockNumberProvider
-        )
+        })
       }
 
       const { recipient, value } = withdrawal.returnValues

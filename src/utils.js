@@ -8,7 +8,12 @@ function getRequiredBlockConfirmations(contract) {
   return contract.methods.requiredBlockConfirmations().call()
 }
 
-function waitForBlockConfirmations(web3, event, requiredBlockConfirmations, blockNumberProvider) {
+function waitForBlockConfirmations({
+  web3,
+  event,
+  requiredBlockConfirmations,
+  blockNumberProvider
+}) {
   const transactionReceiptAsync = async function(event, resolve, reject) {
     const latestBlockNumber = blockNumberProvider.getLatestBlockNumber()
     const blockConfirmations = latestBlockNumber - event.blockNumber + 1
@@ -16,7 +21,18 @@ function waitForBlockConfirmations(web3, event, requiredBlockConfirmations, bloc
       try {
         const receipt = await web3.eth.getTransactionReceipt(event.transactionHash)
         if (receipt && receipt.blockNumber) {
-          resolve(receipt)
+          if (event.blockNumber === receipt.blockNumber) {
+            resolve(receipt)
+          } else {
+            const updatedEvent = {
+              ...event,
+              blockNumber: receipt.blockNumber
+            }
+
+            setTimeout(() => {
+              transactionReceiptAsync(updatedEvent, resolve, reject)
+            }, 5000)
+          }
         } else {
           reject('Tx not found')
         }
