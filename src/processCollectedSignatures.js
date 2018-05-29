@@ -1,12 +1,16 @@
 require('dotenv').config()
 const fs = require('fs')
 const Web3 = require('web3')
-const Web3Utils = require('web3-utils')
-const { sendRawTx, sendTx } = require('./tx/sendTx')
+const { sendTx } = require('./tx/sendTx')
 const { signatureToVRS } = require('./message')
 const { getNonce } = require('./tx/web3')
 const { getGasPrices } = require('./gasPrice')
-const { asyncForEach } = require('./utils')
+const {
+  asyncForEach,
+  getRequiredBlockConfirmations,
+  waitForBlockConfirmations
+} = require('./utils')
+const BlockNumberProvider = require('./blockNumberProvider')
 
 const {
   HOME_RPC_URL,
@@ -32,19 +36,18 @@ const foreignBridge = new web3Foreign.eth.Contract(ForeignABI, FOREIGN_BRIDGE_AD
 const DB_FILE_NAME = 'home_collected_signatures.json'
 const db = require(`../db/${DB_FILE_NAME}`)
 const dbNonce = require(`../db/nonce.json`)
+let requiredBlockConfirmations = 1
+const blockNumberProvider = new BlockNumberProvider(web3Home, 5000)
+
+async function initialize() {
+  requiredBlockConfirmations = await getRequiredBlockConfirmations(homeBridge)
+}
 
 async function processCollectedSignatures(foreignChainId) {
   try {
-    let homeBlockNumber = await sendRawTx({
-      url: HOME_RPC_URL,
-      params: [],
-      method: 'eth_blockNumber'
-    })
-    if (homeBlockNumber === undefined) {
-      return
-    }
-    homeBlockNumber = Web3Utils.hexToNumber(homeBlockNumber)
-    if (homeBlockNumber === db.processedBlock) {
+    const homeBlockNumber = blockNumberProvider.getLatestBlockNumber()
+
+    if (homeBlockNumber === undefined || homeBlockNumber === db.processedBlock) {
       return
     }
 
@@ -71,6 +74,15 @@ async function processCollSignatures(signatures, foreignChainId) {
     let nonce = await getNonce(web3Foreign, VALIDATOR_ADDRESS)
     nonce = Math.max(dbNonce.foreign, nonce)
     await asyncForEach(signatures, async (colSignature, indexSig) => {
+      if (requiredBlockConfirmations > 1) {
+        await waitForBlockConfirmations({
+          web3: web3Home,
+          event: colSignature,
+          requiredBlockConfirmations,
+          blockNumberProvider
+        })
+      }
+
       const { authorityResponsibleForRelay, messageHash } = colSignature.returnValues
       if (authorityResponsibleForRelay === VALIDATOR_ADDRESS) {
         const message = await homeBridge.methods.message(messageHash).call()
@@ -123,5 +135,7 @@ async function processCollSignatures(signatures, foreignChainId) {
     throw new Error(e)
   }
 }
+
+initialize()
 
 module.exports = processCollectedSignatures
