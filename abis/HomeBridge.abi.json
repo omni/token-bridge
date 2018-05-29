@@ -349,6 +349,11 @@
         "indexed": false,
         "name": "messageHash",
         "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "name": "NumberOfCollectedSignatures",
+        "type": "uint256"
       }
     ],
     "name": "CollectedSignatures",
@@ -425,53 +430,6 @@
         "type": "bool"
       }
     ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "gasLimitWithdrawRelay",
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "name": "_withdraw",
-        "type": "bytes32"
-      }
-    ],
-    "name": "withdraws",
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "name": "_gas",
-        "type": "uint256"
-      }
-    ],
-    "name": "setGasLimitWithdrawRelay",
-    "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
