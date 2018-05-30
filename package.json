@@ -4,12 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "watcher:deposit": "node src/watcher.js deposit-watcher-config.js",
+    "sender:home": "node src/sender.js home-sender-config.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "amqplib": "^0.5.2",
     "dotenv": "^5.0.1",
+    "ioredis": "^3.2.2",
     "node-fetch": "^2.1.2",
     "web3": "^1.0.0-beta.34",
     "web3-utils": "^1.0.0-beta.34"
