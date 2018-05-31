@@ -46,7 +46,8 @@ async function processDeposits(deposits) {
 
     txToSend.push({
       data,
-      gasEstimate
+      gasEstimate,
+      transactionReference: deposit.transactionHash
     })
   })
 

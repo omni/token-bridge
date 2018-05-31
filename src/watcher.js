@@ -23,10 +23,12 @@ async function initialize() {
   })
 }
 
-function runMain({ sendToQueue }) {
-  setInterval(() => {
-    main({ sendToQueue })
-  }, 5000)
+async function runMain({ sendToQueue }) {
+  await main({ sendToQueue })
+
+  setTimeout(() => {
+    runMain({ sendToQueue })
+  }, 1000)
 }
 
 async function getLastProcessedBlock() {
@@ -63,7 +65,10 @@ async function main({ sendToQueue }) {
   if (events.length) {
     const job = await processEvents(events)
     console.log('Tx to send: ', job.length)
-    sendToQueue(job)
+
+    if (job.length) {
+      sendToQueue(job)
+    }
   }
   updateLastProcessedBlock(lastBlockNumber)
 }
