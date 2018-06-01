@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "amqp-connection-manager": "^2.0.0",
     "amqplib": "^0.5.2",
     "dotenv": "^5.0.1",
     "ioredis": "^3.2.2",

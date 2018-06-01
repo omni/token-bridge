@@ -1,49 +1,47 @@
 require('dotenv').config()
-const connection = require('amqplib').connect(process.env.QUEUE_URL)
+const connection = require('amqp-connection-manager').connect(process.env.QUEUE_URL)
+
+connection.on('connect', () => {
+  console.log('Connected to amqp Broker')
+})
+
+connection.on('disconnect', () => {
+  console.error('Disconnected from amqp Broker')
+})
 
 function connectWatcherToQueue({ queueName, cb }) {
-  connection
-    .then(conn => conn.createConfirmChannel())
-    .then(ch =>
-      ch.assertQueue(queueName, { durable: true }).then(() => {
-        console.log('Connected to Queue')
-        const sendToQueue = (data, handleFail) =>
-          ch.sendToQueue(
-            queueName,
-            Buffer.from(JSON.stringify(data)),
-            { persistent: true },
-            handleFail
-          )
-        cb({ sendToQueue })
-      })
-    )
-    .catch(console.warn)
+  connection.createChannel({
+    setup(channel) {
+      const sendToQueue = data =>
+        channel.sendToQueue(queueName, Buffer.from(JSON.stringify(data)), { persistent: true })
+
+      return Promise.all([
+        channel.assertQueue(queueName, { durable: true }),
+        cb({ sendToQueue, isAmqpConnected: () => connection.isConnected() })
+      ])
+    }
+  })
 }
 
 function connectSenderToQueue({ queueName, cb }) {
-  connection
-    .then(conn => conn.createConfirmChannel())
-    .then(ch =>
-      ch.assertQueue(queueName, { durable: true }).then(() => {
-        console.log('Connected to Queue')
-        const sendToQueue = (data, handleFail) =>
-          ch.sendToQueue(
-            queueName,
-            Buffer.from(JSON.stringify(data)),
-            { persistent: true },
-            handleFail
-          )
-        ch.consume(queueName, msg =>
+  connection.createChannel({
+    setup(channel) {
+      const sendToQueue = data =>
+        channel.sendToQueue(queueName, Buffer.from(JSON.stringify(data)), { persistent: true })
+
+      return Promise.all([
+        channel.assertQueue(queueName, { durable: true }),
+        channel.consume(queueName, msg =>
           cb({
             msg,
-            ackMsg: job => ch.ack(job),
-            nackMsg: job => ch.nack(job, false, true),
+            ackMsg: job => channel.ack(job),
+            nackMsg: job => channel.nack(job, false, true),
             sendToQueue
           })
         )
-      })
-    )
-    .catch(console.warn)
+      ])
+    }
+  })
 }
 
 module.exports = {

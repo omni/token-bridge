@@ -23,11 +23,13 @@ async function initialize() {
   })
 }
 
-async function runMain({ sendToQueue }) {
-  await main({ sendToQueue })
+async function runMain({ sendToQueue, isAmqpConnected }) {
+  if (isAmqpConnected()) {
+    await main({ sendToQueue })
+  }
 
   setTimeout(() => {
-    runMain({ sendToQueue })
+    runMain({ sendToQueue, isAmqpConnected })
   }, 1000)
 }
 
