@@ -1,9 +1,8 @@
 require('dotenv').config()
 const path = require('path')
 const Web3 = require('web3')
-const Redis = require('ioredis')
-const Redlock = require('redlock')
 const { connectSenderToQueue } = require('./amqpClient')
+const { redis, redlock } = require('./redisClient')
 const { getGasPrices } = require('./gasPrice')
 const { sendTx, sendRawTx } = require('./tx/sendTx')
 const { getNonce } = require('./tx/web3')
@@ -17,13 +16,6 @@ const provider = new Web3.providers.HttpProvider(config.url)
 const web3Instance = new Web3(provider)
 const nonceLock = `lock:${config.id}:nonce`
 const nonceKey = `${config.id}:nonce`
-const redis = new Redis(process.env.REDIS_URL)
-const redlock = new Redlock([redis], {
-  driftFactor: 0.01, // time in ms
-  retryCount: 15,
-  retryDelay: 500, // time in ms
-  retryJitter: 200 // time in ms
-})
 let chainId = 0
 
 async function initialize() {
@@ -52,16 +44,24 @@ function updateNonce(nonce) {
 }
 
 async function main({ msg, ackMsg, nackMsg, sendToQueue }) {
+  if (redis.status !== 'ready') {
+    console.log('Redis not connected.')
+    await setTimeout(() => nackMsg(msg), 5000)
+    return
+  }
+
   const txArray = JSON.parse(msg.content)
   console.log(`Msg received with ${txArray.length} Tx to send`)
   const gasPrice = await getGasPrices()
   const ttl = 60000
 
-  const startLockTime = new Date()
+  const startTryLock = new Date()
   redlock
     .lock(nonceLock, ttl)
     .then(async lock => {
-      console.log('Nonce Locked!')
+      const startTimeLocked = new Date()
+      const timeWaitingForLock = startTimeLocked - startTryLock
+      console.log('Nonce Locked! After: ', timeWaitingForLock)
       let nonce = await readNonce()
       const failedTx = []
       await syncForEach(txArray, async job => {
@@ -102,7 +102,7 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue }) {
       lock
         .unlock()
         .then(() => {
-          const timeLocked = new Date() - startLockTime
+          const timeLocked = new Date() - startTimeLocked
           console.log('Nonce Released! Time Locked: ', timeLocked)
           ackMsg(msg)
         })

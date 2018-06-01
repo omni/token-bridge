@@ -2,13 +2,12 @@ require('dotenv').config()
 const path = require('path')
 const Web3 = require('web3')
 const { connectWatcherToQueue } = require('./amqpClient')
-const Redis = require('ioredis')
 const { getBlockNumber } = require('./utils')
 const processDeposits = require('./processDeposits')
+const { redis } = require('./redisClient')
 
 const config = require(path.join('../config/', process.argv[2]))
 
-const redis = new Redis(process.env.REDIS_URL)
 const provider = new Web3.providers.HttpProvider(config.url)
 const web3Instance = new Web3(provider)
 const bridgeContract = new web3Instance.eth.Contract(config.abi, config.contractAddress)
@@ -24,7 +23,7 @@ async function initialize() {
 }
 
 async function runMain({ sendToQueue, isAmqpConnected }) {
-  if (isAmqpConnected()) {
+  if (isAmqpConnected() && redis.status === 'ready') {
     await main({ sendToQueue })
   }
 
