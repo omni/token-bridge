@@ -1,8 +1,8 @@
 require('dotenv').config()
 const { sendRawTx } = require('./tx/sendTx')
-const processDeposits = require('./processDeposits')
-const processCollectedSignatures = require('./processCollectedSignatures')
-const processWithdraw = require('./processWithdraw')
+const processDeposits = require('./events/processDeposits')
+const processCollectedSignatures = require('./events/processCollectedSignatures')
+const processWithdraw = require('./events/processWithdraw')
 
 async function getChainIds() {
   const { HOME_RPC_URL, FOREIGN_RPC_URL } = process.env

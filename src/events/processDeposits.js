@@ -1,7 +1,7 @@
 require('dotenv').config()
 const Web3 = require('web3')
-const { createMessage } = require('./message')
-const { asyncForEach } = require('./utils')
+const { createMessage } = require('../utils/message')
+const { asyncForEach } = require('../utils/utils')
 
 const {
   HOME_RPC_URL,
@@ -12,7 +12,7 @@ const {
 
 const homeProvider = new Web3.providers.HttpProvider(HOME_RPC_URL)
 const web3Home = new Web3(homeProvider)
-const HomeABI = require('../abis/HomeBridge.abi')
+const HomeABI = require('../../abis/HomeBridge.abi')
 
 const homeBridge = new web3Home.eth.Contract(HomeABI, HOME_BRIDGE_ADDRESS)
 

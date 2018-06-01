@@ -2,11 +2,11 @@ require('dotenv').config()
 const fs = require('fs')
 const Web3 = require('web3')
 const Web3Utils = require('web3-utils')
-const { sendRawTx, sendTx } = require('./tx/sendTx')
-const { signatureToVRS } = require('./message')
-const { getNonce } = require('./tx/web3')
-const { getGasPrices } = require('./gasPrice')
-const { asyncForEach } = require('./utils')
+const { sendRawTx, sendTx } = require('../tx/sendTx')
+const { signatureToVRS } = require('../utils/message')
+const { getNonce } = require('../tx/web3')
+const { getGasPrices } = require('../services/gasPrice')
+const { asyncForEach } = require('../utils/utils')
 
 const {
   HOME_RPC_URL,
@@ -19,19 +19,19 @@ const {
 
 const homeProvider = new Web3.providers.HttpProvider(HOME_RPC_URL)
 const web3Home = new Web3(homeProvider)
-const HomeABI = require('../abis/HomeBridge.abi')
+const HomeABI = require('../../abis/HomeBridge.abi')
 
 const homeBridge = new web3Home.eth.Contract(HomeABI, HOME_BRIDGE_ADDRESS)
 
 const foreignProvider = new Web3.providers.HttpProvider(FOREIGN_RPC_URL)
 const web3Foreign = new Web3(foreignProvider)
-const ForeignABI = require('../abis/ForeignBridge.abi')
+const ForeignABI = require('../../abis/ForeignBridge.abi')
 
 const foreignBridge = new web3Foreign.eth.Contract(ForeignABI, FOREIGN_BRIDGE_ADDRESS)
 
 const DB_FILE_NAME = 'home_collected_signatures.json'
 const db = require(`../db/${DB_FILE_NAME}`)
-const dbNonce = require(`../db/nonce.json`)
+const dbNonce = require(`./db/nonce.json`)
 
 async function processCollectedSignatures(foreignChainId) {
   try {

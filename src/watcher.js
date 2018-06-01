@@ -1,10 +1,10 @@
 require('dotenv').config()
 const path = require('path')
 const Web3 = require('web3')
-const { connectWatcherToQueue } = require('./amqpClient')
-const { getBlockNumber } = require('./utils')
-const processDeposits = require('./processDeposits')
-const { redis } = require('./redisClient')
+const { connectWatcherToQueue } = require('./services/amqpClient')
+const { getBlockNumber } = require('./utils/utils')
+const processDeposits = require('./events/processDeposits')
+const { redis } = require('./services/redisClient')
 
 const config = require(path.join('../config/', process.argv[2]))
 

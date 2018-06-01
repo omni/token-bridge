@@ -1,12 +1,12 @@
 require('dotenv').config()
 const path = require('path')
 const Web3 = require('web3')
-const { connectSenderToQueue } = require('./amqpClient')
-const { redis, redlock } = require('./redisClient')
-const { getGasPrices } = require('./gasPrice')
+const { connectSenderToQueue } = require('./services/amqpClient')
+const { redis, redlock } = require('./services/redisClient')
+const { getGasPrices } = require('./services/gasPrice')
 const { sendTx, sendRawTx } = require('./tx/sendTx')
 const { getNonce } = require('./tx/web3')
-const { syncForEach } = require('./utils')
+const { syncForEach } = require('./utils/utils')
 
 const { VALIDATOR_ADDRESS, VALIDATOR_ADDRESS_PRIVATE_KEY } = process.env
 
