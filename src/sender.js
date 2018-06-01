@@ -25,7 +25,6 @@ const redlock = new Redlock([redis], {
   retryJitter: 200 // time in ms
 })
 let chainId = 0
-let updateNonceFromNetwork = false
 
 async function initialize() {
   chainId = await sendRawTx({
@@ -39,9 +38,8 @@ async function initialize() {
   })
 }
 
-async function readNonce() {
-  if (updateNonceFromNetwork) {
-    updateNonceFromNetwork = false
+async function readNonce(forceUpdate) {
+  if (forceUpdate) {
     return getNonce(web3Instance, VALIDATOR_ADDRESS)
   }
 
@@ -81,11 +79,6 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue }) {
             web3: web3Instance
           })
 
-          if (txHash === undefined) {
-            console.error(`UNDEFINED Tx Failed for event Tx ${job.transactionReference}`)
-            failedTx.push(job)
-            return
-          }
           nonce++
           console.log(`Tx generated ${txHash} for event Tx ${job.transactionReference}`)
         } catch (e) {
@@ -94,7 +87,7 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue }) {
           failedTx.push(job)
 
           if (e.message.includes('Transaction nonce is too low')) {
-            updateNonceFromNetwork = true
+            nonce = await readNonce(true)
           }
         }
       })
