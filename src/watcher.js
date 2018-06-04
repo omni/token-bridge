@@ -4,6 +4,8 @@ const Web3 = require('web3')
 const { connectWatcherToQueue } = require('./services/amqpClient')
 const { getBlockNumber } = require('./utils/utils')
 const processDeposits = require('./events/processDeposits')
+const processCollectedSignatures = require('./events/processCollectedSignatures')
+const processWithdraw = require('./events/processWithdraw')
 const { redis } = require('./services/redisClient')
 
 const config = require(path.join('../config/', process.argv[2]))
@@ -46,32 +48,41 @@ function processEvents(events) {
   switch (config.id) {
     case 'deposit':
       return processDeposits(events)
+    case 'collected-signatures':
+      return processCollectedSignatures(events)
+    case 'withdraw':
+      return processWithdraw(events)
     default:
       return []
   }
 }
 
 async function main({ sendToQueue }) {
-  const lastBlockNumber = await getBlockNumber(web3Instance)
-  if (lastBlockNumber === undefined || lastBlockNumber === lastProcessedBlock) {
-    return
-  }
-
-  const events = await bridgeContract.getPastEvents(config.event, {
-    fromBlock: lastProcessedBlock + 1,
-    toBlock: lastBlockNumber
-  })
-  console.log(`Found ${events.length} ${config.event}`)
-
-  if (events.length) {
-    const job = await processEvents(events)
-    console.log('Tx to send: ', job.length)
-
-    if (job.length) {
-      sendToQueue(job)
+  try {
+    const lastBlockNumber = await getBlockNumber(web3Instance)
+    if (lastBlockNumber === undefined || lastBlockNumber === lastProcessedBlock) {
+      return
     }
+
+    const events = await bridgeContract.getPastEvents(config.event, {
+      fromBlock: lastProcessedBlock + 1,
+      toBlock: lastBlockNumber
+    })
+    console.log(`Found ${events.length} ${config.event}`)
+
+    if (events.length) {
+      const job = await processEvents(events)
+      console.log('Tx to send: ', job.length)
+
+      if (job.length) {
+        sendToQueue(job)
+      }
+    }
+
+    updateLastProcessedBlock(lastBlockNumber)
+  } catch (e) {
+    console.error(e)
   }
-  updateLastProcessedBlock(lastBlockNumber)
 }
 
 initialize()
