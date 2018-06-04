@@ -49,71 +49,66 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue }) {
     await setTimeout(() => nackMsg(msg), 5000)
     return
   }
+  try {
+    const txArray = JSON.parse(msg.content)
+    console.log(`Msg received with ${txArray.length} Tx to send`)
 
-  const txArray = JSON.parse(msg.content)
-  console.log(`Msg received with ${txArray.length} Tx to send`)
-  const gasPrice = await getGasPrices()
-  const ttl = 60000
+    const gasPrice = await getGasPrices()
 
-  const startTryLock = new Date()
-  redlock
-    .lock(nonceLock, ttl)
-    .then(async lock => {
-      const startTimeLocked = new Date()
-      const timeWaitingForLock = startTimeLocked - startTryLock
-      console.log('Nonce Locked! After: ', timeWaitingForLock)
-      let nonce = await readNonce()
-      const failedTx = []
-      await syncForEach(txArray, async job => {
-        try {
-          const txHash = await sendTx({
-            rpcUrl: config.url,
-            data: job.data,
-            nonce,
-            gasPrice: gasPrice.toString(10),
-            amount: '0',
-            gasLimit: job.gasEstimate + 200000,
-            privateKey: VALIDATOR_ADDRESS_PRIVATE_KEY,
-            to: config.contractAddress,
-            chainId,
-            web3: web3Instance
-          })
+    const ttl = 2000 * txArray.length
+    const startTryLock = new Date()
+    const lock = await redlock.lock(nonceLock, ttl)
 
-          nonce++
-          console.log(`Tx generated ${txHash} for event Tx ${job.transactionReference}`)
-        } catch (e) {
-          console.error(e)
-          console.error(`Tx Failed for event Tx ${job.transactionReference}`)
-          failedTx.push(job)
+    const startTimeLocked = new Date()
+    const timeWaitingForLock = startTimeLocked - startTryLock
+    console.log('Nonce Locked! After: ', timeWaitingForLock)
 
-          if (e.message.includes('Transaction nonce is too low')) {
-            nonce = await readNonce(true)
-          }
+    let nonce = await readNonce()
+    const failedTx = []
+
+    await syncForEach(txArray, async job => {
+      try {
+        const txHash = await sendTx({
+          rpcUrl: config.url,
+          data: job.data,
+          nonce,
+          gasPrice: gasPrice.toString(10),
+          amount: '0',
+          gasLimit: job.gasEstimate + 200000,
+          privateKey: VALIDATOR_ADDRESS_PRIVATE_KEY,
+          to: config.contractAddress,
+          chainId,
+          web3: web3Instance
+        })
+
+        nonce++
+        console.log(`Tx generated ${txHash} for event Tx ${job.transactionReference}`)
+      } catch (e) {
+        console.error(e)
+        console.error(`Tx Failed for event Tx ${job.transactionReference}`)
+        failedTx.push(job)
+
+        if (e.message.includes('Transaction nonce is too low')) {
+          nonce = await readNonce(true)
         }
-      })
-
-      if (failedTx.length) {
-        console.log(`Sending ${failedTx.length} Failed Tx to Queue`)
-        sendToQueue(failedTx)
       }
-
-      updateNonce(nonce)
-
-      lock
-        .unlock()
-        .then(() => {
-          const timeLocked = new Date() - startTimeLocked
-          console.log('Nonce Released! Time Locked: ', timeLocked)
-          ackMsg(msg)
-        })
-        .catch(() => {
-          console.log('Error unlocking key, Lock will expire eventually')
-        })
     })
-    .catch(async () => {
-      console.log(`Exceeded attempts to lock the resource "${nonceLock}"`)
-      nackMsg(msg)
-    })
+
+    updateNonce(nonce)
+    await lock.unlock()
+
+    const timeLocked = new Date() - startTimeLocked
+    console.log('Nonce Released! Time Locked: ', timeLocked)
+
+    if (failedTx.length) {
+      console.log(`Sending ${failedTx.length} Failed Tx to Queue`)
+      sendToQueue(failedTx)
+    }
+    ackMsg(msg)
+  } catch (e) {
+    console.error(e)
+    nackMsg(msg)
+  }
 }
 
 initialize()
