@@ -56,7 +56,7 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue }) {
 
     const gasPrice = await getGasPrices()
 
-    const ttl = 2000 * txArray.length
+    const ttl = 1000 * txArray.length
     const startTryLock = new Date()
     const lock = await redlock.lock(nonceLock, ttl)
 
