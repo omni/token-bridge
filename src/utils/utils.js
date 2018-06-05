@@ -4,11 +4,6 @@ async function syncForEach(array, callback) {
   }
 }
 
-function getBlockNumber(web3) {
-  return web3.eth.getBlockNumber()
-}
-
 module.exports = {
-  syncForEach,
-  getBlockNumber
+  syncForEach
 }

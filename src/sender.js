@@ -4,8 +4,8 @@ const Web3 = require('web3')
 const { connectSenderToQueue } = require('./services/amqpClient')
 const { redis, redlock } = require('./services/redisClient')
 const { getGasPrices } = require('./services/gasPrice')
-const { sendTx, sendRawTx } = require('./tx/sendTx')
-const { getNonce } = require('./tx/web3')
+const { sendTx } = require('./tx/sendTx')
+const { getNonce, getChainId } = require('./tx/web3')
 const { syncForEach } = require('./utils/utils')
 
 const { VALIDATOR_ADDRESS, VALIDATOR_ADDRESS_PRIVATE_KEY } = process.env
@@ -19,11 +19,7 @@ const nonceKey = `${config.id}:nonce`
 let chainId = 0
 
 async function initialize() {
-  chainId = await sendRawTx({
-    url: config.url,
-    params: [],
-    method: 'net_version'
-  })
+  chainId = await getChainId(web3Instance)
   connectSenderToQueue({
     queueName: config.queue,
     cb: main
