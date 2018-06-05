@@ -46,7 +46,7 @@ function updateNonce(nonce) {
 async function main({ msg, ackMsg, nackMsg, sendToQueue }) {
   if (redis.status !== 'ready') {
     console.log('Redis not connected.')
-    await setTimeout(() => nackMsg(msg), 5000)
+    nackMsg(msg)
     return
   }
   try {
