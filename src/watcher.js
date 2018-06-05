@@ -80,7 +80,7 @@ async function main({ sendToQueue }) {
       console.log('Tx to send: ', job.length)
 
       if (job.length) {
-        sendToQueue(job)
+        await sendToQueue(job)
       }
     }
 

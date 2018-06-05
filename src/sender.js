@@ -103,7 +103,7 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue }) {
 
     if (failedTx.length) {
       console.log(`Sending ${failedTx.length} Failed Tx to Queue`)
-      sendToQueue(failedTx)
+      await sendToQueue(failedTx)
     }
     ackMsg(msg)
   } catch (e) {

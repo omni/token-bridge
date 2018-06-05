@@ -10,37 +10,35 @@ connection.on('disconnect', () => {
 })
 
 function connectWatcherToQueue({ queueName, cb }) {
-  connection.createChannel({
+  const channelWrapper = connection.createChannel({
+    json: true,
     setup(channel) {
-      const sendToQueue = data =>
-        channel.sendToQueue(queueName, Buffer.from(JSON.stringify(data)), { persistent: true })
-
-      return Promise.all([
-        channel.assertQueue(queueName, { durable: true }),
-        cb({ sendToQueue, isAmqpConnected: () => connection.isConnected() })
-      ])
+      return Promise.all([channel.assertQueue(queueName, { durable: true })])
     }
   })
+
+  const sendToQueue = data => channelWrapper.sendToQueue(queueName, data, { persistent: true })
+
+  cb({ sendToQueue, isAmqpConnected: () => connection.isConnected() })
 }
 
 function connectSenderToQueue({ queueName, cb }) {
-  connection.createChannel({
-    setup(channel) {
-      const sendToQueue = data =>
-        channel.sendToQueue(queueName, Buffer.from(JSON.stringify(data)), { persistent: true })
+  const channelWrapper = connection.createChannel({
+    json: true
+  })
 
-      return Promise.all([
-        channel.assertQueue(queueName, { durable: true }),
-        channel.consume(queueName, msg =>
-          cb({
-            msg,
-            ackMsg: job => channel.ack(job),
-            nackMsg: job => channel.nack(job, false, true),
-            sendToQueue
-          })
-        )
-      ])
-    }
+  channelWrapper.addSetup(channel => {
+    Promise.all([
+      channel.assertQueue(queueName, { durable: true }),
+      channel.consume(queueName, msg =>
+        cb({
+          msg,
+          ackMsg: job => channelWrapper.ack(job),
+          nackMsg: job => channelWrapper.nack(job, false, true),
+          sendToQueue: data => channelWrapper.sendToQueue(queueName, data, { persistent: true })
+        })
+      )
+    ])
   })
 }
 
