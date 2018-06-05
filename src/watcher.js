@@ -8,6 +8,11 @@ const processCollectedSignatures = require('./events/processCollectedSignatures'
 const processWithdraw = require('./events/processWithdraw')
 const { redis } = require('./services/redisClient')
 
+if (process.argv.length < 3) {
+  console.error('Please check the number of arguments, config file was not provided')
+  process.exit(1)
+}
+
 const config = require(path.join('../config/', process.argv[2]))
 
 const provider = new Web3.providers.HttpProvider(config.url)

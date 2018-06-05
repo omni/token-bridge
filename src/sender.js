@@ -10,6 +10,11 @@ const { syncForEach } = require('./utils/utils')
 
 const { VALIDATOR_ADDRESS, VALIDATOR_ADDRESS_PRIVATE_KEY } = process.env
 
+if (process.argv.length < 3) {
+  console.error('Please check the number of arguments, config file was not provided')
+  process.exit(1)
+}
+
 const config = require(path.join('../config/', process.argv[2]))
 
 const provider = new Web3.providers.HttpProvider(config.url)
