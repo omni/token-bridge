@@ -1,6 +1,5 @@
 require('dotenv').config()
 const Web3 = require('web3')
-const { asyncForEach } = require('../utils/utils')
 
 const { HOME_RPC_URL, HOME_BRIDGE_ADDRESS, VALIDATOR_ADDRESS } = process.env
 
@@ -13,7 +12,7 @@ const homeBridge = new web3Home.eth.Contract(HomeABI, HOME_BRIDGE_ADDRESS)
 async function processWithdraw(withdrawals) {
   const txToSend = []
 
-  const callbacks = asyncForEach(withdrawals, async (withdrawal, index) => {
+  const callbacks = withdrawals.map(async (withdrawal, index) => {
     const { recipient, value } = withdrawal.returnValues
 
     let gasEstimate

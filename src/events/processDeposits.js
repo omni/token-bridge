@@ -1,7 +1,6 @@
 require('dotenv').config()
 const Web3 = require('web3')
 const { createMessage } = require('../utils/message')
-const { asyncForEach } = require('../utils/utils')
 
 const {
   HOME_RPC_URL,
@@ -19,7 +18,7 @@ const homeBridge = new web3Home.eth.Contract(HomeABI, HOME_BRIDGE_ADDRESS)
 async function processDeposits(deposits) {
   const txToSend = []
 
-  const callbacks = asyncForEach(deposits, async (deposit, index) => {
+  const callbacks = deposits.map(async (deposit, index) => {
     const { recipient, value } = deposit.returnValues
 
     const message = createMessage({

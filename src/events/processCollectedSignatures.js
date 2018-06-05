@@ -1,7 +1,6 @@
 require('dotenv').config()
 const Web3 = require('web3')
 const { signatureToVRS } = require('../utils/message')
-const { asyncForEach } = require('../utils/utils')
 
 const {
   HOME_RPC_URL,
@@ -25,7 +24,7 @@ const foreignBridge = new web3Foreign.eth.Contract(ForeignABI, FOREIGN_BRIDGE_AD
 
 async function processCollectedSignatures(signatures) {
   const txToSend = []
-  const callbacks = asyncForEach(signatures, async (colSignature, indexSig) => {
+  const callbacks = signatures.map(async (colSignature, indexSig) => {
     const {
       authorityResponsibleForRelay,
       messageHash,
@@ -39,7 +38,7 @@ async function processCollectedSignatures(signatures) {
       requiredSignatures.fill(0)
 
       const [v, r, s] = [[], [], []]
-      const signaturePromises = asyncForEach(requiredSignatures, async (el, index) => {
+      const signaturePromises = requiredSignatures.map(async (el, index) => {
         const signature = await homeBridge.methods.signature(messageHash, index).call()
         const recover = signatureToVRS(signature)
         v.push(recover.v)
