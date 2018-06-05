@@ -41,7 +41,7 @@ async function readNonce(forceUpdate) {
 }
 
 function updateNonce(nonce) {
-  redis.set(nonceKey, nonce)
+  return redis.set(nonceKey, nonce)
 }
 
 async function main({ msg, ackMsg, nackMsg, sendToQueue }) {
@@ -89,13 +89,16 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue }) {
         console.error(`Tx Failed for event Tx ${job.transactionReference}`)
         failedTx.push(job)
 
-        if (e.message.includes('Transaction nonce is too low')) {
+        if (
+          e.message.includes('Transaction nonce is too low') ||
+          e.message.includes('transaction with same nonce in the queue')
+        ) {
           nonce = await readNonce(true)
         }
       }
     })
 
-    updateNonce(nonce)
+    await updateNonce(nonce)
     await lock.unlock()
 
     const timeLocked = new Date() - startTimeLocked
