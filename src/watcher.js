@@ -60,7 +60,7 @@ function processEvents(events) {
 async function main({ sendToQueue }) {
   try {
     const lastBlockNumber = await getBlockNumber(web3Instance)
-    if (lastBlockNumber === undefined || lastBlockNumber === lastProcessedBlock) {
+    if (lastBlockNumber === lastProcessedBlock) {
       return
     }
 
