@@ -3,15 +3,15 @@
 ![bridge architecture](https://user-images.githubusercontent.com/417134/40630604-4a41c986-62aa-11e8-999e-08dca615532d.png)
 
 ### Watcher
-A watcher listen for a certain event and creates proper jobs in the queue. These jobs contains the transaction data (without the nonce) and the transaction hash for the related event. It runs every specific interval and keeps track of the last block processed.
+A watcher listens for a certain event and creates proper jobs in the queue. These jobs contain the transaction data (without the nonce) and the transaction hash for the related event. The watcher runs on a given frequency, keeping track of the last processed block.
 
 There are three Watchers:
-- Deposit Watcher: Listen to `Deposit` events on Home network. 
-- Collected Signatures Watcher: Listen to `CollectedSignatures` events on Home network. 
-- Withdraw Watcher: Listen to `Withdraw` events on Foreign network. 
+- Deposit Watcher: Listens to `Deposit` events on Home network. 
+- Collected Signatures Watcher: Listens to `CollectedSignatures` events on Home network. 
+- Withdraw Watcher: Listens to `Withdraw` events on Foreign network. 
 
 ### Sender
-A sender subscribes to the queue and keeps track of the nonce. It takes jobs from the queue, extract the transaction data, add the proper nonce and send it to the network. 
+A sender subscribes to the queue and keeps track of the nonce. It takes jobs from the queue, extract transaction data, adds proper nonce and sends it to the network.
 
 There are two Senders:
 - Home Sender: Sends transaction to Home network. 
@@ -20,15 +20,17 @@ There are two Senders:
 # How to use
 
 1. Deploy bridge contracts
-    1. Clone repo https://github.com/poanetwork/poa-bridge-contracts
-    2. Checkout branch `v2`
-    3. Compile contracts (`truffle compile`)
-    4. Go to `deploy` folder and create a `.env` file (look at `.env.example` to see the variables that need to be present)
-    5. Execute `node deploy.js`
+    1. Clone repo: `git clone https://github.com/poanetwork/poa-bridge-contracts`
+    2. `cd poa-bridge-contracts`
+    3. Checkout branch `v2` : `git checkout v2`
+    4. Compile contracts: `truffle compile`
+    5. Go to deploy folder: `cd deploy`
+    6. create a `.env` file: `cp .env.example .env` (look at `.env.example` to see the variables that need to be present)
+    7. Execute `node deploy.js`
 
 2. Install [RabbitMQ](https://www.rabbitmq.com/) and [Redis](https://redis.io/)
 
-3. Create a `.env` file and fill in the information using the output of the deploy in the previous step. Check the `.env.example` file to see the required variables.
+3. Create a `.env` file: `cp .env.example .env` and fill in the information using the output data from previous deploy step. Check the `.env.example` file to see the required variables.
 
 4. To run the processes:
   - `npm run watcher:deposit`
