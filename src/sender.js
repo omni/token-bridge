@@ -24,11 +24,16 @@ const nonceKey = `${config.id}:nonce`
 let chainId = 0
 
 async function initialize() {
-  chainId = await getChainId(web3Instance)
-  connectSenderToQueue({
-    queueName: config.queue,
-    cb: main
-  })
+  try {
+    chainId = await getChainId(web3Instance)
+    connectSenderToQueue({
+      queueName: config.queue,
+      cb: main
+    })
+  } catch (e) {
+    console.log(e)
+    process.exit(1)
+  }
 }
 
 async function readNonce(forceUpdate) {
@@ -45,12 +50,13 @@ function updateNonce(nonce) {
 }
 
 async function main({ msg, ackMsg, nackMsg, sendToQueue }) {
-  if (redis.status !== 'ready') {
-    console.log('Redis not connected.')
-    nackMsg(msg)
-    return
-  }
   try {
+    if (redis.status !== 'ready') {
+      console.log('Redis not connected.')
+      nackMsg(msg)
+      return
+    }
+
     const txArray = JSON.parse(msg.content)
     console.log(`Msg received with ${txArray.length} Tx to send`)
 

@@ -22,16 +22,25 @@ const lastBlockRedisKey = `${config.id}:lastProcessedBlock`
 let lastProcessedBlock = 0
 
 async function initialize() {
-  await getLastProcessedBlock()
-  connectWatcherToQueue({
-    queueName: config.queue,
-    cb: runMain
-  })
+  try {
+    await getLastProcessedBlock()
+    connectWatcherToQueue({
+      queueName: config.queue,
+      cb: runMain
+    })
+  } catch (e) {
+    console.log(e)
+    process.exit(1)
+  }
 }
 
 async function runMain({ sendToQueue, isAmqpConnected }) {
-  if (isAmqpConnected() && redis.status === 'ready') {
-    await main({ sendToQueue })
+  try {
+    if (isAmqpConnected() && redis.status === 'ready') {
+      await main({ sendToQueue })
+    }
+  } catch (e) {
+    console.error(e)
   }
 
   setTimeout(() => {
@@ -46,7 +55,7 @@ async function getLastProcessedBlock() {
 
 function updateLastProcessedBlock(lastBlockNumber) {
   lastProcessedBlock = lastBlockNumber
-  redis.set(lastBlockRedisKey, lastProcessedBlock)
+  return redis.set(lastBlockRedisKey, lastProcessedBlock)
 }
 
 function processEvents(events) {
@@ -84,7 +93,7 @@ async function main({ sendToQueue }) {
       }
     }
 
-    updateLastProcessedBlock(lastBlockNumber)
+    await updateLastProcessedBlock(lastBlockNumber)
   } catch (e) {
     console.error(e)
   }
