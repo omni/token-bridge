@@ -8,7 +8,7 @@ const { sendTx } = require('./tx/sendTx')
 const { getNonce, getChainId } = require('./tx/web3')
 const { syncForEach } = require('./utils/utils')
 
-const { VALIDATOR_ADDRESS, VALIDATOR_ADDRESS_PRIVATE_KEY } = process.env
+const { VALIDATOR_ADDRESS, VALIDATOR_ADDRESS_PRIVATE_KEY, REDIS_LOCK_TTL } = process.env
 
 if (process.argv.length < 3) {
   console.error('Please check the number of arguments, config file was not provided')
@@ -62,7 +62,7 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue }) {
 
     const gasPrice = await getGasPrices()
 
-    const ttl = 1000 * txArray.length
+    const ttl = REDIS_LOCK_TTL * txArray.length
     const startTryLock = new Date()
     const lock = await redlock.lock(nonceLock, ttl)
 
