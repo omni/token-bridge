@@ -11,8 +11,13 @@ function getChainId(web3) {
   return web3.eth.net.getId()
 }
 
+function getRequiredBlockConfirmations(contract) {
+  return contract.methods.requiredBlockConfirmations().call()
+}
+
 module.exports = {
   getNonce,
   getBlockNumber,
-  getChainId
+  getChainId,
+  getRequiredBlockConfirmations
 }

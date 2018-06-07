@@ -7,6 +7,7 @@ const processDeposits = require('./events/processDeposits')
 const processCollectedSignatures = require('./events/processCollectedSignatures')
 const processWithdraw = require('./events/processWithdraw')
 const { redis } = require('./services/redisClient')
+const { getRequiredBlockConfirmations } = require('./tx/web3')
 
 if (process.argv.length < 3) {
   console.error('Please check the number of arguments, config file was not provided')
@@ -20,9 +21,11 @@ const web3Instance = new Web3(provider)
 const bridgeContract = new web3Instance.eth.Contract(config.abi, config.contractAddress)
 const lastBlockRedisKey = `${config.id}:lastProcessedBlock`
 let lastProcessedBlock = 0
+let requiredBlockConfirmations = 1
 
 async function initialize() {
   try {
+    requiredBlockConfirmations = await getRequiredBlockConfirmations(bridgeContract)
     await getLastProcessedBlock()
     connectWatcherToQueue({
       queueName: config.queue,
@@ -71,16 +74,20 @@ function processEvents(events) {
   }
 }
 
+async function getLastBlockToProcess() {
+  const lastBlockNumber = await getBlockNumber(web3Instance)
+  return lastBlockNumber - requiredBlockConfirmations + 1
+}
+
 async function main({ sendToQueue }) {
   try {
-    const lastBlockNumber = await getBlockNumber(web3Instance)
-    if (lastBlockNumber === lastProcessedBlock) {
+    const lastBlockToProcess = await getLastBlockToProcess()
+    if (lastBlockToProcess === lastProcessedBlock) {
       return
     }
-
     const events = await bridgeContract.getPastEvents(config.event, {
       fromBlock: lastProcessedBlock + 1,
-      toBlock: lastBlockNumber
+      toBlock: lastBlockToProcess
     })
     console.log(`Found ${events.length} ${config.event}`)
 
@@ -93,7 +100,7 @@ async function main({ sendToQueue }) {
       }
     }
 
-    await updateLastProcessedBlock(lastBlockNumber)
+    await updateLastProcessedBlock(lastBlockToProcess)
   } catch (e) {
     console.error(e)
   }
