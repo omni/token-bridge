@@ -47,36 +47,37 @@ function waitUntil(fn, timeoutMs) {
 }
 
 async function main() {
-  // start parity nodes
-  console.log(chalk.blue('start parity nodes'))
-  await sleep(1000)
+  try {
+    // start parity nodes
+    console.log(chalk.blue('start parity nodes'))
+    await sleep(1000)
 
-  // check that account has zero tokens in the foreign chain
-  console.log(chalk.blue('check balance before tx'))
-  let balance = await token.methods.balanceOf('0xbb140FbA6242a1c3887A7823F7750a73101383e3').call()
-  assert(toBN(balance).isZero(), 'Account should not have tokens yet')
+    // check that account has zero tokens in the foreign chain
+    console.log(chalk.blue('check balance before tx'))
+    let balance = await token.methods.balanceOf('0xbb140FbA6242a1c3887A7823F7750a73101383e3').call()
+    assert(toBN(balance).isZero(), 'Account should not have tokens yet')
 
-  // send transaction to home chain
-  console.log(chalk.blue('send transaction'))
-  await homeWeb3.eth.sendTransaction({
-    from: '0xbb140FbA6242a1c3887A7823F7750a73101383e3',
-    to: '0x32198D570fffC7033641F8A9094FFDCaAEF42624',
-    gasPrice: '1',
-    gasLimit: 50000,
-    value: '1000000000000000000'
-  })
+    // send transaction to home chain
+    console.log(chalk.blue('send transaction'))
+    await homeWeb3.eth.sendTransaction({
+      from: '0xbb140FbA6242a1c3887A7823F7750a73101383e3',
+      to: '0x32198D570fffC7033641F8A9094FFDCaAEF42624',
+      gasPrice: '1',
+      gasLimit: 50000,
+      value: '1000000000000000000'
+    })
 
-  // check that account has tokens in the foreign chain
-  console.log(chalk.blue('check balance after transaction'))
-  const satisfied = await waitUntil(async () => {
-    const balance = await token.methods.balanceOf('0xbb140FbA6242a1c3887A7823F7750a73101383e3').call()
-    return toBN(balance).gt(toBN(0))
-  }, 30000)
-  assert(satisfied, 'Account should have tokens')
+    // check that account has tokens in the foreign chain
+    console.log(chalk.blue('check balance after transaction'))
+    const satisfied = await waitUntil(async () => {
+      const balance = await token.methods.balanceOf('0xbb140FbA6242a1c3887A7823F7750a73101383e3').call()
+      return toBN(balance).gt(toBN(0))
+    }, 30000)
+    assert(satisfied, 'Account should have tokens')
+  } catch (e) {
+    console.error(e)
+    process.exit(1)
+  }
 }
 
-try {
-  main()
-} catch (e) {
-  console.error(e)
-}
+main()
