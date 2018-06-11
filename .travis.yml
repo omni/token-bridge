@@ -1,0 +1,14 @@
+sudo: required
+
+language: node_js
+
+services:
+  - docker
+
+before_install:
+  - cd e2e
+  - docker build -t parity parity
+  - docker build -t e2e .
+
+script:
+  - ./run-tests.sh

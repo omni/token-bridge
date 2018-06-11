@@ -1,0 +1,19 @@
+{
+  "name": "bridge-e2e",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "postinstall": "cd submodules/poa-bridge-contracts && npm install && ./node_modules/.bin/truffle compile && cd deploy && npm install",
+    "deploy": "node deploy.js",
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^2.4.1",
+    "shelljs": "^0.8.2",
+    "tree-kill": "^1.2.0",
+    "web3": "^1.0.0-beta.34"
+  }
+}
