@@ -10,4 +10,9 @@ RUN apt-get clean
 WORKDIR /bridge
 COPY . .
 RUN npm install
-CMD ["npm","run","watcher:deposit"]
+CMD echo "To start a bridge process run:" \
+  "docker-compose run bridge npm run watcher:deposit" \
+  "docker-compose run bridge npm run watcher:collected-signatures" \
+  "docker-compose run bridge npm run watcher:withdraw" \
+  "docker-compose run bridge npm run sender:home" \
+  "docker-compose run bridge npm run sender:foreign"
