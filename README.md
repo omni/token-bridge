@@ -28,9 +28,11 @@ There are two Senders:
     6. create a `.env` file: `cp .env.example .env` (look at `.env.example` to see the variables that need to be present)
     7. Execute `node deploy.js`
 
-2. Install [RabbitMQ](https://www.rabbitmq.com/) and [Redis](https://redis.io/)
+2. Create a `.env` file: `cp .env.example .env` and fill in the information using the output data from previous deploy step. Check the `.env.example` file to see the required variables.
 
-3. Create a `.env` file: `cp .env.example .env` and fill in the information using the output data from previous deploy step. Check the `.env.example` file to see the required variables.
+### Run on local environment
+
+3. Install [RabbitMQ](https://www.rabbitmq.com/) and [Redis](https://redis.io/)
 
 4. To run the processes:
   - `npm run watcher:deposit`
@@ -38,6 +40,16 @@ There are two Senders:
   - `npm run watcher:withdraw`
   - `npm run sender:home`
   - `npm run sender:foreign`
+
+### Run with Docker
+
+  - Start RabbitMQ and Redis: `docker-compose up -d`
+  - `docker-compose run bridge npm run watcher:deposit`
+  - `docker-compose run bridge npm run watcher:collected-signatures`
+  - `docker-compose run bridge npm run watcher:withdraw`
+  - `docker-compose run bridge npm run sender:home`
+  - `docker-compose run bridge npm run sender:foreign`
+
 
 In order to quickly send deposits run
 `node tests/sendUserTxToHome.js`
