@@ -7,5 +7,9 @@ docker-compose run -d bridge npm run sender:home
 docker-compose run -d bridge npm run sender:foreign
 docker-compose run e2e npm start
 rc=$?
+docker-compose logs -f -t &
+PID=$!
+sleep 2
+kill $PID
 docker-compose down
 exit $rc
