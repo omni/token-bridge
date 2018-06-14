@@ -12,8 +12,6 @@ RUN mkdir submodules && \
   cd submodules/poa-bridge-contracts && \
   git checkout v2
 
-RUN echo foo
-
 RUN npm install --unsafe-perm
 
 COPY envs envs
