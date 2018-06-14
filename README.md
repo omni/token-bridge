@@ -29,6 +29,8 @@ There are two Senders:
     7. Execute `node deploy.js`
 
 2. Install [RabbitMQ](https://www.rabbitmq.com/) and [Redis](https://redis.io/)
+  - RabbitMQ version: `3.7`
+  - Redis version: `4.0`
 
 3. Create a `.env` file: `cp .env.example .env` and fill in the information using the output data from previous deploy step. Check the `.env.example` file to see the required variables.
 
@@ -49,3 +51,22 @@ In order to quickly send withdrawals run
 
 To use the bridge UI, clone [the repo](https://github.com/poanetwork/bridge-ui/),
 create a `.env` using the same values as before, and run `npm start`.
+
+### Useful commands for development
+
+#### RabbitMQ
+Command | Description
+--- | ---
+`rabbitmqctl list_queues` | List all queues
+`rabbitmqctl purge_queue home` | Remove all messages from `home` queue 
+
+#### Redis
+Use `redis-cli`
+
+Command | Description
+--- | ---
+`KEYS *` | Returns all keys
+`SET deposit:lastProcessedBlock 1234` | Set key to hold the string value.
+`GET deposit:lastProcessedBlock` | Get the value of key.
+`DEL deposit:lastProcessedBlock` | Removes the specified key.
+`FLUSHALL` | Delete all the keys of all the existing databases
