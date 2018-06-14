@@ -1,4 +1,4 @@
-docker-compose up -d
+docker-compose up -d --build
 docker-compose run e2e npm run deploy
 docker-compose run -d bridge npm run watcher:deposit
 docker-compose run -d bridge npm run watcher:collected-signatures
