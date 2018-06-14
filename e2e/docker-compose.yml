@@ -26,5 +26,5 @@ services:
       - GAS_PRICE_FALLBACK=1
     command: "true"
   e2e:
-    image: e2e
+    build: .
     command: "true"
