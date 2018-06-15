@@ -1,12 +1,18 @@
 // eslint-disable-next-line consistent-return
 async function getNonce(web3, address) {
-  try {
-    return await web3.eth.getTransactionCount(address)
-  } catch (e) {
-    console.error("Wasn't able to get nonce", e)
-  }
+  return web3.eth.getTransactionCount(address)
+}
+
+function getBlockNumber(web3) {
+  return web3.eth.getBlockNumber()
+}
+
+function getChainId(web3) {
+  return web3.eth.net.getId()
 }
 
 module.exports = {
-  getNonce
+  getNonce,
+  getBlockNumber,
+  getChainId
 }
