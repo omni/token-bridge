@@ -28,11 +28,11 @@ There are two Senders:
     6. create a `.env` file: `cp .env.example .env` (look at `.env.example` to see the variables that need to be present)
     7. Execute `node deploy.js`
 
-2. Create a `.env` file: `cp .env.example .env` and fill in the information using the output data from previous deploy step. Check the `.env.example` file to see the required variables.
+2. Install [RabbitMQ](https://www.rabbitmq.com/) and [Redis](https://redis.io/)
+  - RabbitMQ version: `3.7`
+  - Redis version: `4.0`
 
-### Run on local environment
-
-3. Install [RabbitMQ](https://www.rabbitmq.com/) and [Redis](https://redis.io/)
+3. Create a `.env` file: `cp .env.example .env` and fill in the information using the output data from previous deploy step. Check the `.env.example` file to see the required variables.
 
 4. To run the processes:
   - `npm run watcher:deposit`
@@ -61,3 +61,22 @@ In order to quickly send withdrawals run
 
 To use the bridge UI, clone [the repo](https://github.com/poanetwork/bridge-ui/),
 create a `.env` using the same values as before, and run `npm start`.
+
+### Useful commands for development
+
+#### RabbitMQ
+Command | Description
+--- | ---
+`rabbitmqctl list_queues` | List all queues
+`rabbitmqctl purge_queue home` | Remove all messages from `home` queue 
+
+#### Redis
+Use `redis-cli`
+
+Command | Description
+--- | ---
+`KEYS *` | Returns all keys
+`SET deposit:lastProcessedBlock 1234` | Set key to hold the string value.
+`GET deposit:lastProcessedBlock` | Get the value of key.
+`DEL deposit:lastProcessedBlock` | Removes the specified key.
+`FLUSHALL` | Delete all the keys of all the existing databases
