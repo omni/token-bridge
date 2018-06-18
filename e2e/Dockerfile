@@ -14,10 +14,7 @@ RUN mkdir submodules && \
 
 RUN npm install --unsafe-perm
 
-COPY envs envs
-
-COPY deploy.js .
-COPY test test
+ADD . .
 
 
 CMD ["npm", "start"]
