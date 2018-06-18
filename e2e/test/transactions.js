@@ -1,6 +1,7 @@
 const path = require('path')
 const Web3 = require('web3')
 const assert = require('assert')
+const promiseRetry = require('promise-retry')
 
 const abisDir = path.join(__dirname, '..', 'submodules/poa-bridge-contracts/build/contracts')
 
@@ -15,29 +16,6 @@ homeWeb3.eth.accounts.wallet.add(privateKeyUser)
 
 const tokenAbi = require(path.join(abisDir, 'POA20.json')).abi
 const token = new foreignWeb3.eth.Contract(tokenAbi, '0xdbeE25CbE97e4A5CC6c499875774dc7067E9426B')
-
-function waitUntil(fn, timeoutMs) {
-  function tryIt(fn, cb) {
-    Promise.resolve(fn()).then(result => {
-      if (result) {
-        cb(true)
-      } else {
-        setTimeout(() => {
-          tryIt(fn, cb)
-        }, 50)
-      }
-    })
-  }
-
-  return new Promise(resolve => {
-    const timeout = setTimeout(() => resolve(false), timeoutMs)
-
-    tryIt(fn, result => {
-      resolve(result)
-      clearTimeout(timeout)
-    })
-  })
-}
 
 describe('transactions', () => {
   it('should convert eth in home to tokens in foreign', async () => {
@@ -57,12 +35,13 @@ describe('transactions', () => {
     })
 
     // check that account has tokens in the foreign chain
-    const satisfied = await waitUntil(async () => {
+    await promiseRetry(async retry => {
       const balance = await token.methods
         .balanceOf('0xbb140FbA6242a1c3887A7823F7750a73101383e3')
         .call()
-      return toBN(balance).gt(toBN(0))
-    }, 30000)
-    assert(satisfied, 'Account should have tokens')
+      if (toBN(balance).isZero()) {
+        retry()
+      }
+    })
   })
 })
