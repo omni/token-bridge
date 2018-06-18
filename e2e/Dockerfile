@@ -16,8 +16,8 @@ RUN npm install --unsafe-perm
 
 COPY envs envs
 
-COPY index.js .
 COPY deploy.js .
+COPY test test
 
 
 CMD ["npm", "start"]
