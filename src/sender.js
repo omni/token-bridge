@@ -31,7 +31,7 @@ async function initialize() {
       cb: main
     })
   } catch (e) {
-    console.log(e)
+    console.log(e.message)
     process.exit(1)
   }
 }
