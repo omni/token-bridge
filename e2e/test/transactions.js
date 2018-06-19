@@ -46,10 +46,9 @@ describe('transactions', () => {
 
   it('should convert tokens in foreign to eth in home', async () => {
     const originalBalance = await homeWeb3.eth.getBalance(user.address)
-    console.log('==========> originalBalance', originalBalance)
 
     // send tokens to foreign bridge
-    const tx = await token.methods
+    await token.methods
       .transferAndCall(FOREIGN_BRIDGE_ADDRESS, homeWeb3.utils.toWei('0.01'), '0x')
       .send({
         from: user.address,
@@ -59,13 +58,9 @@ describe('transactions', () => {
         console.error(e)
       })
 
-    console.log('tx', tx)
-
     // check that balance increases
     await promiseRetry(async retry => {
-      console.log('retry')
       const balance = await homeWeb3.eth.getBalance(user.address)
-      console.log('==========> balance', balance)
       if (toBN(balance).lte(toBN(originalBalance))) {
         retry()
       }
