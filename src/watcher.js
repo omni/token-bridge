@@ -7,7 +7,7 @@ const processDeposits = require('./events/processDeposits')
 const processCollectedSignatures = require('./events/processCollectedSignatures')
 const processWithdraw = require('./events/processWithdraw')
 const { redis } = require('./services/redisClient')
-const { checkHTTPAllowance } = require('./utils/utils')
+const { checkHTTPS } = require('./utils/utils')
 
 if (process.argv.length < 3) {
   console.error('Please check the number of arguments, config file was not provided')
@@ -24,7 +24,10 @@ let lastProcessedBlock = 0
 
 async function initialize() {
   try {
-    checkHTTPAllowance([process.env.HOME_RPC_URL, process.env.FOREIGN_RPC_URL])
+    const checkHttps = checkHTTPS(process.env.ALLOW_HTTP)
+
+    checkHttps(process.env.HOME_RPC_URL)
+    checkHttps(process.env.FOREIGN_RPC_URL)
 
     await getLastProcessedBlock()
     connectWatcherToQueue({
