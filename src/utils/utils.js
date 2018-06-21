@@ -4,6 +4,19 @@ async function syncForEach(array, callback) {
   }
 }
 
+function checkHTTPAllowance(urls) {
+  urls.forEach(url => {
+    if (!/^https.*/.test(url)) {
+      if (process.env.ALLOW_HTTP !== 'yes') {
+        throw new Error(`http is not allowed: ${url}`)
+      } else {
+        console.warn(`You are using http (${url}). In production https must be used instead.`)
+      }
+    }
+  })
+}
+
 module.exports = {
-  syncForEach
+  syncForEach,
+  checkHTTPAllowance
 }
