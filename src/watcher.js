@@ -82,7 +82,7 @@ async function getLastBlockToProcess() {
 async function main({ sendToQueue }) {
   try {
     const lastBlockToProcess = await getLastBlockToProcess()
-    if (lastBlockToProcess === lastProcessedBlock) {
+    if (lastBlockToProcess <= lastProcessedBlock) {
       return
     }
     const events = await bridgeContract.getPastEvents(config.event, {
