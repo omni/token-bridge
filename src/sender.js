@@ -7,6 +7,7 @@ const { getGasPrices } = require('./services/gasPrice')
 const { sendTx } = require('./tx/sendTx')
 const { getNonce, getChainId } = require('./tx/web3')
 const { syncForEach } = require('./utils/utils')
+const { checkHTTPS } = require('./utils/utils')
 
 const { VALIDATOR_ADDRESS, VALIDATOR_ADDRESS_PRIVATE_KEY, REDIS_LOCK_TTL } = process.env
 
@@ -25,6 +26,11 @@ let chainId = 0
 
 async function initialize() {
   try {
+    const checkHttps = checkHTTPS(process.env.ALLOW_HTTP)
+
+    checkHttps(process.env.HOME_RPC_URL)
+    checkHttps(process.env.FOREIGN_RPC_URL)
+
     chainId = await getChainId(web3Instance)
     connectSenderToQueue({
       queueName: config.queue,
