@@ -21,11 +21,9 @@ const web3Instance = new Web3(provider)
 const bridgeContract = new web3Instance.eth.Contract(config.abi, config.contractAddress)
 const lastBlockRedisKey = `${config.id}:lastProcessedBlock`
 let lastProcessedBlock = 0
-let requiredBlockConfirmations = 1
 
 async function initialize() {
   try {
-    requiredBlockConfirmations = await getRequiredBlockConfirmations(bridgeContract)
     await getLastProcessedBlock()
     connectWatcherToQueue({
       queueName: config.queue,
@@ -75,7 +73,13 @@ function processEvents(events) {
 }
 
 async function getLastBlockToProcess() {
-  const lastBlockNumber = await getBlockNumber(web3Instance)
+  const lastBlockNumberPromise = getBlockNumber(web3Instance)
+  const requiredBlockConfirmationsPromise = getRequiredBlockConfirmations(bridgeContract)
+  const [lastBlockNumber, requiredBlockConfirmations] = await Promise.all([
+    lastBlockNumberPromise,
+    requiredBlockConfirmationsPromise
+  ])
+
   return lastBlockNumber - requiredBlockConfirmations + 1
 }
 
