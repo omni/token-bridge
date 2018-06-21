@@ -80,7 +80,7 @@ async function getLastBlockToProcess() {
     requiredBlockConfirmationsPromise
   ])
 
-  return lastBlockNumber - requiredBlockConfirmations + 1
+  return lastBlockNumber - requiredBlockConfirmations
 }
 
 async function main({ sendToQueue }) {
