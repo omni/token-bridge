@@ -1,0 +1,13 @@
+version: "3"
+services:
+  redis:
+    image: "redis"
+  rabbit:
+    image: "rabbitmq:3-management"
+  bridge:
+    build: .
+    environment:
+      - NODE_ENV=production
+      - QUEUE_URL=amqp://rabbit
+      - REDIS_URL=redis://redis
+    command: "true"
