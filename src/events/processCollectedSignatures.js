@@ -30,7 +30,8 @@ async function processCollectedSignatures(signatures) {
       messageHash,
       NumberOfCollectedSignatures
     } = colSignature.returnValues
-    if (authorityResponsibleForRelay === VALIDATOR_ADDRESS) {
+
+    if (authorityResponsibleForRelay === web3Home.utils.toChecksumAddress(VALIDATOR_ADDRESS)) {
       const message = await homeBridge.methods.message(messageHash).call()
 
       const requiredSignatures = []
