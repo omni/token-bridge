@@ -6,16 +6,16 @@
 A watcher listens for a certain event and creates proper jobs in the queue. These jobs contain the transaction data (without the nonce) and the transaction hash for the related event. The watcher runs on a given frequency, keeping track of the last processed block.
 
 There are three Watchers:
-- Deposit Watcher: Listens to `Deposit` events on Home network. 
-- Collected Signatures Watcher: Listens to `CollectedSignatures` events on Home network. 
-- Withdraw Watcher: Listens to `Withdraw` events on Foreign network. 
+- Deposit Watcher: Listens to `Deposit` events on Home network.
+- Collected Signatures Watcher: Listens to `CollectedSignatures` events on Home network.
+- Withdraw Watcher: Listens to `Withdraw` events on Foreign network.
 
 ### Sender
 A sender subscribes to the queue and keeps track of the nonce. It takes jobs from the queue, extract transaction data, adds proper nonce and sends it to the network.
 
 There are two Senders:
-- Home Sender: Sends transaction to Home network. 
-- Foreign Sender: Sends transaction to Foreign network. 
+- Home Sender: Sends transaction to Home network.
+- Foreign Sender: Sends transaction to Foreign network.
 
 # How to use
 
@@ -68,7 +68,7 @@ create a `.env` using the same values as before, and run `npm start`.
 Command | Description
 --- | ---
 `rabbitmqctl list_queues` | List all queues
-`rabbitmqctl purge_queue home` | Remove all messages from `home` queue 
+`rabbitmqctl purge_queue home` | Remove all messages from `home` queue
 
 #### Redis
 Use `redis-cli`
@@ -80,3 +80,9 @@ Command | Description
 `GET deposit:lastProcessedBlock` | Get the value of key.
 `DEL deposit:lastProcessedBlock` | Removes the specified key.
 `FLUSHALL` | Delete all the keys of all the existing databases
+
+
+### Env Variables
+Variable | Description | Values
+--- | --- | ---
+`ALLOW_HTTP` | Explicitly allows the usage of `http` connections instead of `https`. | `yes` / `no`
