@@ -3,6 +3,7 @@ const Web3 = require('web3')
 const assert = require('assert')
 const promiseRetry = require('promise-retry')
 const { user } = require('../constants.json')
+const { generateNewBlockWithTx } = require('../utils/utils')
 
 const abisDir = path.join(__dirname, '..', 'submodules/poa-bridge-contracts/build/contracts')
 
@@ -27,13 +28,33 @@ describe('transactions', () => {
     assert(toBN(balance).isZero(), 'Account should not have tokens yet')
 
     // send transaction to home chain
-    await homeWeb3.eth.sendTransaction({
+    const depositTx = await homeWeb3.eth.sendTransaction({
       from: user.address,
       to: HOME_BRIDGE_ADDRESS,
       gasPrice: '1',
-      gasLimit: '50000',
+      gas: '50000',
       value: '1000000000000000000'
     })
+
+    // Send a Tx to generate a new block
+    await generateNewBlockWithTx(homeWeb3, user.address)
+
+    // wait to send a Tx to generate a new block
+    await promiseRetry(
+      async retry => {
+        const lastBlockNumber = await homeWeb3.eth.getBlockNumber()
+        if (lastBlockNumber === depositTx.blockNumber + 2) {
+          await generateNewBlockWithTx(homeWeb3, user.address)
+        } else {
+          retry()
+        }
+      },
+      {
+        retries: 1000000,
+        factor: 1,
+        minTimeout: 500
+      }
+    )
 
     // check that account has tokens in the foreign chain
     await promiseRetry(async retry => {
@@ -52,11 +73,14 @@ describe('transactions', () => {
       .transferAndCall(FOREIGN_BRIDGE_ADDRESS, homeWeb3.utils.toWei('0.01'), '0x')
       .send({
         from: user.address,
-        gasLimit: '1000000'
+        gas: '1000000'
       })
       .catch(e => {
         console.error(e)
       })
+
+    // Send a second Tx to generate a new block
+    await generateNewBlockWithTx(foreignWeb3, user.address)
 
     // check that balance increases
     await promiseRetry(async retry => {
