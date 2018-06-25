@@ -7,12 +7,21 @@ function getBlockNumber(web3) {
   return web3.eth.getBlockNumber()
 }
 
-function getChainId(web3) {
-  return web3.eth.net.getId()
+async function getChainId(web3) {
+  try {
+    return await web3.eth.net.getId()
+  } catch (e) {
+    throw new Error(`Chain Id cannot be obtained`)
+  }
+}
+
+function getRequiredBlockConfirmations(contract) {
+  return contract.methods.requiredBlockConfirmations().call()
 }
 
 module.exports = {
   getNonce,
   getBlockNumber,
-  getChainId
+  getChainId,
+  getRequiredBlockConfirmations
 }

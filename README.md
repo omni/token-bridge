@@ -41,6 +41,16 @@ There are two Senders:
   - `npm run sender:home`
   - `npm run sender:foreign`
 
+### Run with Docker
+
+  - Start RabbitMQ and Redis: `docker-compose up -d`
+  - `docker-compose run bridge npm run watcher:deposit`
+  - `docker-compose run bridge npm run watcher:collected-signatures`
+  - `docker-compose run bridge npm run watcher:withdraw`
+  - `docker-compose run bridge npm run sender:home`
+  - `docker-compose run bridge npm run sender:foreign`
+
+
 In order to quickly send deposits run
 `node tests/sendUserTxToHome.js`
 this will send small deposits to home contract

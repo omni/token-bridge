@@ -7,6 +7,7 @@ const processDeposits = require('./events/processDeposits')
 const processCollectedSignatures = require('./events/processCollectedSignatures')
 const processWithdraw = require('./events/processWithdraw')
 const { redis } = require('./services/redisClient')
+const { getRequiredBlockConfirmations } = require('./tx/web3')
 const { checkHTTPS } = require('./utils/utils')
 
 if (process.argv.length < 3) {
@@ -77,16 +78,26 @@ function processEvents(events) {
   }
 }
 
+async function getLastBlockToProcess() {
+  const lastBlockNumberPromise = getBlockNumber(web3Instance)
+  const requiredBlockConfirmationsPromise = getRequiredBlockConfirmations(bridgeContract)
+  const [lastBlockNumber, requiredBlockConfirmations] = await Promise.all([
+    lastBlockNumberPromise,
+    requiredBlockConfirmationsPromise
+  ])
+
+  return lastBlockNumber - requiredBlockConfirmations
+}
+
 async function main({ sendToQueue }) {
   try {
-    const lastBlockNumber = await getBlockNumber(web3Instance)
-    if (lastBlockNumber === lastProcessedBlock) {
+    const lastBlockToProcess = await getLastBlockToProcess()
+    if (lastBlockToProcess <= lastProcessedBlock) {
       return
     }
-
     const events = await bridgeContract.getPastEvents(config.event, {
       fromBlock: lastProcessedBlock + 1,
-      toBlock: lastBlockNumber
+      toBlock: lastBlockToProcess
     })
     console.log(`Found ${events.length} ${config.event}`)
 
@@ -99,7 +110,7 @@ async function main({ sendToQueue }) {
       }
     }
 
-    await updateLastProcessedBlock(lastBlockNumber)
+    await updateLastProcessedBlock(lastBlockToProcess)
   } catch (e) {
     console.error(e)
   }
