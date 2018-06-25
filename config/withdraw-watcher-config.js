@@ -8,5 +8,6 @@ module.exports = {
   contractAddress: process.env.FOREIGN_BRIDGE_ADDRESS,
   abi: ForeignABI,
   queue: 'home',
-  id: 'withdraw'
+  id: 'withdraw',
+  pollingInterval: process.env.FOREIGN_POLLING_INTERVAL
 }

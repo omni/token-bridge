@@ -52,7 +52,7 @@ async function runMain({ sendToQueue, isAmqpConnected }) {
 
   setTimeout(() => {
     runMain({ sendToQueue, isAmqpConnected })
-  }, 1000)
+  }, config.pollingInterval)
 }
 
 async function getLastProcessedBlock() {
