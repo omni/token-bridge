@@ -1,4 +1,4 @@
-function generateNewBlockWithTx(web3, address) {
+function generateNewBlock(web3, address) {
   return web3.eth.sendTransaction({
     from: address,
     to: '0x0000000000000000000000000000000000000000',
@@ -9,5 +9,5 @@ function generateNewBlockWithTx(web3, address) {
 }
 
 module.exports = {
-  generateNewBlockWithTx
+  generateNewBlock
 }
