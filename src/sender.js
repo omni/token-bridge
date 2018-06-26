@@ -1,6 +1,7 @@
 require('dotenv').config()
 const path = require('path')
 const Web3 = require('web3')
+const promiseRetry = require('promise-retry')
 const { connectSenderToQueue } = require('./services/amqpClient')
 const { redis, redlock } = require('./services/redisClient')
 const { getGasPrices } = require('./services/gasPrice')
@@ -23,6 +24,25 @@ const web3Instance = new Web3(provider)
 const nonceLock = `lock:${config.id}:nonce`
 const nonceKey = `${config.id}:nonce`
 let chainId = 0
+
+async function waitForFunds(web3, cb) {
+  const balance = web3.utils.toBN(await web3.eth.getBalance(VALIDATOR_ADDRESS))
+
+  promiseRetry(
+    async retry => {
+      const newBalance = web3.utils.toBN(await web3.eth.getBalance(VALIDATOR_ADDRESS))
+      if (newBalance.eq(balance)) {
+        retry()
+      } else {
+        cb()
+      }
+    },
+    {
+      forever: true,
+      factor: 1
+    }
+  )
+}
 
 async function initialize() {
   try {
@@ -55,7 +75,7 @@ function updateNonce(nonce) {
   return redis.set(nonceKey, nonce)
 }
 
-async function main({ msg, ackMsg, nackMsg, sendToQueue }) {
+async function main({ msg, ackMsg, nackMsg, sendToQueue, close }) {
   try {
     if (redis.status !== 'ready') {
       console.log('Redis not connected.')
@@ -99,13 +119,19 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue }) {
       } catch (e) {
         console.error(e)
         console.error(`Tx Failed for event Tx ${job.transactionReference}`)
-        failedTx.push(job)
+        if (e.message.includes('Insufficient funds')) {
+          console.error('Insufficient funds')
+          waitForFunds(web3Instance, () => initialize())
+          close()
+        } else {
+          failedTx.push(job)
 
-        if (
-          e.message.includes('Transaction nonce is too low') ||
-          e.message.includes('transaction with same nonce in the queue')
-        ) {
-          nonce = await readNonce(true)
+          if (
+            e.message.includes('Transaction nonce is too low') ||
+            e.message.includes('transaction with same nonce in the queue')
+          ) {
+            nonce = await readNonce(true)
+          }
         }
       }
     })

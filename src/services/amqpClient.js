@@ -35,7 +35,8 @@ function connectSenderToQueue({ queueName, cb }) {
           msg,
           ackMsg: job => channelWrapper.ack(job),
           nackMsg: job => channelWrapper.nack(job, false, true),
-          sendToQueue: data => channelWrapper.sendToQueue(queueName, data, { persistent: true })
+          sendToQueue: data => channelWrapper.sendToQueue(queueName, data, { persistent: true }),
+          close: () => channelWrapper.close()
         })
       )
     ])
