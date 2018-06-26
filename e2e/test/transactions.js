@@ -3,7 +3,7 @@ const Web3 = require('web3')
 const assert = require('assert')
 const promiseRetry = require('promise-retry')
 const { user } = require('../constants.json')
-const { generateNewBlockWithTx } = require('../utils/utils')
+const { generateNewBlock } = require('../utils/utils')
 
 const abisDir = path.join(__dirname, '..', 'submodules/poa-bridge-contracts/build/contracts')
 
@@ -36,21 +36,23 @@ describe('transactions', () => {
       value: '1000000000000000000'
     })
 
-    // Send a Tx to generate a new block
-    await generateNewBlockWithTx(homeWeb3, user.address)
+    // Send a trivial transaction to generate a new block since the watcher
+    // is configured to wait 1 confirmation block
+    await generateNewBlock(homeWeb3, user.address)
 
-    // wait to send a Tx to generate a new block
+    // The bridge should create a new transaction with a CollectedSignatures
+    // event so we generate another trivial transaction
     await promiseRetry(
       async retry => {
         const lastBlockNumber = await homeWeb3.eth.getBlockNumber()
-        if (lastBlockNumber === depositTx.blockNumber + 2) {
-          await generateNewBlockWithTx(homeWeb3, user.address)
+        if (lastBlockNumber >= depositTx.blockNumber + 2) {
+          await generateNewBlock(homeWeb3, user.address)
         } else {
           retry()
         }
       },
       {
-        retries: 1000000,
+        forever: true,
         factor: 1,
         minTimeout: 500
       }
@@ -79,8 +81,9 @@ describe('transactions', () => {
         console.error(e)
       })
 
-    // Send a second Tx to generate a new block
-    await generateNewBlockWithTx(foreignWeb3, user.address)
+    // Send a trivial transaction to generate a new block since the watcher
+    // is configured to wait 1 confirmation block
+    await generateNewBlock(foreignWeb3, user.address)
 
     // check that balance increases
     await promiseRetry(async retry => {
