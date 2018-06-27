@@ -55,7 +55,7 @@ function updateNonce(nonce) {
   return redis.set(nonceKey, nonce)
 }
 
-async function main({ msg, ackMsg, nackMsg, sendToQueue, close }) {
+async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
   try {
     if (redis.status !== 'ready') {
       console.log('Redis not connected.')
@@ -77,6 +77,7 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, close }) {
     console.log('Nonce Locked! After: ', timeWaitingForLock)
 
     let nonce = await readNonce()
+    let insufficientFunds = false
     const failedTx = []
 
     await syncForEach(txArray, async job => {
@@ -99,19 +100,16 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, close }) {
       } catch (e) {
         console.error(e)
         console.error(`Tx Failed for event Tx ${job.transactionReference}`)
+        failedTx.push(job)
+
         if (e.message.includes('Insufficient funds')) {
           console.error('Insufficient funds')
-          waitForFunds(web3Instance, () => initialize())
-          close()
-        } else {
-          failedTx.push(job)
-
-          if (
-            e.message.includes('Transaction nonce is too low') ||
-            e.message.includes('transaction with same nonce in the queue')
-          ) {
-            nonce = await readNonce(true)
-          }
+          insufficientFunds = true
+        } else if (
+          e.message.includes('Transaction nonce is too low') ||
+          e.message.includes('transaction with same nonce in the queue')
+        ) {
+          nonce = await readNonce(true)
         }
       }
     })
@@ -127,6 +125,11 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, close }) {
       await sendToQueue(failedTx)
     }
     ackMsg(msg)
+
+    if (insufficientFunds) {
+      channel.close()
+      waitForFunds(web3Instance, VALIDATOR_ADDRESS, initialize)
+    }
   } catch (e) {
     console.error(e)
     nackMsg(msg)

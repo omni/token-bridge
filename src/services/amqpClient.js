@@ -28,15 +28,15 @@ function connectSenderToQueue({ queueName, cb }) {
   })
 
   channelWrapper.addSetup(channel => {
-    Promise.all([
+    return Promise.all([
       channel.assertQueue(queueName, { durable: true }),
       channel.consume(queueName, msg =>
         cb({
           msg,
+          channel: channelWrapper,
           ackMsg: job => channelWrapper.ack(job),
           nackMsg: job => channelWrapper.nack(job, false, true),
-          sendToQueue: data => channelWrapper.sendToQueue(queueName, data, { persistent: true }),
-          close: () => channelWrapper.close()
+          sendToQueue: data => channelWrapper.sendToQueue(queueName, data, { persistent: true })
         })
       )
     ])
