@@ -19,7 +19,7 @@ function connectWatcherToQueue({ queueName, cb }) {
 
   const sendToQueue = data => channelWrapper.sendToQueue(queueName, data, { persistent: true })
 
-  cb({ sendToQueue, isAmqpConnected: () => connection.isConnected() })
+  cb({ sendToQueue, channel: channelWrapper })
 }
 
 function connectSenderToQueue({ queueName, cb }) {
@@ -45,5 +45,6 @@ function connectSenderToQueue({ queueName, cb }) {
 
 module.exports = {
   connectWatcherToQueue,
-  connectSenderToQueue
+  connectSenderToQueue,
+  connection
 }
