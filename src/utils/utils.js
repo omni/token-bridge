@@ -1,3 +1,5 @@
+const promiseRetry = require('promise-retry')
+
 async function syncForEach(array, callback) {
   for (let index = 0; index < array.length; index++) {
     await callback(array[index], index, array)
@@ -16,7 +18,27 @@ function checkHTTPS(ALLOW_HTTP) {
   }
 }
 
+async function waitForFunds(web3, address, cb) {
+  const balance = web3.utils.toBN(await web3.eth.getBalance(address))
+
+  promiseRetry(
+    async retry => {
+      const newBalance = web3.utils.toBN(await web3.eth.getBalance(address))
+      if (newBalance.eq(balance)) {
+        retry()
+      } else {
+        cb()
+      }
+    },
+    {
+      forever: true,
+      factor: 1
+    }
+  )
+}
+
 module.exports = {
   syncForEach,
-  checkHTTPS
+  checkHTTPS,
+  waitForFunds
 }

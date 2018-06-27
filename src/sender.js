@@ -1,14 +1,13 @@
 require('dotenv').config()
 const path = require('path')
 const Web3 = require('web3')
-const promiseRetry = require('promise-retry')
 const { connectSenderToQueue } = require('./services/amqpClient')
 const { redis, redlock } = require('./services/redisClient')
 const { getGasPrices } = require('./services/gasPrice')
 const { sendTx } = require('./tx/sendTx')
 const { getNonce, getChainId } = require('./tx/web3')
 const { syncForEach } = require('./utils/utils')
-const { checkHTTPS } = require('./utils/utils')
+const { waitForFunds, checkHTTPS } = require('./utils/utils')
 
 const { VALIDATOR_ADDRESS, VALIDATOR_ADDRESS_PRIVATE_KEY, REDIS_LOCK_TTL } = process.env
 
@@ -24,25 +23,6 @@ const web3Instance = new Web3(provider)
 const nonceLock = `lock:${config.id}:nonce`
 const nonceKey = `${config.id}:nonce`
 let chainId = 0
-
-async function waitForFunds(web3, cb) {
-  const balance = web3.utils.toBN(await web3.eth.getBalance(VALIDATOR_ADDRESS))
-
-  promiseRetry(
-    async retry => {
-      const newBalance = web3.utils.toBN(await web3.eth.getBalance(VALIDATOR_ADDRESS))
-      if (newBalance.eq(balance)) {
-        retry()
-      } else {
-        cb()
-      }
-    },
-    {
-      forever: true,
-      factor: 1
-    }
-  )
-}
 
 async function initialize() {
   try {
