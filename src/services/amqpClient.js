@@ -30,6 +30,7 @@ function connectSenderToQueue({ queueName, cb }) {
   channelWrapper.addSetup(channel => {
     return Promise.all([
       channel.assertQueue(queueName, { durable: true }),
+      channel.prefetch(1),
       channel.consume(queueName, msg =>
         cb({
           msg,
