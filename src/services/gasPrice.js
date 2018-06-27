@@ -9,7 +9,7 @@ async function getGasPrices() {
     const json = await response.json()
     return json[GAS_PRICE_SPEED_TYPE]
   } catch (e) {
-    console.error('Gas Price API is not available', e)
+    console.error(`Gas Price API is not available. ${e.message}`)
     return GAS_PRICE_FALLBACK
   }
 }
