@@ -3,6 +3,7 @@ const Web3 = require('web3')
 const assert = require('assert')
 const promiseRetry = require('promise-retry')
 const { user } = require('../constants.json')
+const { generateNewBlock } = require('../utils/utils')
 
 const abisDir = path.join(__dirname, '..', 'submodules/poa-bridge-contracts/build/contracts')
 
@@ -27,13 +28,35 @@ describe('transactions', () => {
     assert(toBN(balance).isZero(), 'Account should not have tokens yet')
 
     // send transaction to home chain
-    await homeWeb3.eth.sendTransaction({
+    const depositTx = await homeWeb3.eth.sendTransaction({
       from: user.address,
       to: HOME_BRIDGE_ADDRESS,
       gasPrice: '1',
-      gasLimit: '50000',
+      gas: '50000',
       value: '1000000000000000000'
     })
+
+    // Send a trivial transaction to generate a new block since the watcher
+    // is configured to wait 1 confirmation block
+    await generateNewBlock(homeWeb3, user.address)
+
+    // The bridge should create a new transaction with a CollectedSignatures
+    // event so we generate another trivial transaction
+    await promiseRetry(
+      async retry => {
+        const lastBlockNumber = await homeWeb3.eth.getBlockNumber()
+        if (lastBlockNumber >= depositTx.blockNumber + 2) {
+          await generateNewBlock(homeWeb3, user.address)
+        } else {
+          retry()
+        }
+      },
+      {
+        forever: true,
+        factor: 1,
+        minTimeout: 500
+      }
+    )
 
     // check that account has tokens in the foreign chain
     await promiseRetry(async retry => {
@@ -52,11 +75,15 @@ describe('transactions', () => {
       .transferAndCall(FOREIGN_BRIDGE_ADDRESS, homeWeb3.utils.toWei('0.01'), '0x')
       .send({
         from: user.address,
-        gasLimit: '1000000'
+        gas: '1000000'
       })
       .catch(e => {
         console.error(e)
       })
+
+    // Send a trivial transaction to generate a new block since the watcher
+    // is configured to wait 1 confirmation block
+    await generateNewBlock(foreignWeb3, user.address)
 
     // check that balance increases
     await promiseRetry(async retry => {
