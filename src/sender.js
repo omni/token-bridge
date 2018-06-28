@@ -42,6 +42,11 @@ async function initialize() {
   }
 }
 
+function resume() {
+  console.log('Validator balance changed. Resuming messages processing.')
+  initialize()
+}
+
 async function readNonce(forceUpdate) {
   if (forceUpdate) {
     return getNonce(web3Instance, VALIDATOR_ADDRESS)
@@ -128,7 +133,7 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
 
     if (insufficientFunds) {
       channel.close()
-      waitForFunds(web3Instance, VALIDATOR_ADDRESS, initialize)
+      waitForFunds(web3Instance, VALIDATOR_ADDRESS, resume)
     }
   } catch (e) {
     console.error(e)
