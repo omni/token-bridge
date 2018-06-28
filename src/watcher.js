@@ -3,9 +3,9 @@ const path = require('path')
 const Web3 = require('web3')
 const { connectWatcherToQueue } = require('./services/amqpClient')
 const { getBlockNumber } = require('./tx/web3')
-const processDeposits = require('./events/processDeposits')
+const processSignatureRequests = require('./events/processSignatureRequests')
 const processCollectedSignatures = require('./events/processCollectedSignatures')
-const processWithdraw = require('./events/processWithdraw')
+const processAffirmationRequests = require('./events/processAffirmationRequests')
 const { redis } = require('./services/redisClient')
 const { getRequiredBlockConfirmations } = require('./tx/web3')
 const { checkHTTPS } = require('./utils/utils')
@@ -67,12 +67,12 @@ function updateLastProcessedBlock(lastBlockNumber) {
 
 function processEvents(events) {
   switch (config.id) {
-    case 'deposit':
-      return processDeposits(events)
+    case 'signature-request':
+      return processSignatureRequests(events)
     case 'collected-signatures':
       return processCollectedSignatures(events)
-    case 'withdraw':
-      return processWithdraw(events)
+    case 'affirmation-request':
+      return processAffirmationRequests(events)
     default:
       return []
   }

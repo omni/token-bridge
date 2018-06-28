@@ -6,9 +6,9 @@
 A watcher listens for a certain event and creates proper jobs in the queue. These jobs contain the transaction data (without the nonce) and the transaction hash for the related event. The watcher runs on a given frequency, keeping track of the last processed block.
 
 There are three Watchers:
-- Deposit Watcher: Listens to `Deposit` events on Home network.
+- Signature Request Watcher: Listens to `UserRequestForSignature` events on Home network.
 - Collected Signatures Watcher: Listens to `CollectedSignatures` events on Home network.
-- Withdraw Watcher: Listens to `Withdraw` events on Foreign network.
+- Affirmation Request Watcher: Listens to `UserRequestForAffirmation` events on Foreign network.
 
 ### Sender
 A sender subscribes to the queue and keeps track of the nonce. It takes jobs from the queue, extract transaction data, adds proper nonce and sends it to the network.
@@ -35,18 +35,18 @@ There are two Senders:
 3. Create a `.env` file: `cp .env.example .env` and fill in the information using the output data from previous deploy step. Check the `.env.example` file to see the required variables.
 
 4. To run the processes:
-  - `npm run watcher:deposit`
+  - `npm run watcher:signature-request`
   - `npm run watcher:collected-signatures`
-  - `npm run watcher:withdraw`
+  - `npm run watcher:affirmation-request`
   - `npm run sender:home`
   - `npm run sender:foreign`
 
 ### Run with Docker
 
   - Start RabbitMQ and Redis: `docker-compose up -d`
-  - `docker-compose run bridge npm run watcher:deposit`
+  - `docker-compose run bridge npm run watcher:signature-request`
   - `docker-compose run bridge npm run watcher:collected-signatures`
-  - `docker-compose run bridge npm run watcher:withdraw`
+  - `docker-compose run bridge npm run watcher:affirmation-request`
   - `docker-compose run bridge npm run sender:home`
   - `docker-compose run bridge npm run sender:foreign`
 
@@ -76,9 +76,9 @@ Use `redis-cli`
 Command | Description
 --- | ---
 `KEYS *` | Returns all keys
-`SET deposit:lastProcessedBlock 1234` | Set key to hold the string value.
-`GET deposit:lastProcessedBlock` | Get the value of key.
-`DEL deposit:lastProcessedBlock` | Removes the specified key.
+`SET signature-request:lastProcessedBlock 1234` | Set key to hold the string value.
+`GET signature-request:lastProcessedBlock` | Get the value of key.
+`DEL signature-request:lastProcessedBlock` | Removes the specified key.
 `FLUSHALL` | Delete all the keys of all the existing databases
 
 
