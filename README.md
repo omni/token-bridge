@@ -1,6 +1,6 @@
 # Architecture
 
-![bridge architecture](https://user-images.githubusercontent.com/417134/40630604-4a41c986-62aa-11e8-999e-08dca615532d.png)
+![bridge architecture](https://user-images.githubusercontent.com/4614574/42094368-f260f648-7b85-11e8-91d4-e602253a6560.png)
 
 ### Watcher
 A watcher listens for a certain event and creates proper jobs in the queue. These jobs contain the transaction data (without the nonce) and the transaction hash for the related event. The watcher runs on a given frequency, keeping track of the last processed block.
