@@ -11,6 +11,8 @@ const { waitForFunds, checkHTTPS } = require('./utils/utils')
 
 const { VALIDATOR_ADDRESS, VALIDATOR_ADDRESS_PRIVATE_KEY, REDIS_LOCK_TTL } = process.env
 
+const { toBN } = Web3.utils
+
 if (process.argv.length < 3) {
   console.error('Please check the number of arguments, config file was not provided')
   process.exit(1)
@@ -42,8 +44,8 @@ async function initialize() {
   }
 }
 
-function resume() {
-  console.log('Validator balance changed. Resuming messages processing.')
+function resume(newBalance) {
+  console.log(`Validator balance changed. New balance is ${newBalance}. Resume messages processing.`)
   initialize()
 }
 
@@ -83,6 +85,7 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
 
     let nonce = await readNonce()
     let insufficientFunds = false
+    let minimumBalance = null
     const failedTx = []
 
     await syncForEach(txArray, async job => {
@@ -108,8 +111,14 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
         failedTx.push(job)
 
         if (e.message.includes('Insufficient funds')) {
-          console.error('Insufficient funds')
           insufficientFunds = true
+          const currentBalance = await web3Instance.eth.getBalance(VALIDATOR_ADDRESS)
+          minimumBalance = toBN(job.gasEstimate)
+            .add(toBN(200000))
+            .mul(toBN(gasPrice))
+          console.error(
+            `Insufficient funds: ${currentBalance}. Stop processing messages until the balance is at least ${minimumBalance}.`
+          )
         } else if (
           e.message.includes('Transaction nonce is too low') ||
           e.message.includes('transaction with same nonce in the queue')
@@ -133,7 +142,7 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
 
     if (insufficientFunds) {
       channel.close()
-      waitForFunds(web3Instance, VALIDATOR_ADDRESS, resume)
+      waitForFunds(web3Instance, VALIDATOR_ADDRESS, minimumBalance, resume)
     }
   } catch (e) {
     console.error(e)

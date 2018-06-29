@@ -18,16 +18,14 @@ function checkHTTPS(ALLOW_HTTP) {
   }
 }
 
-async function waitForFunds(web3, address, cb) {
-  const balance = web3.utils.toBN(await web3.eth.getBalance(address))
-
+async function waitForFunds(web3, address, minimumBalance, cb) {
   promiseRetry(
     async retry => {
       const newBalance = web3.utils.toBN(await web3.eth.getBalance(address))
-      if (newBalance.eq(balance)) {
-        retry()
+      if (newBalance.gte(minimumBalance)) {
+        cb(newBalance)
       } else {
-        cb()
+        retry()
       }
     },
     {
