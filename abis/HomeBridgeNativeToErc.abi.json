@@ -3,6 +3,48 @@
     "constant": true,
     "inputs": [
       {
+        "name": "_message",
+        "type": "bytes32"
+      }
+    ],
+    "name": "numMessagesSigned",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_hash",
+        "type": "bytes32"
+      },
+      {
+        "name": "_index",
+        "type": "uint256"
+      }
+    ],
+    "name": "signature",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
         "name": "_day",
         "type": "uint256"
       }
@@ -62,12 +104,105 @@
   },
   {
     "constant": true,
+    "inputs": [
+      {
+        "name": "_hash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "message",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "signature",
+        "type": "bytes"
+      },
+      {
+        "name": "message",
+        "type": "bytes"
+      }
+    ],
+    "name": "submitSignature",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
     "inputs": [],
     "name": "dailyLimit",
     "outputs": [
       {
         "name": "",
         "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "_token",
+        "type": "address"
+      },
+      {
+        "name": "_to",
+        "type": "address"
+      }
+    ],
+    "name": "claimTokens",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_withdrawal",
+        "type": "bytes32"
+      }
+    ],
+    "name": "numAffirmationsSigned",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_withdrawal",
+        "type": "bytes32"
+      }
+    ],
+    "name": "affirmationsSigned",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
       }
     ],
     "payable": false,
@@ -90,6 +225,25 @@
   },
   {
     "constant": true,
+    "inputs": [
+      {
+        "name": "_message",
+        "type": "bytes32"
+      }
+    ],
+    "name": "messagesSigned",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
     "inputs": [],
     "name": "validatorContract",
     "outputs": [
@@ -100,6 +254,28 @@
     ],
     "payable": false,
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "recipient",
+        "type": "address"
+      },
+      {
+        "name": "value",
+        "type": "uint256"
+      },
+      {
+        "name": "transactionHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "executeAffirmation",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -248,21 +424,28 @@
     "type": "function"
   },
   {
-    "payable": true,
-    "stateMutability": "payable",
-    "type": "fallback"
-  },
-  {
-    "anonymous": false,
+    "constant": true,
     "inputs": [
       {
-        "indexed": false,
-        "name": "gas",
+        "name": "_number",
         "type": "uint256"
       }
     ],
-    "name": "GasConsumptionLimitsUpdated",
-    "type": "event"
+    "name": "isAlreadyProcessed",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "payable": true,
+    "stateMutability": "payable",
+    "type": "fallback"
   },
   {
     "anonymous": false,
@@ -278,7 +461,7 @@
         "type": "uint256"
       }
     ],
-    "name": "Deposit",
+    "name": "UserRequestForSignature",
     "type": "event"
   },
   {
@@ -300,7 +483,7 @@
         "type": "bytes32"
       }
     ],
-    "name": "Withdraw",
+    "name": "AffirmationCompleted",
     "type": "event"
   },
   {
@@ -317,7 +500,7 @@
         "type": "bytes32"
       }
     ],
-    "name": "SignedForDeposit",
+    "name": "SignedForUserRequest",
     "type": "event"
   },
   {
@@ -334,7 +517,7 @@
         "type": "bytes32"
       }
     ],
-    "name": "SignedForWithdraw",
+    "name": "SignedForAffirmation",
     "type": "event"
   },
   {
@@ -392,7 +575,7 @@
         "type": "uint256"
       }
     ],
-    "name": "DailyLimit",
+    "name": "DailyLimitChanged",
     "type": "event"
   },
   {
@@ -432,183 +615,6 @@
     ],
     "payable": false,
     "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "name": "recipient",
-        "type": "address"
-      },
-      {
-        "name": "value",
-        "type": "uint256"
-      },
-      {
-        "name": "transactionHash",
-        "type": "bytes32"
-      }
-    ],
-    "name": "withdraw",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "name": "_withdrawal",
-        "type": "bytes32"
-      }
-    ],
-    "name": "numWithdrawalsSigned",
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "name": "_withdrawal",
-        "type": "bytes32"
-      }
-    ],
-    "name": "withdrawalsSigned",
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "name": "signature",
-        "type": "bytes"
-      },
-      {
-        "name": "message",
-        "type": "bytes"
-      }
-    ],
-    "name": "submitSignature",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "name": "_hash",
-        "type": "bytes32"
-      },
-      {
-        "name": "_index",
-        "type": "uint256"
-      }
-    ],
-    "name": "signature",
-    "outputs": [
-      {
-        "name": "",
-        "type": "bytes"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "name": "_message",
-        "type": "bytes32"
-      }
-    ],
-    "name": "messagesSigned",
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "name": "_hash",
-        "type": "bytes32"
-      }
-    ],
-    "name": "message",
-    "outputs": [
-      {
-        "name": "",
-        "type": "bytes"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "name": "_number",
-        "type": "uint256"
-      }
-    ],
-    "name": "isAlreadyProcessed",
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "pure",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "name": "_message",
-        "type": "bytes32"
-      }
-    ],
-    "name": "numMessagesSigned",
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
     "type": "function"
   }
 ]

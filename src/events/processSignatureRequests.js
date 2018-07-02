@@ -11,20 +11,20 @@ const {
 
 const homeProvider = new Web3.providers.HttpProvider(HOME_RPC_URL)
 const web3Home = new Web3(homeProvider)
-const HomeABI = require('../../abis/HomeBridge.abi')
+const HomeABI = require('../../abis/HomeBridgeNativeToErc.abi')
 
 const homeBridge = new web3Home.eth.Contract(HomeABI, HOME_BRIDGE_ADDRESS)
 
-async function processDeposits(deposits) {
+async function processSignatureRequests(signatureRequests) {
   const txToSend = []
 
-  const callbacks = deposits.map(async (deposit, index) => {
-    const { recipient, value } = deposit.returnValues
+  const callbacks = signatureRequests.map(async (signatureRequest, index) => {
+    const { recipient, value } = signatureRequest.returnValues
 
     const message = createMessage({
       recipient,
       value,
-      transactionHash: deposit.transactionHash
+      transactionHash: signatureRequest.transactionHash
     })
 
     const signature = web3Home.eth.accounts.sign(message, `0x${VALIDATOR_ADDRESS_PRIVATE_KEY}`)
@@ -35,7 +35,11 @@ async function processDeposits(deposits) {
         .submitSignature(signature.signature, message)
         .estimateGas({ from: VALIDATOR_ADDRESS })
     } catch (e) {
-      console.log(index + 1, '# already processed deposit ', deposit.transactionHash)
+      console.log(
+        index + 1,
+        '# already processed UserRequestForSignature ',
+        signatureRequest.transactionHash
+      )
       return
     }
 
@@ -46,7 +50,7 @@ async function processDeposits(deposits) {
     txToSend.push({
       data,
       gasEstimate,
-      transactionReference: deposit.transactionHash
+      transactionReference: signatureRequest.transactionHash
     })
   })
 
@@ -54,4 +58,4 @@ async function processDeposits(deposits) {
   return txToSend
 }
 
-module.exports = processDeposits
+module.exports = processSignatureRequests
