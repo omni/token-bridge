@@ -1,16 +1,14 @@
 require('dotenv').config()
 const fetch = require('node-fetch')
 
-const { GAS_PRICE_FALLBACK, GAS_PRICE_SPEED_TYPE } = process.env
-
-async function getGasPrices() {
+async function getGasPrices({ url, gasPriceSpeedType, gasPriceFallback }) {
   try {
-    const response = await fetch('https://gasprice.poa.network/')
+    const response = await fetch(url)
     const json = await response.json()
-    return json[GAS_PRICE_SPEED_TYPE]
+    return json[gasPriceSpeedType]
   } catch (e) {
     console.error('Gas Price API is not available', e)
-    return GAS_PRICE_FALLBACK
+    return gasPriceFallback
   }
 }
 

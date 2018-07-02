@@ -66,7 +66,7 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue }) {
     const txArray = JSON.parse(msg.content)
     console.log(`Msg received with ${txArray.length} Tx to send`)
 
-    const gasPrice = await getGasPrices()
+    const gasPrice = await getGasPrices(config)
 
     const ttl = REDIS_LOCK_TTL * txArray.length
     const startTryLock = new Date()
