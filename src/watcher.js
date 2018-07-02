@@ -7,7 +7,7 @@ const processDeposits = require('./events/processDeposits')
 const processCollectedSignatures = require('./events/processCollectedSignatures')
 const processWithdraw = require('./events/processWithdraw')
 const { redis } = require('./services/redisClient')
-const { getRequiredBlockConfirmations } = require('./tx/web3')
+const { getRequiredBlockConfirmations, getEvents } = require('./tx/web3')
 const { checkHTTPS } = require('./utils/utils')
 
 if (process.argv.length < 3) {
@@ -95,7 +95,9 @@ async function main({ sendToQueue }) {
     if (lastBlockToProcess <= lastProcessedBlock) {
       return
     }
-    const events = await bridgeContract.getPastEvents(config.event, {
+    const events = await getEvents({
+      contract: bridgeContract,
+      event: config.event,
       fromBlock: lastProcessedBlock + 1,
       toBlock: lastBlockToProcess
     })

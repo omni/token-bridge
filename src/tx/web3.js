@@ -1,10 +1,17 @@
-// eslint-disable-next-line consistent-return
 async function getNonce(web3, address) {
-  return web3.eth.getTransactionCount(address)
+  try {
+    return await web3.eth.getTransactionCount(address)
+  } catch (e) {
+    throw new Error(`Nonce cannot be obtained`)
+  }
 }
 
-function getBlockNumber(web3) {
-  return web3.eth.getBlockNumber()
+async function getBlockNumber(web3) {
+  try {
+    return await web3.eth.getBlockNumber()
+  } catch (e) {
+    throw new Error(`Block Number cannot be obtained`)
+  }
 }
 
 async function getChainId(web3) {
@@ -15,13 +22,26 @@ async function getChainId(web3) {
   }
 }
 
-function getRequiredBlockConfirmations(contract) {
-  return contract.methods.requiredBlockConfirmations().call()
+async function getRequiredBlockConfirmations(contract) {
+  try {
+    return await contract.methods.requiredBlockConfirmations().call()
+  } catch (e) {
+    throw new Error(`Required block confirmations cannot be obtained`)
+  }
+}
+
+async function getEvents({ contract, event, fromBlock, toBlock }) {
+  try {
+    return await contract.getPastEvents(event, { fromBlock, toBlock })
+  } catch (e) {
+    throw new Error(`${event} events cannot be obtained`)
+  }
 }
 
 module.exports = {
   getNonce,
   getBlockNumber,
   getChainId,
-  getRequiredBlockConfirmations
+  getRequiredBlockConfirmations,
+  getEvents
 }
