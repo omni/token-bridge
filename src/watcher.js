@@ -17,6 +17,7 @@ const config = require(path.join('../config/', process.argv[2]))
 const processSignatureRequests = require('./events/processSignatureRequests')(config)
 const processCollectedSignatures = require('./events/processCollectedSignatures')(config)
 const processAffirmationRequests = require('./events/processAffirmationRequests')(config)
+const processTransfers = require('./events/processTransfers')(config)
 
 const provider = new Web3.providers.HttpProvider(config.url)
 const web3Instance = new Web3(provider)
@@ -70,11 +71,15 @@ function updateLastProcessedBlock(lastBlockNumber) {
 function processEvents(events) {
   switch (config.id) {
     case 'signature-request':
+    case 'erc-signature-request':
       return processSignatureRequests(events)
     case 'collected-signatures':
+    case 'erc-collected-signatures':
       return processCollectedSignatures(events)
     case 'affirmation-request':
       return processAffirmationRequests(events)
+    case 'erc-transfer':
+      return processTransfers(events)
     default:
       return []
   }
