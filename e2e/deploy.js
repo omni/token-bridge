@@ -7,3 +7,6 @@ const deployContractsDir = path.join(__dirname, 'submodules/poa-bridge-contracts
 shell.cp(path.join(envsDir, 'contracts-deploy.env'), path.join(deployContractsDir, '.env'))
 shell.cd(deployContractsDir)
 shell.exec('node deploy.js')
+shell.rm('.env')
+shell.cp(path.join(envsDir, 'erc-contracts-deploy.env'), path.join(deployContractsDir, '.env'))
+shell.exec('node deploy.js')
