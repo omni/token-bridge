@@ -8,9 +8,10 @@ const {
   USER_ADDRESS_PRIVATE_KEY,
   HOME_BRIDGE_ADDRESS,
   HOME_RPC_URL,
-  HOME_MIN_AMOUNT_PER_TX,
-  NUMBER_OF_DEPOSITS_TO_SEND
+  HOME_MIN_AMOUNT_PER_TX
 } = process.env
+
+const NUMBER_OF_DEPOSITS_TO_SEND = process.argv[2] || 1
 
 const homeProvider = new Web3.providers.HttpProvider(HOME_RPC_URL)
 const web3Home = new Web3(homeProvider)
