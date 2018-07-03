@@ -3,9 +3,6 @@ const path = require('path')
 const Web3 = require('web3')
 const { connectWatcherToQueue } = require('./services/amqpClient')
 const { getBlockNumber } = require('./tx/web3')
-const processSignatureRequests = require('./events/processSignatureRequests')
-const processCollectedSignatures = require('./events/processCollectedSignatures')
-const processAffirmationRequests = require('./events/processAffirmationRequests')
 const { redis } = require('./services/redisClient')
 const { getRequiredBlockConfirmations } = require('./tx/web3')
 const { checkHTTPS } = require('./utils/utils')
@@ -17,9 +14,14 @@ if (process.argv.length < 3) {
 
 const config = require(path.join('../config/', process.argv[2]))
 
+const processSignatureRequests = require('./events/processSignatureRequests')(config)
+const processCollectedSignatures = require('./events/processCollectedSignatures')(config)
+const processAffirmationRequests = require('./events/processAffirmationRequests')(config)
+
 const provider = new Web3.providers.HttpProvider(config.url)
 const web3Instance = new Web3(provider)
-const bridgeContract = new web3Instance.eth.Contract(config.abi, config.contractAddress)
+const bridgeContract = new web3Instance.eth.Contract(config.bridgeAbi, config.bridgeContractAddress)
+const eventContract = new web3Instance.eth.Contract(config.eventAbi, config.eventContractAddress)
 const lastBlockRedisKey = `${config.id}:lastProcessedBlock`
 let lastProcessedBlock = 0
 
@@ -95,9 +97,10 @@ async function main({ sendToQueue }) {
     if (lastBlockToProcess <= lastProcessedBlock) {
       return
     }
-    const events = await bridgeContract.getPastEvents(config.event, {
+    const events = await eventContract.getPastEvents(config.event, {
       fromBlock: lastProcessedBlock + 1,
-      toBlock: lastBlockToProcess
+      toBlock: lastBlockToProcess,
+      filter: config.eventFilter
     })
     console.log(`Found ${events.length} ${config.event}`)
 

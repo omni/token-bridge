@@ -2,60 +2,56 @@ require('dotenv').config()
 const Web3 = require('web3')
 const { createMessage } = require('../utils/message')
 
-const {
-  HOME_RPC_URL,
-  HOME_BRIDGE_ADDRESS,
-  VALIDATOR_ADDRESS,
-  VALIDATOR_ADDRESS_PRIVATE_KEY
-} = process.env
+const { HOME_RPC_URL, VALIDATOR_ADDRESS, VALIDATOR_ADDRESS_PRIVATE_KEY } = process.env
 
-const homeProvider = new Web3.providers.HttpProvider(HOME_RPC_URL)
-const web3Home = new Web3(homeProvider)
-const HomeABI = require('../../abis/HomeBridgeNativeToErc.abi')
+function processSignatureRequestsBuilder(config) {
+  const homeProvider = new Web3.providers.HttpProvider(HOME_RPC_URL)
+  const web3Home = new Web3(homeProvider)
+  const homeBridge = new web3Home.eth.Contract(config.homeBridgeAbi, config.homeBridgeAddress)
 
-const homeBridge = new web3Home.eth.Contract(HomeABI, HOME_BRIDGE_ADDRESS)
+  return async function processSignatureRequests(signatureRequests) {
+    const txToSend = []
 
-async function processSignatureRequests(signatureRequests) {
-  const txToSend = []
+    const callbacks = signatureRequests.map(async (signatureRequest, index) => {
+      const { recipient, value } = signatureRequest.returnValues
 
-  const callbacks = signatureRequests.map(async (signatureRequest, index) => {
-    const { recipient, value } = signatureRequest.returnValues
+      const message = createMessage({
+        recipient,
+        value,
+        transactionHash: signatureRequest.transactionHash
+      })
 
-    const message = createMessage({
-      recipient,
-      value,
-      transactionHash: signatureRequest.transactionHash
-    })
+      const signature = web3Home.eth.accounts.sign(message, `0x${VALIDATOR_ADDRESS_PRIVATE_KEY}`)
 
-    const signature = web3Home.eth.accounts.sign(message, `0x${VALIDATOR_ADDRESS_PRIVATE_KEY}`)
+      let gasEstimate
+      try {
+        gasEstimate = await homeBridge.methods
+          .submitSignature(signature.signature, message)
+          .estimateGas({ from: VALIDATOR_ADDRESS })
+      } catch (e) {
+        console.log(
+          index + 1,
+          '# already processed UserRequestForSignature ',
+          signatureRequest.transactionHash
+        )
+        return
+      }
 
-    let gasEstimate
-    try {
-      gasEstimate = await homeBridge.methods
+      const data = await homeBridge.methods
         .submitSignature(signature.signature, message)
-        .estimateGas({ from: VALIDATOR_ADDRESS })
-    } catch (e) {
-      console.log(
-        index + 1,
-        '# already processed UserRequestForSignature ',
-        signatureRequest.transactionHash
-      )
-      return
-    }
+        .encodeABI({ from: VALIDATOR_ADDRESS })
 
-    const data = await homeBridge.methods
-      .submitSignature(signature.signature, message)
-      .encodeABI({ from: VALIDATOR_ADDRESS })
-
-    txToSend.push({
-      data,
-      gasEstimate,
-      transactionReference: signatureRequest.transactionHash
+      txToSend.push({
+        data,
+        gasEstimate,
+        transactionReference: signatureRequest.transactionHash,
+        to: config.homeBridgeAddress
+      })
     })
-  })
 
-  await Promise.all(callbacks)
-  return txToSend
+    await Promise.all(callbacks)
+    return txToSend
+  }
 }
 
-module.exports = processSignatureRequests
+module.exports = processSignatureRequestsBuilder

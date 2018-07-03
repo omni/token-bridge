@@ -1,13 +1,10 @@
 require('dotenv').config()
-
-const HomeABI = require('../abis/HomeBridgeNativeToErc.abi')
+const nativeErcConfig = require('./base-native-erc-watcher.config')
 
 module.exports = {
+  ...nativeErcConfig.bridgeConfig,
+  ...nativeErcConfig.homeConfig,
   event: 'CollectedSignatures',
-  url: process.env.HOME_RPC_URL,
-  contractAddress: process.env.HOME_BRIDGE_ADDRESS,
-  abi: HomeABI,
   queue: 'foreign',
-  id: 'collected-signatures',
-  pollingInterval: process.env.HOME_POLLING_INTERVAL
+  id: 'collected-signatures'
 }

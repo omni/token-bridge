@@ -89,7 +89,7 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue }) {
           amount: '0',
           gasLimit: job.gasEstimate + 200000,
           privateKey: VALIDATOR_ADDRESS_PRIVATE_KEY,
-          to: config.contractAddress,
+          to: job.to,
           chainId,
           web3: web3Instance
         })
