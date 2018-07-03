@@ -1,4 +1,3 @@
-require('dotenv').config()
 const nativeErcConfig = require('./base-native-erc-watcher.config')
 
 module.exports = {
