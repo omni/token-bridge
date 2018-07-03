@@ -9,7 +9,8 @@
     "watcher:collected-signatures": "node src/watcher.js collected-signatures-watcher-config.js",
     "watcher:withdraw": "node src/watcher.js withdraw-watcher-config.js",
     "sender:home": "node src/sender.js home-sender-config.js",
-    "sender:foreign": "node src/sender.js foreign-sender-config.js"
+    "sender:foreign": "node src/sender.js foreign-sender-config.js",
+    "dev": "concurrently -n 'watcher:deposit,watcher:collected-signatures,watcher:withdraw,sender:home,sender:foreign' -c 'red,green,yellow,blue,magenta' 'npm run watcher:deposit' 'npm run watcher:collected-signatures' 'npm run watcher:withdraw' 'npm run sender:home' 'npm run sender:foreign'"
   },
   "author": "",
   "license": "ISC",
@@ -24,6 +25,7 @@
     "web3-utils": "^1.0.0-beta.34"
   },
   "devDependencies": {
+    "concurrently": "^3.6.0",
     "eslint": "^4.19.1",
     "eslint-config-airbnb-base": "^12.1.0",
     "eslint-config-prettier": "^2.9.0",
