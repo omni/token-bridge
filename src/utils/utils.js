@@ -1,3 +1,4 @@
+const BigNumber = require('bignumber.js')
 const promiseRetry = require('promise-retry')
 
 async function syncForEach(array, callback) {
@@ -35,8 +36,18 @@ async function waitForFunds(web3, address, minimumBalance, cb) {
   )
 }
 
+function addExtraGas(gas, extraPercentage) {
+  gas = BigNumber(gas)
+  extraPercentage = BigNumber(1 + extraPercentage)
+
+  const gasWithExtra = gas.multipliedBy(extraPercentage).toFixed(0)
+
+  return BigNumber(gasWithExtra)
+}
+
 module.exports = {
   syncForEach,
   checkHTTPS,
-  waitForFunds
+  waitForFunds,
+  addExtraGas
 }

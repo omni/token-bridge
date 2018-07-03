@@ -16,6 +16,7 @@
   "dependencies": {
     "amqp-connection-manager": "^2.0.0",
     "amqplib": "^0.5.2",
+    "bignumber.js": "^7.2.1",
     "dotenv": "^5.0.1",
     "ioredis": "^3.2.2",
     "node-fetch": "^2.1.2",
