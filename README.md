@@ -34,10 +34,41 @@ There are two Senders:
 
 3. Create a `.env` file: `cp .env.example .env` and fill in the information using the output data from previous deploy step. Check the `.env.example` file to see the required variables.
 
-4. To run the processes:
+## Run the processes
+
+### Native to Erc mode
   - `npm run watcher:signature-request`
   - `npm run watcher:collected-signatures`
   - `npm run watcher:affirmation-request`
+  - `npm run sender:home`
+  - `npm run sender:foreign`
+
+To send deposits to home contract run `node tests/sendUserTxToHome.js`
+
+To send withdrawals to foreign contract run `node tests/sendUserTxToForeign.js`
+
+Make sure your `HOME_MIN_AMOUNT_PER_TX` and `FOREIGN_MIN_AMOUNT_PER_TX` is same as in your .env deployment contract
+
+
+### Erc to Erc mode
+  - `npm run watcher:erc:signature-request`
+  - `npm run watcher:erc:collected-signatures`
+  - `npm run watcher:erc:transfer`
+  - `npm run sender:home`
+  - `npm run sender:foreign`
+
+To send deposits to home contract run `node tests/sendUserTxToErcHome.js`
+
+To send withdrawals to foreign contract run `node tests/sendUserTxToErcForeign.js`
+
+### Run both bridge modes together
+
+  - `npm run watcher:signature-request`
+  - `npm run watcher:collected-signatures`
+  - `npm run watcher:affirmation-request`
+  - `npm run watcher:erc:signature-request`
+  - `npm run watcher:erc:collected-signatures`
+  - `npm run watcher:erc:transfer`
   - `npm run sender:home`
   - `npm run sender:foreign`
 
@@ -50,14 +81,6 @@ There are two Senders:
   - `docker-compose run bridge npm run sender:home`
   - `docker-compose run bridge npm run sender:foreign`
 
-
-In order to quickly send deposits run
-`node tests/sendUserTxToHome.js`
-this will send small deposits to home contract
-Make sure your HOME\_MIN\_AMOUNT\_PER\_TX is same as in your .env deployment contract
-
-In order to quickly send withdrawals run
-`node tests/sendUserTxToForeignWithdraw.js`
 
 To use the bridge UI, clone [the repo](https://github.com/poanetwork/bridge-ui/),
 create a `.env` using the same values as before, and run `npm start`.
