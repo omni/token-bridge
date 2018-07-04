@@ -32,12 +32,17 @@ const cache = {
   foreign: FOREIGN_GAS_PRICE_FALLBACK
 }
 
-async function fetchGasPrice({ bridgeContract, fallback, oracleUrl, speedType }) {
+async function fetchGasPriceFromOracle(oracleUrl, speedType) {
+  const response = await fetch(oracleUrl)
+  const json = await response.json()
+  const gasPrice = json[speedType]
+  return gasPrice
+}
+
+async function fetchGasPrice({ bridgeContract, fallback, oracleFn }) {
   let gasPrice = fallback
   try {
-    const response = await fetch(oracleUrl)
-    const json = await response.json()
-    gasPrice = json[speedType]
+    gasPrice = await oracleFn()
   } catch (e) {
     console.error('Gas Price API is not available', e)
 
@@ -62,8 +67,7 @@ async function start() {
     const gasPrice = await fetchGasPrice({
       bridgeContract: homeBridge,
       fallback: HOME_GAS_PRICE_FALLBACK,
-      oracleUrl: HOME_GAS_PRICE_ORACLE_URL,
-      speedType: HOME_GAS_PRICE_SPEED_TYPE
+      oracleFn: () => fetchGasPriceFromOracle(HOME_GAS_PRICE_ORACLE_URL, HOME_GAS_PRICE_SPEED_TYPE)
     })
     cache.home = gasPrice
   }, HOME_GAS_PRICE_UPDATE_INTERVAL)
@@ -73,8 +77,8 @@ async function start() {
     const gasPrice = await fetchGasPrice({
       bridgeContract: foreignBridge,
       fallback: FOREIGN_GAS_PRICE_FALLBACK,
-      oracleUrl: FOREIGN_GAS_PRICE_ORACLE_URL,
-      speedType: FOREIGN_GAS_PRICE_SPEED_TYPE
+      oracleFn: () =>
+        fetchGasPriceFromOracle(FOREIGN_GAS_PRICE_ORACLE_URL, FOREIGN_GAS_PRICE_SPEED_TYPE)
     })
     cache.foreign = gasPrice
   }, FOREIGN_GAS_PRICE_UPDATE_INTERVAL)

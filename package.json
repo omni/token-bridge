@@ -10,7 +10,8 @@
     "watcher:withdraw": "node src/watcher.js withdraw-watcher-config.js",
     "sender:home": "node src/sender.js home-sender-config.js",
     "sender:foreign": "node src/sender.js foreign-sender-config.js",
-    "dev": "concurrently -n 'watcher:deposit,watcher:collected-signatures,watcher:withdraw,sender:home,sender:foreign' -c 'red,green,yellow,blue,magenta' 'npm run watcher:deposit' 'npm run watcher:collected-signatures' 'npm run watcher:withdraw' 'npm run sender:home' 'npm run sender:foreign'"
+    "dev": "concurrently -n 'watcher:deposit,watcher:collected-signatures,watcher:withdraw,sender:home,sender:foreign' -c 'red,green,yellow,blue,magenta' 'npm run watcher:deposit' 'npm run watcher:collected-signatures' 'npm run watcher:withdraw' 'npm run sender:home' 'npm run sender:foreign'",
+    "test": "mocha"
   },
   "author": "",
   "license": "ISC",
@@ -25,6 +26,7 @@
     "web3-utils": "^1.0.0-beta.34"
   },
   "devDependencies": {
+    "chai": "^4.1.2",
     "concurrently": "^3.6.0",
     "eslint": "^4.19.1",
     "eslint-config-airbnb-base": "^12.1.0",
@@ -32,7 +34,9 @@
     "eslint-plugin-import": "^2.12.0",
     "eslint-plugin-node": "^6.0.1",
     "eslint-plugin-prettier": "^2.6.0",
-    "prettier": "^1.12.1"
+    "mocha": "^5.2.0",
+    "prettier": "^1.12.1",
+    "sinon": "^6.1.0"
   },
   "engines": {
     "node": ">= 8.9"
