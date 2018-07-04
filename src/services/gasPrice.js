@@ -32,6 +32,24 @@ const cache = {
   foreign: FOREIGN_GAS_PRICE_FALLBACK
 }
 
+async function fetchGasPrice({ bridgeContract, fallback, oracleUrl, speedType }) {
+  let gasPrice = fallback
+  try {
+    const response = await fetch(oracleUrl)
+    const json = await response.json()
+    gasPrice = json[speedType]
+  } catch (e) {
+    console.error('Gas Price API is not available', e)
+
+    try {
+      gasPrice = await bridgeContract.methods.gasPrice().call()
+    } catch (e) {
+      console.error('There was a problem getting the gas price from the contract', e)
+    }
+  }
+  return gasPrice
+}
+
 let homeGasPriceInterval = null
 let foreignGasPriceInterval = null
 
@@ -41,39 +59,23 @@ async function start() {
 
   // start interval for fetching home gas price
   homeGasPriceInterval = setInterval(async () => {
-    let gasPrice = HOME_GAS_PRICE_FALLBACK
-    try {
-      const response = await fetch(HOME_GAS_PRICE_ORACLE_URL)
-      const json = await response.json()
-      gasPrice = json[HOME_GAS_PRICE_SPEED_TYPE]
-    } catch (e) {
-      console.error('Gas Price API is not available', e)
-
-      try {
-        gasPrice = await homeBridge.methods.gasPrice().call()
-      } catch (e) {
-        console.error('There was a problem getting the gas price from the contract', e)
-      }
-    }
+    const gasPrice = await fetchGasPrice({
+      bridgeContract: homeBridge,
+      fallback: HOME_GAS_PRICE_FALLBACK,
+      oracleUrl: HOME_GAS_PRICE_ORACLE_URL,
+      speedType: HOME_GAS_PRICE_SPEED_TYPE
+    })
     cache.home = gasPrice
   }, HOME_GAS_PRICE_UPDATE_INTERVAL)
 
   // start interval for fetching foreign gas price
   foreignGasPriceInterval = setInterval(async () => {
-    let gasPrice = FOREIGN_GAS_PRICE_FALLBACK
-    try {
-      const response = await fetch(FOREIGN_GAS_PRICE_ORACLE_URL)
-      const json = await response.json()
-      gasPrice = json[FOREIGN_GAS_PRICE_SPEED_TYPE]
-    } catch (e) {
-      console.error('Gas Price API is not available', e)
-
-      try {
-        gasPrice = await foreignBridge.methods.gasPrice().call()
-      } catch (e) {
-        console.error('There was a problem getting the gas price from the contract', e)
-      }
-    }
+    const gasPrice = await fetchGasPrice({
+      bridgeContract: foreignBridge,
+      fallback: FOREIGN_GAS_PRICE_FALLBACK,
+      oracleUrl: FOREIGN_GAS_PRICE_ORACLE_URL,
+      speedType: FOREIGN_GAS_PRICE_SPEED_TYPE
+    })
     cache.foreign = gasPrice
   }, FOREIGN_GAS_PRICE_UPDATE_INTERVAL)
 }
@@ -88,5 +90,6 @@ async function getPrice(chain) {
 
 module.exports = {
   start,
+  fetchGasPrice,
   getPrice
 }
