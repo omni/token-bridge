@@ -99,7 +99,7 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue }) {
         nonce++
         console.log(`Tx generated ${txHash} for event Tx ${job.transactionReference}`)
       } catch (e) {
-        console.error(e)
+        console.error(e.message)
         console.error(`Tx Failed for event Tx ${job.transactionReference}`)
         failedTx.push(job)
 

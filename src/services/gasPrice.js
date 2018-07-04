@@ -44,12 +44,12 @@ async function fetchGasPrice({ bridgeContract, fallback, oracleFn }) {
   try {
     gasPrice = await oracleFn()
   } catch (e) {
-    console.error('Gas Price API is not available', e)
+    console.error(`Gas Price API is not available. ${e.message}`)
 
     try {
       gasPrice = await bridgeContract.methods.gasPrice().call()
     } catch (e) {
-      console.error('There was a problem getting the gas price from the contract', e)
+      console.error(`There was a problem getting the gas price from the contract. ${e.message}`)
     }
   }
   return gasPrice
