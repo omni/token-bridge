@@ -4,7 +4,7 @@ const Web3 = require('web3')
 const { connectWatcherToQueue } = require('./services/amqpClient')
 const { getBlockNumber } = require('./tx/web3')
 const { redis } = require('./services/redisClient')
-const { getRequiredBlockConfirmations } = require('./tx/web3')
+const { getRequiredBlockConfirmations, getEvents } = require('./tx/web3')
 const { checkHTTPS } = require('./utils/utils')
 
 if (process.argv.length < 3) {
@@ -102,7 +102,9 @@ async function main({ sendToQueue }) {
     if (lastBlockToProcess <= lastProcessedBlock) {
       return
     }
-    const events = await eventContract.getPastEvents(config.event, {
+    const events = await getEvents({
+      contract: eventContract,
+      event: config.event,
       fromBlock: lastProcessedBlock + 1,
       toBlock: lastBlockToProcess,
       filter: config.eventFilter
