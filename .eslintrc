@@ -6,6 +6,7 @@
   ],
   "plugins": ["node"],
   "rules": {
+    "arrow-body-style": "off",
     "func-names": "off",
     "no-await-in-loop": "off",
     "no-console": "off",

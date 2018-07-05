@@ -1,7 +1,7 @@
 require('dotenv').config()
 const path = require('path')
 const Web3 = require('web3')
-const { connectWatcherToQueue } = require('./services/amqpClient')
+const { connectWatcherToQueue, connection } = require('./services/amqpClient')
 const { getBlockNumber } = require('./tx/web3')
 const processDeposits = require('./events/processDeposits')
 const processCollectedSignatures = require('./events/processCollectedSignatures')
@@ -41,9 +41,9 @@ async function initialize() {
   }
 }
 
-async function runMain({ sendToQueue, isAmqpConnected }) {
+async function runMain({ sendToQueue }) {
   try {
-    if (isAmqpConnected() && redis.status === 'ready') {
+    if (connection.isConnected() && redis.status === 'ready') {
       await main({ sendToQueue })
     }
   } catch (e) {
@@ -51,7 +51,7 @@ async function runMain({ sendToQueue, isAmqpConnected }) {
   }
 
   setTimeout(() => {
-    runMain({ sendToQueue, isAmqpConnected })
+    runMain({ sendToQueue })
   }, config.pollingInterval)
 }
 

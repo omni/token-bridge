@@ -2,12 +2,18 @@ version: '3'
 services:
   parity1:
     build: parity
+    ports:
+      - "8541:8545"
   parity2:
     build: parity
+    ports:
+      - "8542:8545"
   redis:
     image: "redis"
   rabbit:
     image: "rabbitmq:3-management"
+    ports:
+      - "15672:15672"
   bridge:
     build: ..
     environment:
@@ -27,6 +33,12 @@ services:
       - HOME_POLLING_INTERVAL=500
       - FOREIGN_POLLING_INTERVAL=500
       - ALLOW_HTTP=yes
+      - NUMBER_OF_WITHDRAWALS_TO_SEND=3
+      - NUMBER_OF_DEPOSITS_TO_SEND=3
+      - USER_ADDRESS=0xbb140FbA6242a1c3887A7823F7750a73101383e3
+      - USER_ADDRESS_PRIVATE_KEY=63e48a8ba0b99e0377c6b483af4a072cbca5ffbcfdac77be72e69f4960125800
+      - HOME_MIN_AMOUNT_PER_TX=0.01
+      - FOREIGN_MIN_AMOUNT_PER_TX=0.01
     command: "true"
   e2e:
     build: .

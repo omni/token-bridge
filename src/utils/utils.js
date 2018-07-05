@@ -1,3 +1,6 @@
+const BigNumber = require('bignumber.js')
+const promiseRetry = require('promise-retry')
+
 async function syncForEach(array, callback) {
   for (let index = 0; index < array.length; index++) {
     await callback(array[index], index, array)
@@ -16,7 +19,35 @@ function checkHTTPS(ALLOW_HTTP) {
   }
 }
 
+async function waitForFunds(web3, address, minimumBalance, cb) {
+  promiseRetry(
+    async retry => {
+      const newBalance = web3.utils.toBN(await web3.eth.getBalance(address))
+      if (newBalance.gte(minimumBalance)) {
+        cb(newBalance)
+      } else {
+        retry()
+      }
+    },
+    {
+      forever: true,
+      factor: 1
+    }
+  )
+}
+
+function addExtraGas(gas, extraPercentage) {
+  gas = BigNumber(gas)
+  extraPercentage = BigNumber(1 + extraPercentage)
+
+  const gasWithExtra = gas.multipliedBy(extraPercentage).toFixed(0)
+
+  return BigNumber(gasWithExtra)
+}
+
 module.exports = {
   syncForEach,
-  checkHTTPS
+  checkHTTPS,
+  waitForFunds,
+  addExtraGas
 }
