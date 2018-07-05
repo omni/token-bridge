@@ -30,9 +30,9 @@ async function getRequiredBlockConfirmations(contract) {
   }
 }
 
-async function getEvents({ contract, event, fromBlock, toBlock }) {
+async function getEvents({ contract, event, fromBlock, toBlock, filter }) {
   try {
-    return await contract.getPastEvents(event, { fromBlock, toBlock })
+    return await contract.getPastEvents(event, { fromBlock, toBlock, filter })
   } catch (e) {
     throw new Error(`${event} events cannot be obtained`)
   }
