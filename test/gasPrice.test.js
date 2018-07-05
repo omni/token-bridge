@@ -25,7 +25,6 @@ describe('gasPrice', () => {
       // when
       const gasPrice = await fetchGasPrice({
         bridgeContract: bridgeContractMock,
-        fallback: '3',
         oracleFn: oracleFnMock
       })
 
@@ -46,14 +45,13 @@ describe('gasPrice', () => {
       // when
       const gasPrice = await fetchGasPrice({
         bridgeContract: bridgeContractMock,
-        fallback: '3',
         oracleFn: oracleFnMock
       })
 
       // then
       expect(gasPrice).to.equal('2')
     })
-    it('should use the fallback price if both the oracle and the contract fail', async () => {
+    it('should return null if both the oracle and the contract fail', async () => {
       // given
       const oracleFnMock = () => Promise.reject(new Error('oracle failed'))
       const bridgeContractMock = {
@@ -67,12 +65,11 @@ describe('gasPrice', () => {
       // when
       const gasPrice = await fetchGasPrice({
         bridgeContract: bridgeContractMock,
-        fallback: '3',
         oracleFn: oracleFnMock
       })
 
       // then
-      expect(gasPrice).to.equal('3')
+      expect(gasPrice).to.equal(null)
     })
   })
 })

@@ -36,8 +36,8 @@ async function fetchGasPriceFromOracle(oracleUrl, speedType) {
   return gasPrice
 }
 
-async function fetchGasPrice({ bridgeContract, fallback, oracleFn }) {
-  let gasPrice = fallback
+async function fetchGasPrice({ bridgeContract, oracleFn }) {
+  let gasPrice = null
   try {
     gasPrice = await oracleFn()
   } catch (e) {
@@ -58,22 +58,23 @@ async function start(chainId) {
   clearInterval(fetchGasPriceInterval)
 
   let bridgeContract = null
-  let fallback = null
   let oracleUrl = null
   let speedType = null
   let updateInterval = null
   if (chainId === 'home') {
     bridgeContract = homeBridge
-    fallback = HOME_GAS_PRICE_FALLBACK
     oracleUrl = HOME_GAS_PRICE_ORACLE_URL
     speedType = HOME_GAS_PRICE_SPEED_TYPE
     updateInterval = HOME_GAS_PRICE_UPDATE_INTERVAL
+
+    cachedGasPrice = HOME_GAS_PRICE_FALLBACK
   } else if (chainId === 'foreign') {
     bridgeContract = foreignBridge
-    fallback = FOREIGN_GAS_PRICE_FALLBACK
     oracleUrl = FOREIGN_GAS_PRICE_ORACLE_URL
     speedType = FOREIGN_GAS_PRICE_SPEED_TYPE
     updateInterval = FOREIGN_GAS_PRICE_UPDATE_INTERVAL
+
+    cachedGasPrice = FOREIGN_GAS_PRICE_FALLBACK
   } else {
     throw new Error(`Unrecognized chainId '${chainId}'`)
   }
@@ -81,10 +82,9 @@ async function start(chainId) {
   fetchGasPriceInterval = setInterval(async () => {
     const gasPrice = await fetchGasPrice({
       bridgeContract,
-      fallback,
       oracleFn: () => fetchGasPriceFromOracle(oracleUrl, speedType)
     })
-    cachedGasPrice = gasPrice
+    cachedGasPrice = gasPrice || cachedGasPrice
   }, updateInterval)
 }
 
