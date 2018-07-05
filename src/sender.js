@@ -6,8 +6,8 @@ const { redis, redlock } = require('./services/redisClient')
 const GasPrice = require('./services/gasPrice')
 const { sendTx } = require('./tx/sendTx')
 const { getNonce, getChainId } = require('./tx/web3')
-const { syncForEach } = require('./utils/utils')
-const { checkHTTPS } = require('./utils/utils')
+const { addExtraGas, checkHTTPS, syncForEach, waitForFunds } = require('./utils/utils')
+const { EXTRA_GAS_PERCENTAGE } = require('./utils/constants')
 
 const { VALIDATOR_ADDRESS, VALIDATOR_ADDRESS_PRIVATE_KEY, REDIS_LOCK_TTL } = process.env
 
@@ -44,6 +44,13 @@ async function initialize() {
   }
 }
 
+function resume(newBalance) {
+  console.log(
+    `Validator balance changed. New balance is ${newBalance}. Resume messages processing.`
+  )
+  initialize()
+}
+
 async function readNonce(forceUpdate) {
   if (forceUpdate) {
     return getNonce(web3Instance, VALIDATOR_ADDRESS)
@@ -57,7 +64,7 @@ function updateNonce(nonce) {
   return redis.set(nonceKey, nonce)
 }
 
-async function main({ msg, ackMsg, nackMsg, sendToQueue }) {
+async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
   try {
     if (redis.status !== 'ready') {
       console.log('Redis not connected.')
@@ -79,9 +86,13 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue }) {
     console.log('Nonce Locked! After: ', timeWaitingForLock)
 
     let nonce = await readNonce()
+    let insufficientFunds = false
+    let minimumBalance = null
     const failedTx = []
 
     await syncForEach(txArray, async job => {
+      const gasLimit = addExtraGas(job.gasEstimate, EXTRA_GAS_PERCENTAGE)
+
       try {
         const txHash = await sendTx({
           rpcUrl: config.url,
@@ -89,7 +100,7 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue }) {
           nonce,
           gasPrice: gasPrice.toString(10),
           amount: '0',
-          gasLimit: job.gasEstimate + 200000,
+          gasLimit,
           privateKey: VALIDATOR_ADDRESS_PRIVATE_KEY,
           to: config.contractAddress,
           chainId,
@@ -103,7 +114,14 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue }) {
         console.error(`Tx Failed for event Tx ${job.transactionReference}`)
         failedTx.push(job)
 
-        if (
+        if (e.message.includes('Insufficient funds')) {
+          insufficientFunds = true
+          const currentBalance = await web3Instance.eth.getBalance(VALIDATOR_ADDRESS)
+          minimumBalance = gasLimit.multipliedBy(gasPrice)
+          console.error(
+            `Insufficient funds: ${currentBalance}. Stop processing messages until the balance is at least ${minimumBalance}.`
+          )
+        } else if (
           e.message.includes('Transaction nonce is too low') ||
           e.message.includes('transaction with same nonce in the queue')
         ) {
@@ -123,6 +141,11 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue }) {
       await sendToQueue(failedTx)
     }
     ackMsg(msg)
+
+    if (insufficientFunds) {
+      channel.close()
+      waitForFunds(web3Instance, VALIDATOR_ADDRESS, minimumBalance, resume)
+    }
   } catch (e) {
     console.error(e)
     nackMsg(msg)

@@ -19,7 +19,7 @@ function connectWatcherToQueue({ queueName, cb }) {
 
   const sendToQueue = data => channelWrapper.sendToQueue(queueName, data, { persistent: true })
 
-  cb({ sendToQueue, isAmqpConnected: () => connection.isConnected() })
+  cb({ sendToQueue, channel: channelWrapper })
 }
 
 function connectSenderToQueue({ queueName, cb }) {
@@ -28,11 +28,13 @@ function connectSenderToQueue({ queueName, cb }) {
   })
 
   channelWrapper.addSetup(channel => {
-    Promise.all([
+    return Promise.all([
       channel.assertQueue(queueName, { durable: true }),
+      channel.prefetch(1),
       channel.consume(queueName, msg =>
         cb({
           msg,
+          channel: channelWrapper,
           ackMsg: job => channelWrapper.ack(job),
           nackMsg: job => channelWrapper.nack(job, false, true),
           sendToQueue: data => channelWrapper.sendToQueue(queueName, data, { persistent: true })
@@ -44,5 +46,6 @@ function connectSenderToQueue({ queueName, cb }) {
 
 module.exports = {
   connectWatcherToQueue,
-  connectSenderToQueue
+  connectSenderToQueue,
+  connection
 }

@@ -8,8 +8,10 @@ RUN apt-get install -y wget
 RUN apt-get clean
 
 WORKDIR /bridge
-COPY . .
+COPY package.json .
+COPY package-lock.json .
 RUN npm install
+COPY . .
 CMD echo "To start a bridge process run:" \
   "docker-compose run bridge npm run watcher:deposit" \
   "docker-compose run bridge npm run watcher:collected-signatures" \
