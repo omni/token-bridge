@@ -1,4 +1,3 @@
-require('./nativeToErc')
 const path = require('path')
 const Web3 = require('web3')
 const assert = require('assert')
@@ -12,7 +11,7 @@ const homeWeb3 = new Web3(new Web3.providers.HttpProvider('http://parity1:8545')
 const foreignWeb3 = new Web3(new Web3.providers.HttpProvider('http://parity2:8545'))
 
 const HOME_BRIDGE_ADDRESS = '0x1feB40aD9420b186F019A717c37f5546165d411E'
-const FOREIGN_BRIDGE_ADDRESS = '0x8397be90BCF57b0B71219f555Fe121b22e5a994C'
+const FOREIGN_BRIDGE_ADDRESS = '0xD0B9745831dDA9cbb47D0dEa904972cDcecc52e8'
 
 const { toBN } = foreignWeb3.utils
 
@@ -22,7 +21,7 @@ foreignWeb3.eth.accounts.wallet.add(user.privateKey)
 const tokenAbi = require(path.join(abisDir, 'ERC677BridgeToken.json')).abi
 const erc20Token = new foreignWeb3.eth.Contract(
   tokenAbi,
-  '0xdbeE25CbE97e4A5CC6c499875774dc7067E9426B'
+  '0x7777D2BF48993088dC1ceD832863b80427Ff5Ec9'
 )
 const erc677Token = new homeWeb3.eth.Contract(
   tokenAbi,
