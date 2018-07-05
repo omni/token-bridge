@@ -31,7 +31,7 @@ async function initialize() {
     checkHttps(process.env.HOME_RPC_URL)
     checkHttps(process.env.FOREIGN_RPC_URL)
 
-    GasPrice.start()
+    GasPrice.start(config.id)
 
     chainId = await getChainId(web3Instance)
     connectSenderToQueue({
@@ -68,7 +68,7 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue }) {
     const txArray = JSON.parse(msg.content)
     console.log(`Msg received with ${txArray.length} Tx to send`)
 
-    const gasPrice = await GasPrice.getPrice(config.id)
+    const gasPrice = await GasPrice.getPrice()
 
     const ttl = REDIS_LOCK_TTL * txArray.length
     const startTryLock = new Date()
