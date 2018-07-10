@@ -21,7 +21,7 @@ const provider = new Web3.providers.HttpProvider(config.url)
 const web3Instance = new Web3(provider)
 const bridgeContract = new web3Instance.eth.Contract(config.abi, config.contractAddress)
 const lastBlockRedisKey = `${config.id}:lastProcessedBlock`
-let lastProcessedBlock = 0
+let lastProcessedBlock = config.startBlock || 0
 
 async function initialize() {
   try {
@@ -57,7 +57,7 @@ async function runMain({ sendToQueue }) {
 
 async function getLastProcessedBlock() {
   const result = await redis.get(lastBlockRedisKey)
-  lastProcessedBlock = result ? Number(result) : 0
+  lastProcessedBlock = result ? Number(result) : lastProcessedBlock
 }
 
 function updateLastProcessedBlock(lastBlockNumber) {
