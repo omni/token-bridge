@@ -1,6 +1,6 @@
 require('dotenv').config()
 
-const HomeABI = require('../abis/HomeBridge.abi')
+const HomeABI = require('../abis/HomeBridgeNativeToErc.abi')
 
 module.exports = {
   event: 'CollectedSignatures',

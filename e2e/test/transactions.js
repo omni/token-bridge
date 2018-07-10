@@ -18,7 +18,7 @@ const { toBN } = foreignWeb3.utils
 homeWeb3.eth.accounts.wallet.add(user.privateKey)
 foreignWeb3.eth.accounts.wallet.add(user.privateKey)
 
-const tokenAbi = require(path.join(abisDir, 'POA20.json')).abi
+const tokenAbi = require(path.join(abisDir, 'ERC677BridgeToken.json')).abi
 const token = new foreignWeb3.eth.Contract(tokenAbi, '0xdbeE25CbE97e4A5CC6c499875774dc7067E9426B')
 
 describe('transactions', () => {
