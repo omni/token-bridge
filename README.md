@@ -53,7 +53,7 @@ Make sure your `HOME_MIN_AMOUNT_PER_TX` and `FOREIGN_MIN_AMOUNT_PER_TX` is same 
 ### Erc to Erc mode
   - `npm run watcher:erc:signature-request`
   - `npm run watcher:erc:collected-signatures`
-  - `npm run watcher:erc:transfer`
+  - `npm run watcher:erc:affirmation-request`
   - `npm run sender:home`
   - `npm run sender:foreign`
 
@@ -68,7 +68,7 @@ To send withdrawals to foreign contract run `node tests/sendUserTxToErcForeign.j
   - `npm run watcher:affirmation-request`
   - `npm run watcher:erc:signature-request`
   - `npm run watcher:erc:collected-signatures`
-  - `npm run watcher:erc:transfer`
+  - `npm run watcher:erc:affirmation-request`
   - `npm run sender:home`
   - `npm run sender:foreign`
 

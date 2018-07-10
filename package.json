@@ -10,7 +10,7 @@
     "watcher:affirmation-request": "node src/watcher.js affirmation-request-watcher.config.js",
     "watcher:erc:signature-request": "node src/watcher.js erc-signature-request-watcher.config.js",
     "watcher:erc:collected-signatures": "node src/watcher.js erc-collected-signatures-watcher.config.js",
-    "watcher:erc:transfer": "node src/watcher.js erc-transfer-watcher.config.js",
+    "watcher:erc:affirmation-request": "node src/watcher.js erc-affirmation-request-watcher.config.js",
     "sender:home": "node src/sender.js home-sender.config.js",
     "sender:foreign": "node src/sender.js foreign-sender.config.js"
   },
