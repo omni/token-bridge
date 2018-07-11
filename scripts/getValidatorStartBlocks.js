@@ -28,7 +28,6 @@ async function getStartBlock(rpcUrl, bridgeAddress, bridgeAbi) {
 
     return validatorAddedEvents.length ? validatorAddedEvents[0].blockNumber : deployedAtBlock
   } catch (e) {
-    console.log(e)
     return 0
   }
 }
@@ -38,11 +37,10 @@ async function main() {
 
   const homeStartBlock = await getStartBlock(HOME_RPC_URL, HOME_BRIDGE_ADDRESS, homeABI)
   const foreignStartBlock = await getStartBlock(FOREIGN_RPC_URL, FOREIGN_BRIDGE_ADDRESS, foreignABI)
-
-  return {
-    homeStartBlock,
-    foreignStartBlock
-  }
+  console.log([homeStartBlock, foreignStartBlock])
+  return [homeStartBlock, foreignStartBlock]
 }
+
+main()
 
 module.exports = main
