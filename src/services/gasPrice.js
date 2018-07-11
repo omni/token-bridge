@@ -33,6 +33,9 @@ async function fetchGasPriceFromOracle(oracleUrl, speedType) {
   const response = await fetch(oracleUrl)
   const json = await response.json()
   const gasPrice = json[speedType]
+  if (!gasPrice) {
+    throw new Error(`Response from Oracle didn't include gas price for ${speedType} type.`)
+  }
   return gasPrice
 }
 
