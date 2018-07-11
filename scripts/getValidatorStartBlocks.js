@@ -37,8 +37,12 @@ async function main() {
 
   const homeStartBlock = await getStartBlock(HOME_RPC_URL, HOME_BRIDGE_ADDRESS, homeABI)
   const foreignStartBlock = await getStartBlock(FOREIGN_RPC_URL, FOREIGN_BRIDGE_ADDRESS, foreignABI)
-  console.log([homeStartBlock, foreignStartBlock])
-  return [homeStartBlock, foreignStartBlock]
+  const result = {
+    homeStartBlock,
+    foreignStartBlock
+  }
+  console.log(result)
+  return result
 }
 
 main()
