@@ -6,7 +6,7 @@ const { sendTx, sendRawTx } = require('../src/tx/sendTx')
 const {
   USER_ADDRESS,
   USER_ADDRESS_PRIVATE_KEY,
-  ERC_FOREIGN_BRIDGE_ADDRESS,
+  FOREIGN_BRIDGE_ADDRESS,
   FOREIGN_RPC_URL,
   FOREIGN_MIN_AMOUNT_PER_TX,
   ERC20_TOKEN_ADDRESS,
@@ -60,10 +60,10 @@ async function main() {
     let actualSent = 0
     for (let i = 0; i < Number(NUMBER_OF_DEPOSITS_TO_SEND); i++) {
       const gasLimit = await poa20.methods
-        .transfer(ERC_FOREIGN_BRIDGE_ADDRESS, Web3Utils.toWei(FOREIGN_MIN_AMOUNT_PER_TX))
+        .transfer(FOREIGN_BRIDGE_ADDRESS, Web3Utils.toWei(FOREIGN_MIN_AMOUNT_PER_TX))
         .estimateGas({ from: USER_ADDRESS })
       const data = await poa20.methods
-        .transfer(ERC_FOREIGN_BRIDGE_ADDRESS, Web3Utils.toWei(FOREIGN_MIN_AMOUNT_PER_TX))
+        .transfer(FOREIGN_BRIDGE_ADDRESS, Web3Utils.toWei(FOREIGN_MIN_AMOUNT_PER_TX))
         .encodeABI({ from: USER_ADDRESS })
       const txHash = await sendTx({
         rpcUrl: FOREIGN_RPC_URL,

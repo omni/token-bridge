@@ -17,7 +17,6 @@ const web3Home = new Web3(homeProvider)
 
 async function main() {
   try {
-    console.log(HOME_RPC_URL)
     const homeChaindId = await sendRawTx({
       url: HOME_RPC_URL,
       params: [],

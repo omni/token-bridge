@@ -1,9 +1,9 @@
-const nativeErcConfig = require('./base-native-erc-watcher.config')
+const baseConfig = require('./base-watcher.config')
 
 module.exports = {
-  ...nativeErcConfig.bridgeConfig,
-  ...nativeErcConfig.homeConfig,
+  ...baseConfig.bridgeConfig,
+  ...baseConfig.homeConfig,
   event: 'CollectedSignatures',
   queue: 'foreign',
-  id: 'collected-signatures'
+  id: baseConfig.isErcToErc ? 'erc-collected-signatures' : 'collected-signatures'
 }

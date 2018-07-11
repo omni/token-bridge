@@ -78,7 +78,7 @@ function processEvents(events) {
       return processCollectedSignatures(events)
     case 'affirmation-request':
       return processAffirmationRequests(events)
-    case 'erc-transfer':
+    case 'erc-affirmation-request':
       return processTransfers(events)
     default:
       return []

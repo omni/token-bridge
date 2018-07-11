@@ -51,26 +51,18 @@ Make sure your `HOME_MIN_AMOUNT_PER_TX` and `FOREIGN_MIN_AMOUNT_PER_TX` is same 
 
 
 ### Erc to Erc mode
-  - `npm run watcher:erc:signature-request`
-  - `npm run watcher:erc:collected-signatures`
-  - `npm run watcher:erc:affirmation-request`
+
+On `.env` file set `BRIDGE_MODE=ERC_TO_ERC`
+
+  - `npm run watcher:signature-request`
+  - `npm run watcher:collected-signatures`
+  - `npm run watcher:affirmation-request`
   - `npm run sender:home`
   - `npm run sender:foreign`
 
 To send deposits to home contract run `node tests/sendUserTxToErcHome.js`
 
 To send withdrawals to foreign contract run `node tests/sendUserTxToErcForeign.js`
-
-### Run both bridge modes together
-
-  - `npm run watcher:signature-request`
-  - `npm run watcher:collected-signatures`
-  - `npm run watcher:affirmation-request`
-  - `npm run watcher:erc:signature-request`
-  - `npm run watcher:erc:collected-signatures`
-  - `npm run watcher:erc:affirmation-request`
-  - `npm run sender:home`
-  - `npm run sender:foreign`
 
 ### Run with Docker
 

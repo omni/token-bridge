@@ -6,7 +6,7 @@ const { sendTx, sendRawTx } = require('../src/tx/sendTx')
 const {
   USER_ADDRESS,
   USER_ADDRESS_PRIVATE_KEY,
-  ERC_HOME_BRIDGE_ADDRESS,
+  HOME_BRIDGE_ADDRESS,
   HOME_RPC_URL,
   HOME_MIN_AMOUNT_PER_TX,
   BRIDGEABLE_TOKEN_ADDRESS,
@@ -64,10 +64,10 @@ async function main() {
     let actualSent = 0
     for (let i = 0; i < Number(NUMBER_OF_WITHDRAWALS_TO_SEND); i++) {
       const gasLimit = await erc677.methods
-        .transferAndCall(ERC_HOME_BRIDGE_ADDRESS, Web3Utils.toWei(HOME_MIN_AMOUNT_PER_TX), '0x')
+        .transferAndCall(HOME_BRIDGE_ADDRESS, Web3Utils.toWei(HOME_MIN_AMOUNT_PER_TX), '0x')
         .estimateGas({ from: USER_ADDRESS })
       const data = await erc677.methods
-        .transferAndCall(ERC_HOME_BRIDGE_ADDRESS, Web3Utils.toWei(HOME_MIN_AMOUNT_PER_TX), '0x')
+        .transferAndCall(HOME_BRIDGE_ADDRESS, Web3Utils.toWei(HOME_MIN_AMOUNT_PER_TX), '0x')
         .encodeABI({ from: USER_ADDRESS })
       const txHash = await sendTx({
         rpcUrl: HOME_RPC_URL,
