@@ -3,6 +3,7 @@ const path = require('path')
 const Web3 = require('web3')
 const { connectSenderToQueue } = require('./services/amqpClient')
 const { redis, redlock } = require('./services/redisClient')
+const logger = require('./services/logger')
 const { getGasPrices } = require('./services/gasPrice')
 const { sendTx } = require('./tx/sendTx')
 const { getNonce, getChainId } = require('./tx/web3')
@@ -12,7 +13,7 @@ const { EXTRA_GAS_PERCENTAGE } = require('./utils/constants')
 const { VALIDATOR_ADDRESS, VALIDATOR_ADDRESS_PRIVATE_KEY, REDIS_LOCK_TTL } = process.env
 
 if (process.argv.length < 3) {
-  console.error('Please check the number of arguments, config file was not provided')
+  logger.error('Please check the number of arguments, config file was not provided')
   process.exit(1)
 }
 
@@ -37,13 +38,13 @@ async function initialize() {
       cb: main
     })
   } catch (e) {
-    console.log(e.message)
+    logger.error(e.message)
     process.exit(1)
   }
 }
 
 function resume(newBalance) {
-  console.log(
+  logger.info(
     `Validator balance changed. New balance is ${newBalance}. Resume messages processing.`
   )
   initialize()
@@ -65,23 +66,16 @@ function updateNonce(nonce) {
 async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
   try {
     if (redis.status !== 'ready') {
-      console.log('Redis not connected.')
       nackMsg(msg)
       return
     }
 
     const txArray = JSON.parse(msg.content)
-    console.log(`Msg received with ${txArray.length} Tx to send`)
-
+    logger.info(`Msg received with ${txArray.length} Tx to send`)
     const gasPrice = await getGasPrices()
 
     const ttl = REDIS_LOCK_TTL * txArray.length
-    const startTryLock = new Date()
     const lock = await redlock.lock(nonceLock, ttl)
-
-    const startTimeLocked = new Date()
-    const timeWaitingForLock = startTimeLocked - startTryLock
-    console.log('Nonce Locked! After: ', timeWaitingForLock)
 
     let nonce = await readNonce()
     let insufficientFunds = false
@@ -106,17 +100,23 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
         })
 
         nonce++
-        console.log(`Tx generated ${txHash} for event Tx ${job.transactionReference}`)
+        logger.info(
+          { eventTransactionHash: job.transactionReference, generatedTransactionHash: txHash },
+          `Tx generated ${txHash} for event Tx ${job.transactionReference}`
+        )
       } catch (e) {
-        console.error(e.message)
-        console.error(`Tx Failed for event Tx ${job.transactionReference}`)
+        logger.error(
+          { eventTransactionHash: job.transactionReference, error: e.message },
+          `Tx Failed for event Tx ${job.transactionReference}.`,
+          e.message
+        )
         failedTx.push(job)
 
         if (e.message.includes('Insufficient funds')) {
           insufficientFunds = true
           const currentBalance = await web3Instance.eth.getBalance(VALIDATOR_ADDRESS)
           minimumBalance = gasLimit.multipliedBy(gasPrice)
-          console.error(
+          logger.error(
             `Insufficient funds: ${currentBalance}. Stop processing messages until the balance is at least ${minimumBalance}.`
           )
         } else if (
@@ -131,21 +131,19 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
     await updateNonce(nonce)
     await lock.unlock()
 
-    const timeLocked = new Date() - startTimeLocked
-    console.log('Nonce Released! Time Locked: ', timeLocked)
-
     if (failedTx.length) {
-      console.log(`Sending ${failedTx.length} Failed Tx to Queue`)
+      logger.info(`Sending ${failedTx.length} Failed Tx to Queue`)
       await sendToQueue(failedTx)
     }
     ackMsg(msg)
+    logger.info(`Finished processing msg`)
 
     if (insufficientFunds) {
       channel.close()
       waitForFunds(web3Instance, VALIDATOR_ADDRESS, minimumBalance, resume)
     }
   } catch (e) {
-    console.error(e)
+    logger.error(e)
     nackMsg(msg)
   }
 }

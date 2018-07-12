@@ -1,5 +1,6 @@
 const BigNumber = require('bignumber.js')
 const promiseRetry = require('promise-retry')
+const logger = require('../services/logger')
 
 async function syncForEach(array, callback) {
   for (let index = 0; index < array.length; index++) {
@@ -13,7 +14,7 @@ function checkHTTPS(ALLOW_HTTP) {
       if (ALLOW_HTTP !== 'yes') {
         throw new Error(`http is not allowed: ${url}`)
       } else {
-        console.warn(`You are using http (${url}). In production https must be used instead.`)
+        logger.warn(`You are using http (${url}). In production https must be used instead.`)
       }
     }
   }
