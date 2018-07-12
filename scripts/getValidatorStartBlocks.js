@@ -41,7 +41,7 @@ async function main() {
     homeStartBlock,
     foreignStartBlock
   }
-  console.log(result)
+  console.log(JSON.stringify(result))
   return result
 }
 
