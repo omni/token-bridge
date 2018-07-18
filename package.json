@@ -5,11 +5,11 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint .",
-    "watcher:signature-request": "node src/watcher.js signature-request-watcher-config.js",
-    "watcher:collected-signatures": "node src/watcher.js collected-signatures-watcher-config.js",
-    "watcher:affirmation-request": "node src/watcher.js affirmation-request-watcher-config.js",
-    "sender:home": "node src/sender.js home-sender-config.js",
-    "sender:foreign": "node src/sender.js foreign-sender-config.js"
+    "watcher:signature-request": "node src/watcher.js signature-request-watcher.config.js",
+    "watcher:collected-signatures": "node src/watcher.js collected-signatures-watcher.config.js",
+    "watcher:affirmation-request": "node src/watcher.js affirmation-request-watcher.config.js",
+    "sender:home": "node src/sender.js home-sender.config.js",
+    "sender:foreign": "node src/sender.js foreign-sender.config.js"
   },
   "author": "",
   "license": "ISC",

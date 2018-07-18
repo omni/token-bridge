@@ -89,7 +89,7 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue }) {
           amount: '0',
           gasLimit: job.gasEstimate + 200000,
           privateKey: VALIDATOR_ADDRESS_PRIVATE_KEY,
-          to: config.contractAddress,
+          to: job.to,
           chainId,
           web3: web3Instance
         })
@@ -99,7 +99,9 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue }) {
       } catch (e) {
         console.error(e.message)
         console.error(`Tx Failed for event Tx ${job.transactionReference}`)
-        failedTx.push(job)
+        if (!e.message.includes('Transaction with the same hash was already imported')) {
+          failedTx.push(job)
+        }
 
         if (
           e.message.includes('Transaction nonce is too low') ||
