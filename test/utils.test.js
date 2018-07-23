@@ -1,12 +1,39 @@
 const sinon = require('sinon')
 const chai = require('chai')
 const chaiAsPromised = require('chai-as-promised')
-const { checkHTTPS, syncForEach } = require('../src/utils/utils')
+const BigNumber = require('bignumber.js')
+const { addExtraGas, checkHTTPS, syncForEach } = require('../src/utils/utils')
 
 chai.use(chaiAsPromised)
 const { expect } = chai
 
 describe('utils', () => {
+  describe('addExtraGas', () => {
+    it('should return a BigNumber', () => {
+      const result = addExtraGas(100, 0.25)
+
+      expect(BigNumber.isBigNumber(result)).to.equal(true)
+    })
+
+    it('should work with numbers', () => {
+      const result = addExtraGas(100, 0.25)
+
+      expect(result.toString()).to.equal('125')
+    })
+
+    it('should work with BigNumbers', () => {
+      const result = addExtraGas(new BigNumber(100), 0.25)
+
+      expect(result.toString()).to.equal('125')
+    })
+
+    it('should accept factors bigger than 1', () => {
+      const result = addExtraGas(new BigNumber(100), 1.25)
+
+      expect(result.toString()).to.equal('225')
+    })
+  })
+
   describe('checkHTTPS', () => {
     beforeEach(() => {
       sinon.stub(console, 'warn')
