@@ -41,6 +41,9 @@ async function processDeposits(deposits) {
         .submitSignature(signature.signature, message)
         .estimateGas({ from: VALIDATOR_ADDRESS })
     } catch (e) {
+      if (e.message.includes('Invalid JSON RPC response')) {
+        throw new Error(`RPC Connection Error: submitSignature Gas Estimate cannot be obtained.`)
+      }
       logger.info(
         { eventTransactionHash: deposit.transactionHash },
         `Already processed Deposit ${deposit.transactionHash}`

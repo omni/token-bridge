@@ -58,6 +58,9 @@ async function processCollectedSignatures(signatures) {
       try {
         gasEstimate = await foreignBridge.methods.deposit(v, r, s, message).estimateGas()
       } catch (e) {
+        if (e.message.includes('Invalid JSON RPC response')) {
+          throw new Error(`RPC Connection Error: deposit Gas Estimate cannot be obtained.`)
+        }
         logger.info(
           { eventTransactionHash: colSignature.transactionHash },
           `Already processed CollectedSignatures ${colSignature.transactionHash}`

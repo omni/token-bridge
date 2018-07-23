@@ -27,6 +27,9 @@ async function processWithdraw(withdrawals) {
         .withdraw(recipient, value, withdrawal.transactionHash)
         .estimateGas({ from: VALIDATOR_ADDRESS })
     } catch (e) {
+      if (e.message.includes('Invalid JSON RPC response')) {
+        throw new Error(`RPC Connection Error: withdraw Gas Estimate cannot be obtained.`)
+      }
       logger.info(
         { eventTransactionHash: withdrawal.transactionHash },
         `Already processed Withdraw ${withdrawal.transactionHash}`
