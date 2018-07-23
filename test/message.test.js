@@ -1,5 +1,5 @@
 const { expect } = require('chai')
-const { createMessage } = require('../src/utils/message')
+const { createMessage, signatureToVRS } = require('../src/utils/message')
 
 describe('message utils', () => {
   describe('createMessage', () => {
@@ -129,6 +129,46 @@ describe('message utils', () => {
 
       // then
       expect(messageThunk).to.throw()
+    })
+  })
+  describe('signatureToVRS', () => {
+    it('should return the v, r, s values', () => {
+      // given
+      // 'foo' signed with PK 0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d
+      const signature =
+        '0xed157c39b80281741e7d4075655f25b11a9182f12d90878a1ba9bfed111c899620b74dc25ba2f581be753e11673413eb90f1f08285c2100d8e16c6799818c77d1b'
+
+      // when
+      const { v, r, s } = signatureToVRS(signature)
+
+      // then
+      expect(v).to.equal(27)
+      expect(r).to.equal('0xed157c39b80281741e7d4075655f25b11a9182f12d90878a1ba9bfed111c8996')
+      expect(s).to.equal('0x20b74dc25ba2f581be753e11673413eb90f1f08285c2100d8e16c6799818c77d')
+    })
+
+    it('should fail if signature is too short', () => {
+      // given
+      const signature =
+        '0xed157c39b80281741e7d4075655f25b11a9182f12d90878a1ba9bfed111c899620b74dc25ba2f581be753e11673413eb90f1f08285c2100d8e16c6799818c77d1'
+
+      // when
+      const signatureThunk = () => signatureToVRS(signature)
+
+      // then
+      expect(signatureThunk).to.throw()
+    })
+
+    it('should fail if signature is too long', () => {
+      // given
+      const signature =
+        '0xed157c39b80281741e7d4075655f25b11a9182f12d90878a1ba9bfed111c899620b74dc25ba2f581be753e11673413eb90f1f08285c2100d8e16c6799818c77d1bb'
+
+      // when
+      const signatureThunk = () => signatureToVRS(signature)
+
+      // then
+      expect(signatureThunk).to.throw()
     })
   })
 })
