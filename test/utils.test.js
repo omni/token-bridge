@@ -2,7 +2,8 @@ const sinon = require('sinon')
 const chai = require('chai')
 const chaiAsPromised = require('chai-as-promised')
 const BigNumber = require('bignumber.js')
-const { addExtraGas, checkHTTPS, syncForEach } = require('../src/utils/utils')
+const proxyquire = require('proxyquire')
+const { addExtraGas, syncForEach } = require('../src/utils/utils')
 
 chai.use(chaiAsPromised)
 const { expect } = chai
@@ -35,31 +36,36 @@ describe('utils', () => {
   })
 
   describe('checkHTTPS', () => {
+    let utils
+    const logger = {
+      warn: () => {}
+    }
     beforeEach(() => {
-      sinon.stub(console, 'warn')
+      sinon.stub(logger, 'warn')
+      utils = proxyquire('../src/utils/utils', { '../services/logger': logger })
     })
 
     afterEach(() => {
-      console.warn.restore()
+      logger.warn.restore()
     })
 
     it('should do nothing if HTTP is allowed and the URL is https', () => {
-      checkHTTPS('yes')('https://www.google.com')
-      expect(console.warn.called).to.equal(false)
+      utils.checkHTTPS('yes')('https://www.google.com')
+      expect(logger.warn.called).to.equal(false)
     })
 
     it('should emit a warning if HTTP is allowed and the URL is http', () => {
-      checkHTTPS('yes')('http://www.google.com')
-      expect(console.warn.called).to.equal(true)
+      utils.checkHTTPS('yes')('http://www.google.com')
+      expect(logger.warn.called).to.equal(true)
     })
 
     it('should do nothing if HTTP is not allowed and the URL is https', () => {
-      checkHTTPS('no')('https://www.google.com')
-      expect(console.warn.called).to.equal(false)
+      utils.checkHTTPS('no')('https://www.google.com')
+      expect(logger.warn.called).to.equal(false)
     })
 
     it('should throw an error if HTTP is not allowed and the URL is http', () => {
-      expect(() => checkHTTPS('no')('http://www.google.com')).to.throw()
+      expect(() => utils.checkHTTPS('no')('http://www.google.com')).to.throw()
     })
   })
 
