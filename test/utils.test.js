@@ -37,11 +37,9 @@ describe('utils', () => {
 
   describe('checkHTTPS', () => {
     let utils
-    const logger = {
-      warn: () => {}
-    }
+    const logger = { warn: sinon.stub() }
     beforeEach(() => {
-      logger.warn = sinon.stub()
+      logger.warn.reset()
       utils = proxyquire('../src/utils/utils', { '../services/logger': logger })
     })
 
