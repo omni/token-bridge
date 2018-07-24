@@ -41,12 +41,8 @@ describe('utils', () => {
       warn: () => {}
     }
     beforeEach(() => {
-      sinon.stub(logger, 'warn')
+      logger.warn = sinon.stub()
       utils = proxyquire('../src/utils/utils', { '../services/logger': logger })
-    })
-
-    afterEach(() => {
-      logger.warn.restore()
     })
 
     it('should do nothing if HTTP is allowed and the URL is https', () => {
