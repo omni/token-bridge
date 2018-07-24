@@ -3,6 +3,7 @@ const path = require('path')
 const Web3 = require('web3')
 const { connectSenderToQueue } = require('./services/amqpClient')
 const { redis, redlock } = require('./services/redisClient')
+const GasPrice = require('./services/gasPrice')
 const logger = require('./services/logger')
 const { getGasPrices } = require('./services/gasPrice')
 const { sendTx } = require('./tx/sendTx')
@@ -31,6 +32,8 @@ async function initialize() {
 
     checkHttps(process.env.HOME_RPC_URL)
     checkHttps(process.env.FOREIGN_RPC_URL)
+
+    GasPrice.start(config.id)
 
     chainId = await getChainId(web3Instance)
     connectSenderToQueue({
@@ -72,7 +75,7 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
 
     const txArray = JSON.parse(msg.content)
     logger.info(`Msg received with ${txArray.length} Tx to send`)
-    const gasPrice = await getGasPrices()
+    const gasPrice = await GasPrice.getPrice()
 
     const ttl = REDIS_LOCK_TTL * txArray.length
     const lock = await redlock.lock(nonceLock, ttl)

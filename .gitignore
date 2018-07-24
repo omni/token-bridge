@@ -1,3 +1,5 @@
 node_modules
 .env
 .idea
+.nyc_output
+coverage/
