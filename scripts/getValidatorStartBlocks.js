@@ -21,8 +21,10 @@ async function getStartBlock(rpcUrl, bridgeAddress, bridgeAbi) {
       validatorContractAddress
     )
 
+    const validatorDeployedAtBlock = await validatorContract.methods.deployedAtBlock().call()
+
     const validatorAddedEvents = await validatorContract.getPastEvents('ValidatorAdded', {
-      fromBlock: 0,
+      fromBlock: validatorDeployedAtBlock,
       filter: { validator: process.env.VALIDATOR_ADDRESS }
     })
 
