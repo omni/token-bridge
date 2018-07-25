@@ -3,6 +3,7 @@ const Web3 = require('web3')
 const fetch = require('node-fetch')
 const HomeABI = require('../../abis/HomeBridge.abi')
 const ForeignABI = require('../../abis/ForeignBridge.abi')
+const logger = require('../services/logger')
 
 const {
   FOREIGN_BRIDGE_ADDRESS,
@@ -44,12 +45,12 @@ async function fetchGasPrice({ bridgeContract, oracleFn }) {
   try {
     gasPrice = await oracleFn()
   } catch (e) {
-    console.error(`Gas Price API is not available. ${e.message}`)
+    logger.error(`Gas Price API is not available. ${e.message}`)
 
     try {
       gasPrice = await bridgeContract.methods.gasPrice().call()
     } catch (e) {
-      console.error(`There was a problem getting the gas price from the contract. ${e.message}`)
+      logger.error(`There was a problem getting the gas price from the contract. ${e.message}`)
     }
   }
   return gasPrice

@@ -1,5 +1,6 @@
 require('dotenv').config()
 const Web3 = require('web3')
+const logger = require('../services/logger')
 const { createMessage } = require('../utils/message')
 
 const {
@@ -18,8 +19,13 @@ const homeBridge = new web3Home.eth.Contract(HomeABI, HOME_BRIDGE_ADDRESS)
 async function processDeposits(deposits) {
   const txToSend = []
 
-  const callbacks = deposits.map(async (deposit, index) => {
+  const callbacks = deposits.map(async deposit => {
     const { recipient, value } = deposit.returnValues
+
+    logger.info(
+      { eventTransactionHash: deposit.transactionHash, sender: recipient, value },
+      `Processing Deposit ${deposit.transactionHash}`
+    )
 
     const message = createMessage({
       recipient,
@@ -35,7 +41,13 @@ async function processDeposits(deposits) {
         .submitSignature(signature.signature, message)
         .estimateGas({ from: VALIDATOR_ADDRESS })
     } catch (e) {
-      console.log(index + 1, '# already processed deposit ', deposit.transactionHash)
+      if (e.message.includes('Invalid JSON RPC response')) {
+        throw new Error(`RPC Connection Error: submitSignature Gas Estimate cannot be obtained.`)
+      }
+      logger.info(
+        { eventTransactionHash: deposit.transactionHash },
+        `Already processed Deposit ${deposit.transactionHash}`
+      )
       return
     }
 

@@ -1,5 +1,6 @@
 const Redis = require('ioredis')
 const Redlock = require('redlock')
+const logger = require('./logger')
 
 const redis = new Redis(process.env.REDIS_URL)
 const redlock = new Redlock([redis], {
@@ -10,11 +11,11 @@ const redlock = new Redlock([redis], {
 })
 
 redis.on('connect', () => {
-  console.log('Connected to redis')
+  logger.info('Connected to redis')
 })
 
-redis.on('reconnecting', () => {
-  console.log('Trying to connect to redis')
+redis.on('error', () => {
+  logger.error('Disconnected from redis')
 })
 
 module.exports = {

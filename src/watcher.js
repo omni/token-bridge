@@ -7,11 +7,12 @@ const processDeposits = require('./events/processDeposits')
 const processCollectedSignatures = require('./events/processCollectedSignatures')
 const processWithdraw = require('./events/processWithdraw')
 const { redis } = require('./services/redisClient')
+const logger = require('./services/logger')
 const { getRequiredBlockConfirmations, getEvents } = require('./tx/web3')
 const { checkHTTPS } = require('./utils/utils')
 
 if (process.argv.length < 3) {
-  console.error('Please check the number of arguments, config file was not provided')
+  logger.error('Please check the number of arguments, config file was not provided')
   process.exit(1)
 }
 
@@ -36,7 +37,7 @@ async function initialize() {
       cb: runMain
     })
   } catch (e) {
-    console.log(e)
+    logger.error(e)
     process.exit(1)
   }
 }
@@ -47,7 +48,7 @@ async function runMain({ sendToQueue }) {
       await main({ sendToQueue })
     }
   } catch (e) {
-    console.error(e)
+    logger.error(e)
   }
 
   setTimeout(() => {
@@ -101,11 +102,11 @@ async function main({ sendToQueue }) {
       fromBlock: lastProcessedBlock + 1,
       toBlock: lastBlockToProcess
     })
-    console.log(`Found ${events.length} ${config.event}`)
+    logger.info(`Found ${events.length} ${config.event} events`)
 
     if (events.length) {
       const job = await processEvents(events)
-      console.log('Tx to send: ', job.length)
+      logger.info('Transactions to send:', job.length)
 
       if (job.length) {
         await sendToQueue(job)
@@ -114,7 +115,7 @@ async function main({ sendToQueue }) {
 
     await updateLastProcessedBlock(lastBlockToProcess)
   } catch (e) {
-    console.error(e)
+    logger.error(e)
   }
 }
 

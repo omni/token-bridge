@@ -1,12 +1,13 @@
 require('dotenv').config()
 const connection = require('amqp-connection-manager').connect(process.env.QUEUE_URL)
+const logger = require('./logger')
 
 connection.on('connect', () => {
-  console.log('Connected to amqp Broker')
+  logger.info('Connected to amqp Broker')
 })
 
 connection.on('disconnect', () => {
-  console.error('Disconnected from amqp Broker')
+  logger.error('Disconnected from amqp Broker')
 })
 
 function connectWatcherToQueue({ queueName, cb }) {

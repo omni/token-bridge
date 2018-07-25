@@ -1,5 +1,6 @@
 require('dotenv').config()
 const Web3 = require('web3')
+const logger = require('../services/logger')
 const { signatureToVRS } = require('../utils/message')
 
 const {
@@ -24,7 +25,7 @@ const foreignBridge = new web3Foreign.eth.Contract(ForeignABI, FOREIGN_BRIDGE_AD
 
 async function processCollectedSignatures(signatures) {
   const txToSend = []
-  const callbacks = signatures.map(async (colSignature, indexSig) => {
+  const callbacks = signatures.map(async colSignature => {
     const {
       authorityResponsibleForRelay,
       messageHash,
@@ -32,6 +33,10 @@ async function processCollectedSignatures(signatures) {
     } = colSignature.returnValues
 
     if (authorityResponsibleForRelay === web3Home.utils.toChecksumAddress(VALIDATOR_ADDRESS)) {
+      logger.info(
+        { eventTransactionHash: colSignature.transactionHash },
+        `Processing CollectedSignatures ${colSignature.transactionHash}`
+      )
       const message = await homeBridge.methods.message(messageHash).call()
 
       const requiredSignatures = []
@@ -53,7 +58,13 @@ async function processCollectedSignatures(signatures) {
       try {
         gasEstimate = await foreignBridge.methods.deposit(v, r, s, message).estimateGas()
       } catch (e) {
-        console.log(indexSig + 1, ' # already processed col sig', colSignature.transactionHash)
+        if (e.message.includes('Invalid JSON RPC response')) {
+          throw new Error(`RPC Connection Error: deposit Gas Estimate cannot be obtained.`)
+        }
+        logger.info(
+          { eventTransactionHash: colSignature.transactionHash },
+          `Already processed CollectedSignatures ${colSignature.transactionHash}`
+        )
         return
       }
       const data = await foreignBridge.methods.deposit(v, r, s, message).encodeABI()
@@ -62,6 +73,11 @@ async function processCollectedSignatures(signatures) {
         gasEstimate,
         transactionReference: colSignature.transactionHash
       })
+    } else {
+      logger.info(
+        { eventTransactionHash: colSignature.transactionHash },
+        `Validator not responsible for relaying CollectedSignatures ${colSignature.transactionHash}`
+      )
     }
   })
 
