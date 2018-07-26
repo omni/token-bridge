@@ -9,9 +9,11 @@ const {
   FOREIGN_BRIDGE_ADDRESS,
   FOREIGN_RPC_URL,
   FOREIGN_MIN_AMOUNT_PER_TX,
-  ERC20_TOKEN_ADDRESS,
-  NUMBER_OF_DEPOSITS_TO_SEND
+  ERC20_TOKEN_ADDRESS
 } = process.env
+
+const NUMBER_OF_WITHDRAWALS_TO_SEND =
+  process.argv[2] || process.env.NUMBER_OF_WITHDRAWALS_TO_SEND || 1
 
 const ERC20_ABI = [
   {
@@ -24,9 +26,13 @@ const ERC20_ABI = [
       {
         name: '_value',
         type: 'uint256'
+      },
+      {
+        name: '_data',
+        type: 'bytes'
       }
     ],
-    name: 'transfer',
+    name: 'transferAndCall',
     outputs: [
       {
         name: '',
@@ -58,12 +64,12 @@ async function main() {
     })
     nonce = Web3Utils.hexToNumber(nonce)
     let actualSent = 0
-    for (let i = 0; i < Number(NUMBER_OF_DEPOSITS_TO_SEND); i++) {
+    for (let i = 0; i < Number(NUMBER_OF_WITHDRAWALS_TO_SEND); i++) {
       const gasLimit = await poa20.methods
-        .transfer(FOREIGN_BRIDGE_ADDRESS, Web3Utils.toWei(FOREIGN_MIN_AMOUNT_PER_TX))
+        .transferAndCall(FOREIGN_BRIDGE_ADDRESS, Web3Utils.toWei(FOREIGN_MIN_AMOUNT_PER_TX), '0x')
         .estimateGas({ from: USER_ADDRESS })
       const data = await poa20.methods
-        .transfer(FOREIGN_BRIDGE_ADDRESS, Web3Utils.toWei(FOREIGN_MIN_AMOUNT_PER_TX))
+        .transferAndCall(FOREIGN_BRIDGE_ADDRESS, Web3Utils.toWei(FOREIGN_MIN_AMOUNT_PER_TX), '0x')
         .encodeABI({ from: USER_ADDRESS })
       const txHash = await sendTx({
         rpcUrl: FOREIGN_RPC_URL,

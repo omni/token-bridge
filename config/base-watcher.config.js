@@ -25,7 +25,8 @@ const homeConfig = {
   eventAbi: homeAbi,
   bridgeContractAddress: process.env.HOME_BRIDGE_ADDRESS,
   bridgeAbi: homeAbi,
-  pollingInterval: process.env.HOME_POLLING_INTERVAL
+  pollingInterval: process.env.HOME_POLLING_INTERVAL,
+  startBlock: process.env.HOME_START_BLOCK
 }
 
 const foreignConfig = {
@@ -34,7 +35,8 @@ const foreignConfig = {
   eventAbi: foreignAbi,
   bridgeContractAddress: process.env.FOREIGN_BRIDGE_ADDRESS,
   bridgeAbi: foreignAbi,
-  pollingInterval: process.env.FOREIGN_POLLING_INTERVAL
+  pollingInterval: process.env.FOREIGN_POLLING_INTERVAL,
+  startBlock: process.env.FOREIGN_START_BLOCK
 }
 
 module.exports = {

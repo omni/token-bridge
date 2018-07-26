@@ -1,5 +1,6 @@
 require('dotenv').config()
 const Web3 = require('web3')
+const logger = require('../services/logger')
 
 const { HOME_RPC_URL, VALIDATOR_ADDRESS } = process.env
 
@@ -11,8 +12,13 @@ function processAffirmationRequestsBuilder(config) {
   return async function processAffirmationRequests(affirmationRequests) {
     const txToSend = []
 
-    const callbacks = affirmationRequests.map(async (affirmationRequest, index) => {
+    const callbacks = affirmationRequests.map(async affirmationRequest => {
       const { recipient, value } = affirmationRequest.returnValues
+
+      logger.info(
+        { eventTransactionHash: affirmationRequest.transactionHash, sender: recipient, value },
+        `Processing affirmationRequest ${affirmationRequest.transactionHash}`
+      )
 
       let gasEstimate
       try {
@@ -20,10 +26,14 @@ function processAffirmationRequestsBuilder(config) {
           .executeAffirmation(recipient, value, affirmationRequest.transactionHash)
           .estimateGas({ from: VALIDATOR_ADDRESS })
       } catch (e) {
-        console.log(
-          index + 1,
-          '# already processed UserRequestForAffirmation',
-          affirmationRequest.transactionHash
+        if (e.message.includes('Invalid JSON RPC response')) {
+          throw new Error(
+            `RPC Connection Error: executeAffirmation Gas Estimate cannot be obtained.`
+          )
+        }
+        logger.info(
+          { eventTransactionHash: affirmationRequest.transactionHash },
+          `Already processed affirmationRequest ${affirmationRequest.transactionHash}`
         )
         return
       }

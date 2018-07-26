@@ -1,5 +1,6 @@
 require('dotenv').config()
 const Web3 = require('web3')
+const logger = require('../services/logger')
 const { createMessage } = require('../utils/message')
 
 const { HOME_RPC_URL, VALIDATOR_ADDRESS, VALIDATOR_ADDRESS_PRIVATE_KEY } = process.env
@@ -12,8 +13,13 @@ function processSignatureRequestsBuilder(config) {
   return async function processSignatureRequests(signatureRequests) {
     const txToSend = []
 
-    const callbacks = signatureRequests.map(async (signatureRequest, index) => {
+    const callbacks = signatureRequests.map(async signatureRequest => {
       const { recipient, value } = signatureRequest.returnValues
+
+      logger.info(
+        { eventTransactionHash: signatureRequest.transactionHash, sender: recipient, value },
+        `Processing signatureRequest ${signatureRequest.transactionHash}`
+      )
 
       const message = createMessage({
         recipient,
@@ -29,10 +35,12 @@ function processSignatureRequestsBuilder(config) {
           .submitSignature(signature.signature, message)
           .estimateGas({ from: VALIDATOR_ADDRESS })
       } catch (e) {
-        console.log(
-          index + 1,
-          '# already processed UserRequestForSignature ',
-          signatureRequest.transactionHash
+        if (e.message.includes('Invalid JSON RPC response')) {
+          throw new Error(`RPC Connection Error: submitSignature Gas Estimate cannot be obtained.`)
+        }
+        logger.info(
+          { eventTransactionHash: signatureRequest.transactionHash },
+          `Already processed signatureRequest ${signatureRequest.transactionHash}`
         )
         return
       }

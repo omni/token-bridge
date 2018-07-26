@@ -2,6 +2,8 @@ require('dotenv').config()
 const baseConfig = require('./base-watcher.config')
 const erc20Abi = require('../abis/ERC20.abi')
 
+const id = baseConfig.isErcToErc ? 'erc-affirmation-request' : 'affirmation-request'
+
 module.exports = baseConfig.isErcToErc
   ? {
       ...baseConfig.bridgeConfig,
@@ -11,12 +13,14 @@ module.exports = baseConfig.isErcToErc
       eventAbi: erc20Abi,
       eventFilter: { to: process.env.FOREIGN_BRIDGE_ADDRESS },
       queue: 'home',
-      id: 'erc-affirmation-request'
+      name: `watcher-${id}`,
+      id
     }
   : {
       ...baseConfig.bridgeConfig,
       ...baseConfig.foreignConfig,
       event: 'UserRequestForAffirmation',
       queue: 'home',
-      id: 'affirmation-request'
+      name: `watcher-${id}`,
+      id
     }

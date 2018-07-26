@@ -28,10 +28,10 @@ function processCollectedSignaturesBuilder(config) {
 
       if (authorityResponsibleForRelay === web3Home.utils.toChecksumAddress(VALIDATOR_ADDRESS)) {
         logger.info(
-        { eventTransactionHash: colSignature.transactionHash },
-        `Processing CollectedSignatures ${colSignature.transactionHash}`
-      )
-      const message = await homeBridge.methods.message(messageHash).call()
+          { eventTransactionHash: colSignature.transactionHash },
+          `Processing CollectedSignatures ${colSignature.transactionHash}`
+        )
+        const message = await homeBridge.methods.message(messageHash).call()
 
         const requiredSignatures = []
         requiredSignatures.length = NumberOfCollectedSignatures
@@ -48,35 +48,39 @@ function processCollectedSignaturesBuilder(config) {
 
         await Promise.all(signaturePromises)
 
-      let gasEstimate
-      try {
-        gasEstimate = await foreignBridge.methods
-          .executeSignatures(v, r, s, message)
-          .estimateGas()
-      } catch (e) {
-        if (e.message.includes('Invalid JSON RPC response')) {
-          throw new Error(`RPC Connection Error: deposit Gas Estimate cannot be obtained.`)
+        let gasEstimate
+        try {
+          gasEstimate = await foreignBridge.methods
+            .executeSignatures(v, r, s, message)
+            .estimateGas()
+        } catch (e) {
+          if (e.message.includes('Invalid JSON RPC response')) {
+            throw new Error(
+              `RPC Connection Error: executeSignatures Gas Estimate cannot be obtained.`
+            )
+          }
+          logger.info(
+            { eventTransactionHash: colSignature.transactionHash },
+            `Already processed CollectedSignatures ${colSignature.transactionHash}`
+          )
+          return
         }
+        const data = await foreignBridge.methods.executeSignatures(v, r, s, message).encodeABI()
+        txToSend.push({
+          data,
+          gasEstimate,
+          transactionReference: colSignature.transactionHash,
+          to: config.foreignBridgeAddress
+        })
+      } else {
         logger.info(
           { eventTransactionHash: colSignature.transactionHash },
-          `Already processed CollectedSignatures ${colSignature.transactionHash}`
+          `Validator not responsible for relaying CollectedSignatures ${
+            colSignature.transactionHash
+          }`
         )
-        return
       }
-      const data = await foreignBridge.methods.executeSignatures(v, r, s, message).encodeABI()
-      txToSend.push({
-        data,
-        gasEstimate,
-        transactionReference: colSignature.transactionHash,
-        to: config.foreignBridgeAddress
-      })
-    } else {
-      logger.info(
-        { eventTransactionHash: colSignature.transactionHash },
-        `Validator not responsible for relaying CollectedSignatures ${colSignature.transactionHash}`
-      )
-    }
-  })
+    })
 
     await Promise.all(callbacks)
 
