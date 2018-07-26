@@ -1,4 +1,4 @@
-const baseConfig = require('./base-watcher.config')
+const baseConfig = require('./base.config')
 
 const id = baseConfig.isErcToErc ? 'erc-signature-request' : 'signature-request'
 

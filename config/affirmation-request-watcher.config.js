@@ -1,5 +1,5 @@
 require('dotenv').config()
-const baseConfig = require('./base-watcher.config')
+const baseConfig = require('./base.config')
 const erc20Abi = require('../abis/ERC20.abi')
 
 const id = baseConfig.isErcToErc ? 'erc-affirmation-request' : 'affirmation-request'

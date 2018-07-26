@@ -1,9 +1,15 @@
 require('dotenv').config()
 const Web3 = require('web3')
 const fetch = require('node-fetch')
-const HomeABI = require('../../abis/HomeBridge.abi')
-const ForeignABI = require('../../abis/ForeignBridge.abi')
+const { isErcToErc } = require('../../config/base.config')
+const HomeNativeABI = require('../../abis/HomeBridgeNativeToErc.abi')
+const ForeignNativeABI = require('../../abis/ForeignBridgeNativeToErc.abi')
+const HomeErcABI = require('../../abis/HomeBridgeErcToErc.abi')
+const ForeignErcABI = require('../../abis/ForeignBridgeErcToErc.abi')
 const logger = require('../services/logger')
+
+const HomeABI = isErcToErc ? HomeErcABI : HomeNativeABI
+const ForeignABI = isErcToErc ? ForeignNativeABI : ForeignErcABI
 
 const {
   FOREIGN_BRIDGE_ADDRESS,
