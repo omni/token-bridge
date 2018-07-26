@@ -1,3 +1,4 @@
+/* eslint import/no-unresolved: 0  node/no-missing-require: 0 */
 const path = require('path')
 require('dotenv').config({
   path: path.join(__dirname, '../submodules/poa-bridge-contracts/deploy/.env')
