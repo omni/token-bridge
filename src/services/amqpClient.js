@@ -1,12 +1,13 @@
 require('dotenv').config()
 const connection = require('amqp-connection-manager').connect(process.env.QUEUE_URL)
+const logger = require('./logger')
 
 connection.on('connect', () => {
-  console.log('Connected to amqp Broker')
+  logger.info('Connected to amqp Broker')
 })
 
 connection.on('disconnect', () => {
-  console.error('Disconnected from amqp Broker')
+  logger.error('Disconnected from amqp Broker')
 })
 
 function connectWatcherToQueue({ queueName, cb }) {
@@ -19,7 +20,7 @@ function connectWatcherToQueue({ queueName, cb }) {
 
   const sendToQueue = data => channelWrapper.sendToQueue(queueName, data, { persistent: true })
 
-  cb({ sendToQueue, isAmqpConnected: () => connection.isConnected() })
+  cb({ sendToQueue, channel: channelWrapper })
 }
 
 function connectSenderToQueue({ queueName, cb }) {
@@ -28,11 +29,13 @@ function connectSenderToQueue({ queueName, cb }) {
   })
 
   channelWrapper.addSetup(channel => {
-    Promise.all([
+    return Promise.all([
       channel.assertQueue(queueName, { durable: true }),
+      channel.prefetch(1),
       channel.consume(queueName, msg =>
         cb({
           msg,
+          channel: channelWrapper,
           ackMsg: job => channelWrapper.ack(job),
           nackMsg: job => channelWrapper.nack(job, false, true),
           sendToQueue: data => channelWrapper.sendToQueue(queueName, data, { persistent: true })
@@ -44,5 +47,6 @@ function connectSenderToQueue({ queueName, cb }) {
 
 module.exports = {
   connectWatcherToQueue,
-  connectSenderToQueue
+  connectSenderToQueue,
+  connection
 }

@@ -1,14 +1,15 @@
 require('dotenv').config()
 const path = require('path')
 const Web3 = require('web3')
-const { connectWatcherToQueue } = require('./services/amqpClient')
+const { connectWatcherToQueue, connection } = require('./services/amqpClient')
 const { getBlockNumber } = require('./tx/web3')
 const { redis } = require('./services/redisClient')
+const logger = require('./services/logger')
 const { getRequiredBlockConfirmations, getEvents } = require('./tx/web3')
 const { checkHTTPS } = require('./utils/utils')
 
 if (process.argv.length < 3) {
-  console.error('Please check the number of arguments, config file was not provided')
+  logger.error('Please check the number of arguments, config file was not provided')
   process.exit(1)
 }
 
@@ -24,7 +25,7 @@ const web3Instance = new Web3(provider)
 const bridgeContract = new web3Instance.eth.Contract(config.bridgeAbi, config.bridgeContractAddress)
 const eventContract = new web3Instance.eth.Contract(config.eventAbi, config.eventContractAddress)
 const lastBlockRedisKey = `${config.id}:lastProcessedBlock`
-let lastProcessedBlock = 0
+let lastProcessedBlock = config.startBlock || 0
 
 async function initialize() {
   try {
@@ -39,28 +40,28 @@ async function initialize() {
       cb: runMain
     })
   } catch (e) {
-    console.log(e)
+    logger.error(e)
     process.exit(1)
   }
 }
 
-async function runMain({ sendToQueue, isAmqpConnected }) {
+async function runMain({ sendToQueue }) {
   try {
-    if (isAmqpConnected() && redis.status === 'ready') {
+    if (connection.isConnected() && redis.status === 'ready') {
       await main({ sendToQueue })
     }
   } catch (e) {
-    console.error(e)
+    logger.error(e)
   }
 
   setTimeout(() => {
-    runMain({ sendToQueue, isAmqpConnected })
+    runMain({ sendToQueue })
   }, config.pollingInterval)
 }
 
 async function getLastProcessedBlock() {
   const result = await redis.get(lastBlockRedisKey)
-  lastProcessedBlock = result ? Number(result) : 0
+  lastProcessedBlock = result ? Number(result) : lastProcessedBlock
 }
 
 function updateLastProcessedBlock(lastBlockNumber) {
@@ -109,11 +110,11 @@ async function main({ sendToQueue }) {
       toBlock: lastBlockToProcess,
       filter: config.eventFilter
     })
-    console.log(`Found ${events.length} ${config.event}`)
+    logger.info(`Found ${events.length} ${config.event} events`)
 
     if (events.length) {
       const job = await processEvents(events)
-      console.log('Tx to send: ', job.length)
+      logger.info('Transactions to send:', job.length)
 
       if (job.length) {
         await sendToQueue(job)
@@ -122,7 +123,7 @@ async function main({ sendToQueue }) {
 
     await updateLastProcessedBlock(lastBlockToProcess)
   } catch (e) {
-    console.error(e)
+    logger.error(e)
   }
 }
 
