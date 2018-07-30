@@ -8,16 +8,18 @@ describe('message utils', () => {
       const recipient = '0xe3D952Ad4B96A756D65790393128FA359a7CD888'
       const value = '42'
       const transactionHash = '0x4a298455c1ccb17de77718fc045a876e1b4e063afaad361dcdef142a8ee48d5a'
+      const bridgeAddress = '0xfA79875FB0828c1FBD438583ED23fF5a956D80a1'
 
       // when
-      const message = createMessage({ recipient, value, transactionHash })
+      const message = createMessage({ recipient, value, transactionHash, bridgeAddress })
 
       // then
       expect(message).to.equal(
         [
           '0xe3D952Ad4B96A756D65790393128FA359a7CD888',
           '000000000000000000000000000000000000000000000000000000000000002a',
-          '4a298455c1ccb17de77718fc045a876e1b4e063afaad361dcdef142a8ee48d5a'
+          '4a298455c1ccb17de77718fc045a876e1b4e063afaad361dcdef142a8ee48d5a',
+          'fA79875FB0828c1FBD438583ED23fF5a956D80a1'
         ].join('')
       )
     })
@@ -27,16 +29,18 @@ describe('message utils', () => {
       const recipient = 'e3D952Ad4B96A756D65790393128FA359a7CD888'
       const value = '42'
       const transactionHash = '0x4a298455c1ccb17de77718fc045a876e1b4e063afaad361dcdef142a8ee48d5a'
+      const bridgeAddress = '0xfA79875FB0828c1FBD438583ED23fF5a956D80a1'
 
       // when
-      const message = createMessage({ recipient, value, transactionHash })
+      const message = createMessage({ recipient, value, transactionHash, bridgeAddress })
 
       // then
       expect(message).to.equal(
         [
           '0xe3D952Ad4B96A756D65790393128FA359a7CD888',
           '000000000000000000000000000000000000000000000000000000000000002a',
-          '4a298455c1ccb17de77718fc045a876e1b4e063afaad361dcdef142a8ee48d5a'
+          '4a298455c1ccb17de77718fc045a876e1b4e063afaad361dcdef142a8ee48d5a',
+          'fA79875FB0828c1FBD438583ED23fF5a956D80a1'
         ].join('')
       )
     })
@@ -46,16 +50,18 @@ describe('message utils', () => {
       const recipient = '0xe3D952Ad4B96A756D65790393128FA359a7CD888'
       const value = '0x2a'
       const transactionHash = '0x4a298455c1ccb17de77718fc045a876e1b4e063afaad361dcdef142a8ee48d5a'
+      const bridgeAddress = '0xfA79875FB0828c1FBD438583ED23fF5a956D80a1'
 
       // when
-      const message = createMessage({ recipient, value, transactionHash })
+      const message = createMessage({ recipient, value, transactionHash, bridgeAddress })
 
       // then
       expect(message).to.equal(
         [
           '0xe3D952Ad4B96A756D65790393128FA359a7CD888',
           '000000000000000000000000000000000000000000000000000000000000002a',
-          '4a298455c1ccb17de77718fc045a876e1b4e063afaad361dcdef142a8ee48d5a'
+          '4a298455c1ccb17de77718fc045a876e1b4e063afaad361dcdef142a8ee48d5a',
+          'fA79875FB0828c1FBD438583ED23fF5a956D80a1'
         ].join('')
       )
     })
@@ -65,16 +71,39 @@ describe('message utils', () => {
       const recipient = '0xe3D952Ad4B96A756D65790393128FA359a7CD888'
       const value = '42'
       const transactionHash = '4a298455c1ccb17de77718fc045a876e1b4e063afaad361dcdef142a8ee48d5a'
+      const bridgeAddress = '0xfA79875FB0828c1FBD438583ED23fF5a956D80a1'
 
       // when
-      const message = createMessage({ recipient, value, transactionHash })
+      const message = createMessage({ recipient, value, transactionHash, bridgeAddress })
 
       // then
       expect(message).to.equal(
         [
           '0xe3D952Ad4B96A756D65790393128FA359a7CD888',
           '000000000000000000000000000000000000000000000000000000000000002a',
-          '4a298455c1ccb17de77718fc045a876e1b4e063afaad361dcdef142a8ee48d5a'
+          '4a298455c1ccb17de77718fc045a876e1b4e063afaad361dcdef142a8ee48d5a',
+          'fA79875FB0828c1FBD438583ED23fF5a956D80a1'
+        ].join('')
+      )
+    })
+
+    it('should work if the bridge address hash is not prefixed with 0x', () => {
+      // given
+      const recipient = '0xe3D952Ad4B96A756D65790393128FA359a7CD888'
+      const value = '42'
+      const transactionHash = '0x4a298455c1ccb17de77718fc045a876e1b4e063afaad361dcdef142a8ee48d5a'
+      const bridgeAddress = 'fA79875FB0828c1FBD438583ED23fF5a956D80a1'
+
+      // when
+      const message = createMessage({ recipient, value, transactionHash, bridgeAddress })
+
+      // then
+      expect(message).to.equal(
+        [
+          '0xe3D952Ad4B96A756D65790393128FA359a7CD888',
+          '000000000000000000000000000000000000000000000000000000000000002a',
+          '4a298455c1ccb17de77718fc045a876e1b4e063afaad361dcdef142a8ee48d5a',
+          'fA79875FB0828c1FBD438583ED23fF5a956D80a1'
         ].join('')
       )
     })
@@ -126,6 +155,34 @@ describe('message utils', () => {
 
       // when
       const messageThunk = () => createMessage({ recipient, value, transactionHash })
+
+      // then
+      expect(messageThunk).to.throw()
+    })
+
+    it('should fail if the bridge address is too short', () => {
+      // given
+      const recipient = '0xe3D952Ad4B96A756D65790393128FA359a7CD888'
+      const value = '42'
+      const transactionHash = '0x4a298455c1ccb17de77718fc045a876e1b4e063afaad361dcdef142a8ee48d5a'
+      const bridgeAddress = '0xfA79875FB0828c1FBD438583ED23fF5a956D80a'
+
+      // when
+      const messageThunk = () => createMessage({ recipient, value, transactionHash, bridgeAddress })
+
+      // then
+      expect(messageThunk).to.throw()
+    })
+
+    it('should fail if the bridge address is too long', () => {
+      // given
+      const recipient = '0xe3D952Ad4B96A756D65790393128FA359a7CD888'
+      const value = '42'
+      const transactionHash = '0x4a298455c1ccb17de77718fc045a876e1b4e063afaad361dcdef142a8ee48d5a'
+      const bridgeAddress = '0xfA79875FB0828c1FBD438583ED23fF5a956D80a11'
+
+      // when
+      const messageThunk = () => createMessage({ recipient, value, transactionHash, bridgeAddress })
 
       // then
       expect(messageThunk).to.throw()
