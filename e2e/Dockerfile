@@ -14,6 +14,12 @@ RUN mkdir submodules && \
 
 RUN npm install --unsafe-perm
 
+RUN cd submodules/poa-bridge-contracts && \
+  npm install && \
+  ./node_modules/.bin/truffle compile && \
+  cd deploy && \
+  npm install
+
 ADD . .
 
 
