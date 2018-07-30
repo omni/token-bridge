@@ -33,7 +33,13 @@ function getRedisKey(name) {
 async function main() {
   try {
     const processName = process.argv[2]
-    const newBlockValue = process.argv[3]
+    const rawBlockValue = process.argv[3]
+
+    const newBlockValue = Number(rawBlockValue)
+    if (!Number.isInteger(newBlockValue)) {
+      logError('Expecting new block value to be an integer!')
+    }
+
     const lastBlockRedisKey = getRedisKey(processName)
 
     const value = await redis.get(lastBlockRedisKey)
