@@ -6,11 +6,11 @@ WORKDIR /stuff
 COPY package.json .
 COPY package-lock.json .
 
-RUN git clone https://github.com/poanetwork/poa-bridge-contracts.git
+RUN git clone https://github.com/rstormsf/poa-parity-bridge-contracts.git
 RUN mkdir submodules && \
-  mv poa-bridge-contracts submodules && \
+  mv poa-parity-bridge-contracts submodules/poa-bridge-contracts && \
   cd submodules/poa-bridge-contracts && \
-  git checkout refactor_v1
+  git checkout 57dfe2285f18f5ecd2f9f0ee7a111b1fbcaaf307
 
 RUN npm install --unsafe-perm
 
