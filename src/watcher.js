@@ -5,6 +5,7 @@ const { connectWatcherToQueue, connection } = require('./services/amqpClient')
 const { getBlockNumber } = require('./tx/web3')
 const { redis } = require('./services/redisClient')
 const logger = require('./services/logger')
+const rpcUrlsManager = require('./services/getRpcUrlsManager')
 const { getRequiredBlockConfirmations, getEvents } = require('./tx/web3')
 const { checkHTTPS } = require('./utils/utils')
 
@@ -31,8 +32,8 @@ async function initialize() {
   try {
     const checkHttps = checkHTTPS(process.env.ALLOW_HTTP)
 
-    checkHttps(process.env.HOME_RPC_URL)
-    checkHttps(process.env.FOREIGN_RPC_URL)
+    rpcUrlsManager.homeUrls.forEach(checkHttps)
+    rpcUrlsManager.foreignUrls.forEach(checkHttps)
 
     await getLastProcessedBlock()
     connectWatcherToQueue({

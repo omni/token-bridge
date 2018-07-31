@@ -7,6 +7,7 @@ const ForeignNativeABI = require('../../abis/ForeignBridgeNativeToErc.abi')
 const HomeErcABI = require('../../abis/HomeBridgeErcToErc.abi')
 const ForeignErcABI = require('../../abis/ForeignBridgeErcToErc.abi')
 const logger = require('../services/logger')
+const rpcUrlsManager = require('../services/getRpcUrlsManager')
 
 const HomeABI = isErcToErc ? HomeErcABI : HomeNativeABI
 const ForeignABI = isErcToErc ? ForeignNativeABI : ForeignErcABI
@@ -17,20 +18,20 @@ const {
   FOREIGN_GAS_PRICE_ORACLE_URL,
   FOREIGN_GAS_PRICE_SPEED_TYPE,
   FOREIGN_GAS_PRICE_UPDATE_INTERVAL,
-  FOREIGN_RPC_URL,
   HOME_BRIDGE_ADDRESS,
   HOME_GAS_PRICE_FALLBACK,
   HOME_GAS_PRICE_ORACLE_URL,
   HOME_GAS_PRICE_SPEED_TYPE,
-  HOME_GAS_PRICE_UPDATE_INTERVAL,
-  HOME_RPC_URL
+  HOME_GAS_PRICE_UPDATE_INTERVAL
 } = process.env
 
-const homeProvider = new Web3.providers.HttpProvider(HOME_RPC_URL)
+const homeRpcUrl = rpcUrlsManager.getHomeUrl()
+const homeProvider = new Web3.providers.HttpProvider(homeRpcUrl)
 const web3Home = new Web3(homeProvider)
 const homeBridge = new web3Home.eth.Contract(HomeABI, HOME_BRIDGE_ADDRESS)
 
-const foreignProvider = new Web3.providers.HttpProvider(FOREIGN_RPC_URL)
+const foreignRpcUrl = rpcUrlsManager.getForeignUrl()
+const foreignProvider = new Web3.providers.HttpProvider(foreignRpcUrl)
 const web3Foreign = new Web3(foreignProvider)
 const foreignBridge = new web3Foreign.eth.Contract(ForeignABI, FOREIGN_BRIDGE_ADDRESS)
 

@@ -1,11 +1,13 @@
 require('dotenv').config()
 const Web3 = require('web3')
 const logger = require('../services/logger')
+const rpcUrlsManager = require('../services/getRpcUrlsManager')
 
-const { HOME_RPC_URL, VALIDATOR_ADDRESS } = process.env
+const { VALIDATOR_ADDRESS } = process.env
 
 function processAffirmationRequestsBuilder(config) {
-  const homeProvider = new Web3.providers.HttpProvider(HOME_RPC_URL)
+  const homeRpcUrl = rpcUrlsManager.getHomeUrl()
+  const homeProvider = new Web3.providers.HttpProvider(homeRpcUrl)
   const web3Home = new Web3(homeProvider)
   const homeBridge = new web3Home.eth.Contract(config.homeBridgeAbi, config.homeBridgeAddress)
 

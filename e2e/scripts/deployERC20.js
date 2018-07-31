@@ -10,8 +10,7 @@ const {
 } = require('../submodules/poa-bridge-contracts/deploy/src/deploymentUtils')
 const {
   web3Foreign,
-  deploymentPrivateKey,
-  FOREIGN_RPC_URL
+  deploymentPrivateKey
 } = require('../submodules/poa-bridge-contracts/deploy/src/web3')
 const POA20 = require('../submodules/poa-bridge-contracts/build/contracts/ERC677BridgeToken.json')
 const { user } = require('../constants.json')
@@ -30,6 +29,10 @@ async function deployErc20() {
     foreignNonce++
     console.log('[Foreign] POA20 Test: ', poa20foreign.options.address)
 
+    // TODO: Fix this when the e2e are modified to use the whole repo as docker context.
+    // Right now, we can't require the RpcUrlManager from here.
+    const foreignRpcUrl = process.env.FOREIGN_RPC_URL.split(',')[0]
+
     const mintData = await poa20foreign.methods
       .mint(user.address, '1000000000000000000')
       .encodeABI({ from: DEPLOYMENT_ACCOUNT_ADDRESS })
@@ -38,7 +41,7 @@ async function deployErc20() {
       nonce: foreignNonce,
       to: poa20foreign.options.address,
       privateKey: deploymentPrivateKey,
-      url: FOREIGN_RPC_URL
+      url: foreignRpcUrl
     })
   } catch (e) {
     console.log(e)
