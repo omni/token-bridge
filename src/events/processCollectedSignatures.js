@@ -1,5 +1,6 @@
 require('dotenv').config()
 const Web3 = require('web3')
+const HttpListProvider = require('../utils/HttpListProvider')
 const logger = require('../services/logger')
 const rpcUrlsManager = require('../services/getRpcUrlsManager')
 const { signatureToVRS } = require('../utils/message')
@@ -7,13 +8,11 @@ const { signatureToVRS } = require('../utils/message')
 const { VALIDATOR_ADDRESS } = process.env
 
 function processCollectedSignaturesBuilder(config) {
-  const homeRpcUrl = rpcUrlsManager.getHomeUrl()
-  const homeProvider = new Web3.providers.HttpProvider(homeRpcUrl)
+  const homeProvider = new HttpListProvider(rpcUrlsManager.homeUrls)
   const web3Home = new Web3(homeProvider)
   const homeBridge = new web3Home.eth.Contract(config.homeBridgeAbi, config.homeBridgeAddress)
 
-  const foreignRpcUrl = rpcUrlsManager.getForeignUrl()
-  const foreignProvider = new Web3.providers.HttpProvider(foreignRpcUrl)
+  const foreignProvider = new HttpListProvider(rpcUrlsManager.foreignUrls)
   const web3Foreign = new Web3(foreignProvider)
   const foreignBridge = new web3Foreign.eth.Contract(
     config.foreignBridgeAbi,

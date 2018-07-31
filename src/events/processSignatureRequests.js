@@ -1,5 +1,6 @@
 require('dotenv').config()
 const Web3 = require('web3')
+const HttpListProvider = require('../utils/HttpListProvider')
 const logger = require('../services/logger')
 const rpcUrlsManager = require('../services/getRpcUrlsManager')
 const { createMessage } = require('../utils/message')
@@ -7,8 +8,7 @@ const { createMessage } = require('../utils/message')
 const { VALIDATOR_ADDRESS, VALIDATOR_ADDRESS_PRIVATE_KEY } = process.env
 
 function processSignatureRequestsBuilder(config) {
-  const homeRpcUrl = rpcUrlsManager.getHomeUrl()
-  const homeProvider = new Web3.providers.HttpProvider(homeRpcUrl)
+  const homeProvider = new HttpListProvider(rpcUrlsManager.homeUrls)
   const web3Home = new Web3(homeProvider)
   const homeBridge = new web3Home.eth.Contract(config.homeBridgeAbi, config.homeBridgeAddress)
 

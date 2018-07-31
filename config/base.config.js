@@ -21,11 +21,8 @@ const bridgeConfig = {
   eventFilter: {}
 }
 
-const homeRpcUrl = rpcUrlsManager.getHomeUrl()
-const foreignRpcUrl = rpcUrlsManager.getForeignUrl()
-
 const homeConfig = {
-  url: homeRpcUrl,
+  urls: rpcUrlsManager.homeUrls,
   eventContractAddress: process.env.HOME_BRIDGE_ADDRESS,
   eventAbi: homeAbi,
   bridgeContractAddress: process.env.HOME_BRIDGE_ADDRESS,
@@ -35,7 +32,7 @@ const homeConfig = {
 }
 
 const foreignConfig = {
-  url: foreignRpcUrl,
+  urls: rpcUrlsManager.foreignUrls,
   eventContractAddress: process.env.FOREIGN_BRIDGE_ADDRESS,
   eventAbi: foreignAbi,
   bridgeContractAddress: process.env.FOREIGN_BRIDGE_ADDRESS,

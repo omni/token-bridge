@@ -54,12 +54,12 @@ const erc677 = new web3Home.eth.Contract(BRIDGEABLE_TOKEN_ABI, BRIDGEABLE_TOKEN_
 async function main() {
   try {
     const homeChainId = await sendRawTx({
-      url: homeRpcUrl,
+      urls: [homeRpcUrl],
       params: [],
       method: 'net_version'
     })
     let nonce = await sendRawTx({
-      url: homeRpcUrl,
+      urls: [homeRpcUrl],
       method: 'eth_getTransactionCount',
       params: [USER_ADDRESS, 'latest']
     })
@@ -73,7 +73,7 @@ async function main() {
         .transferAndCall(HOME_BRIDGE_ADDRESS, Web3Utils.toWei(HOME_MIN_AMOUNT_PER_TX), '0x')
         .encodeABI({ from: USER_ADDRESS })
       const txHash = await sendTx({
-        rpcUrl: homeRpcUrl,
+        rpcUrls: [homeRpcUrl],
         privateKey: USER_ADDRESS_PRIVATE_KEY,
         data,
         nonce,

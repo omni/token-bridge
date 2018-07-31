@@ -3,7 +3,7 @@ require('dotenv').config()
 const rpcUrlsManager = require('../src/services/getRpcUrlsManager')
 
 module.exports = {
-  url: rpcUrlsManager.getHomeUrl(),
+  urls: rpcUrlsManager.homeUrls,
   queue: 'home',
   id: 'home',
   name: 'sender-home'

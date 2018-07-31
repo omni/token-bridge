@@ -1,6 +1,7 @@
 require('dotenv').config()
 const path = require('path')
 const Web3 = require('web3')
+const HttpListProvider = require('./utils/HttpListProvider')
 const { connectSenderToQueue } = require('./services/amqpClient')
 const { redis, redlock } = require('./services/redisClient')
 const GasPrice = require('./services/gasPrice')
@@ -20,7 +21,7 @@ if (process.argv.length < 3) {
 
 const config = require(path.join('../config/', process.argv[2]))
 
-const provider = new Web3.providers.HttpProvider(config.url)
+const provider = new HttpListProvider(config.urls)
 const web3Instance = new Web3(provider)
 const nonceLock = `lock:${config.id}:nonce`
 const nonceKey = `${config.id}:nonce`
@@ -90,7 +91,7 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
 
       try {
         const txHash = await sendTx({
-          rpcUrl: config.url,
+          rpcUrls: config.urls,
           data: job.data,
           nonce,
           gasPrice: gasPrice.toString(10),

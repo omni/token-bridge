@@ -29,10 +29,6 @@ async function deployErc20() {
     foreignNonce++
     console.log('[Foreign] POA20 Test: ', poa20foreign.options.address)
 
-    // TODO: Fix this when the e2e are modified to use the whole repo as docker context.
-    // Right now, we can't require the RpcUrlManager from here.
-    const foreignRpcUrl = process.env.FOREIGN_RPC_URL.split(',')[0]
-
     const mintData = await poa20foreign.methods
       .mint(user.address, '1000000000000000000')
       .encodeABI({ from: DEPLOYMENT_ACCOUNT_ADDRESS })
@@ -41,7 +37,7 @@ async function deployErc20() {
       nonce: foreignNonce,
       to: poa20foreign.options.address,
       privateKey: deploymentPrivateKey,
-      url: foreignRpcUrl
+      url: process.env.FOREIGN_RPC_URL
     })
   } catch (e) {
     console.log(e)
