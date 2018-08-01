@@ -103,6 +103,7 @@ async function main({ sendToQueue }) {
   try {
     const lastBlockToProcess = await getLastBlockToProcess()
     if (lastBlockToProcess <= lastProcessedBlock) {
+      logger.info('All blocks already processed')
       return
     }
     const events = await getEvents({
