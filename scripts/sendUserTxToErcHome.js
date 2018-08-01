@@ -45,7 +45,7 @@ const BRIDGEABLE_TOKEN_ABI = [
   }
 ]
 
-const homeRpcUrl = rpcUrlsManager.getHomeUrl()
+const homeRpcUrl = rpcUrlsManager.homeUrls[0]
 const homeProvider = new Web3.providers.HttpProvider(homeRpcUrl)
 const web3Home = new Web3(homeProvider)
 

@@ -46,8 +46,8 @@ async function getStartBlock(rpcUrl, bridgeAddress, bridgeAbi) {
 async function main() {
   const { HOME_BRIDGE_ADDRESS, FOREIGN_BRIDGE_ADDRESS } = process.env
 
-  const homeRpcUrl = rpcUrlsManager.getHomeUrl()
-  const foreignRpcUrl = rpcUrlsManager.getForeignUrl()
+  const homeRpcUrl = rpcUrlsManager.homeUrls[0]
+  const foreignRpcUrl = rpcUrlsManager.foreignUrls[0]
   const homeStartBlock = await getStartBlock(homeRpcUrl, HOME_BRIDGE_ADDRESS, homeABI)
   const foreignStartBlock = await getStartBlock(foreignRpcUrl, FOREIGN_BRIDGE_ADDRESS, foreignABI)
   const result = {

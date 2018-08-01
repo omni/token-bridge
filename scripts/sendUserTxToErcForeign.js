@@ -40,7 +40,7 @@ const ERC20_ABI = [
   }
 ]
 
-const foreignRpcUrl = rpcUrlsManager.getForeignUrl()
+const foreignRpcUrl = rpcUrlsManager.foreignUrls[0]
 const foreignProvider = new Web3.providers.HttpProvider(foreignRpcUrl)
 const web3Foreign = new Web3(foreignProvider)
 

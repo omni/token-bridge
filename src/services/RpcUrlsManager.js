@@ -10,12 +10,4 @@ function RpcUrlsManager(homeUrls, foreignUrls) {
   this.foreignUrls = foreignUrls.split(',')
 }
 
-RpcUrlsManager.prototype.getHomeUrl = function() {
-  return this.homeUrls[0]
-}
-
-RpcUrlsManager.prototype.getForeignUrl = function() {
-  return this.foreignUrls[0]
-}
-
 module.exports = RpcUrlsManager
