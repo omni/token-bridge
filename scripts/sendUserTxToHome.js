@@ -1,6 +1,7 @@
 require('dotenv').config()
 const Web3 = require('web3')
 const Web3Utils = require('web3-utils')
+const HttpListProvider = require('../src/utils/HttpListProvider')
 const { sendTx, sendRawTx } = require('../src/tx/sendTx')
 const rpcUrlsManager = require('../src/services/getRpcUrlsManager')
 
@@ -13,19 +14,18 @@ const {
 
 const NUMBER_OF_DEPOSITS_TO_SEND = process.argv[2] || 1
 
-const homeRpcUrl = rpcUrlsManager.getHomeUrl()
-const homeProvider = new Web3.providers.HttpProvider(homeRpcUrl)
+const homeProvider = HttpListProvider(rpcUrlsManager.homeUrls)
 const web3Home = new Web3(homeProvider)
 
 async function main() {
   try {
     const homeChaindId = await sendRawTx({
-      urls: [homeRpcUrl],
+      urls: rpcUrlsManager.homeUrls,
       params: [],
       method: 'net_version'
     })
     let nonce = await sendRawTx({
-      urls: [homeRpcUrl],
+      urls: rpcUrlsManager.homeUrls,
       method: 'eth_getTransactionCount',
       params: [USER_ADDRESS, 'latest']
     })
@@ -33,7 +33,7 @@ async function main() {
     let actualSent = 0
     for (let i = 0; i < Number(NUMBER_OF_DEPOSITS_TO_SEND); i++) {
       const txHash = await sendTx({
-        rpcUrls: [homeRpcUrl],
+        rpcUrls: rpcUrlsManager.homeUrls,
         privateKey: USER_ADDRESS_PRIVATE_KEY,
         data: '0x',
         nonce,

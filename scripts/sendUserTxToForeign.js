@@ -1,6 +1,7 @@
 require('dotenv').config()
 const Web3 = require('web3')
 const Web3Utils = require('web3-utils')
+const HttpListProvider = require('../src/utils/HttpListProvider')
 const rpcUrlsManager = require('../src/services/getRpcUrlsManager')
 const { sendTx, sendRawTx } = require('../src/tx/sendTx')
 
@@ -45,8 +46,7 @@ const ERC20_ABI = [
   }
 ]
 
-const foreignRpcUrl = rpcUrlsManager.getForeignUrl()
-const foreignProvider = new Web3.providers.HttpProvider(foreignRpcUrl)
+const foreignProvider = new HttpListProvider(rpcUrlsManager.foreignUrls)
 const web3Foreign = new Web3(foreignProvider)
 
 const poa20 = new web3Foreign.eth.Contract(ERC20_ABI, ERC20_TOKEN_ADDRESS)
@@ -54,12 +54,12 @@ const poa20 = new web3Foreign.eth.Contract(ERC20_ABI, ERC20_TOKEN_ADDRESS)
 async function main() {
   try {
     const foreignChaindId = await sendRawTx({
-      urls: [foreignRpcUrl],
+      urls: rpcUrlsManager.foreignUrls,
       params: [],
       method: 'net_version'
     })
     let nonce = await sendRawTx({
-      urls: [foreignRpcUrl],
+      urls: rpcUrlsManager.foreignUrls,
       method: 'eth_getTransactionCount',
       params: [USER_ADDRESS, 'latest']
     })
@@ -73,7 +73,7 @@ async function main() {
         .transferAndCall(FOREIGN_BRIDGE_ADDRESS, Web3Utils.toWei(FOREIGN_MIN_AMOUNT_PER_TX), '0x')
         .encodeABI({ from: USER_ADDRESS })
       const txHash = await sendTx({
-        rpcUrls: [foreignRpcUrl],
+        rpcUrls: rpcUrlsManager.foreignUrls,
         privateKey: USER_ADDRESS_PRIVATE_KEY,
         data,
         nonce,
