@@ -10,11 +10,14 @@ function HttpListProvider(urls) {
 }
 
 HttpListProvider.prototype.send = async function(payload, callback, retries = 0) {
+  // save the currentIndex to avoid race condition
+  const currentIndex = this.currentIndex // eslint-disable-line prefer-destructuring
+
   if (retries === this.urls.length) {
     callback(new Error('Request failed for all urls'))
   }
 
-  const url = this.urls[this.currentIndex]
+  const url = this.urls[currentIndex]
 
   try {
     const result = await fetch(url, {
@@ -27,7 +30,7 @@ HttpListProvider.prototype.send = async function(payload, callback, retries = 0)
 
     callback(null, result)
   } catch (e) {
-    this.currentIndex = (this.currentIndex + 1) % this.urls.length
+    this.currentIndex = (currentIndex + 1) % this.urls.length
     this.send(payload, callback, retries + 1)
   }
 }
