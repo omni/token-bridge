@@ -54,12 +54,12 @@ const poa20 = new web3Foreign.eth.Contract(ERC20_ABI, ERC20_TOKEN_ADDRESS)
 async function main() {
   try {
     const foreignChaindId = await sendRawTx({
-      urls: rpcUrlsManager.foreignUrls,
+      chain: 'foreign',
       params: [],
       method: 'net_version'
     })
     let nonce = await sendRawTx({
-      urls: rpcUrlsManager.foreignUrls,
+      chain: 'foreign',
       method: 'eth_getTransactionCount',
       params: [USER_ADDRESS, 'latest']
     })
@@ -73,7 +73,7 @@ async function main() {
         .transferAndCall(FOREIGN_BRIDGE_ADDRESS, Web3Utils.toWei(FOREIGN_MIN_AMOUNT_PER_TX), '0x')
         .encodeABI({ from: USER_ADDRESS })
       const txHash = await sendTx({
-        rpcUrls: rpcUrlsManager.foreignUrls,
+        chain: 'foreign',
         privateKey: USER_ADDRESS_PRIVATE_KEY,
         data,
         nonce,

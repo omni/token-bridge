@@ -20,12 +20,12 @@ const web3Home = new Web3(homeProvider)
 async function main() {
   try {
     const homeChaindId = await sendRawTx({
-      urls: rpcUrlsManager.homeUrls,
+      chain: 'home',
       params: [],
       method: 'net_version'
     })
     let nonce = await sendRawTx({
-      urls: rpcUrlsManager.homeUrls,
+      chain: 'home',
       method: 'eth_getTransactionCount',
       params: [USER_ADDRESS, 'latest']
     })
@@ -33,7 +33,7 @@ async function main() {
     let actualSent = 0
     for (let i = 0; i < Number(NUMBER_OF_DEPOSITS_TO_SEND); i++) {
       const txHash = await sendTx({
-        rpcUrls: rpcUrlsManager.homeUrls,
+        chain: 'home',
         privateKey: USER_ADDRESS_PRIVATE_KEY,
         data: '0x',
         nonce,

@@ -91,7 +91,7 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
 
       try {
         const txHash = await sendTx({
-          rpcUrls: config.urls,
+          chain: config.id,
           data: job.data,
           nonce,
           gasPrice: gasPrice.toString(10),
