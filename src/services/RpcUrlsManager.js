@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const tryEach = require('../utils/tryEach')
 
 function RpcUrlsManager(homeUrls, foreignUrls) {
@@ -12,9 +13,13 @@ function RpcUrlsManager(homeUrls, foreignUrls) {
   this.foreignUrls = foreignUrls.split(',')
 }
 
-async function tryEachHelper(originalUrls, f) {
+RpcUrlsManager.prototype.tryEach = async function(chain, f) {
+  if (chain !== 'home' && chain !== 'foreign') {
+    throw new Error(`Invalid argument chain: '${chain}'`)
+  }
+
   // save homeUrls to avoid race condition
-  const urls = JSON.parse(JSON.stringify(originalUrls))
+  const urls = chain === 'home' ? _.cloneDeep(this.homeUrls) : _.cloneDeep(this.foreignUrls)
 
   const [result, index] = await tryEach(urls, f)
 
@@ -24,22 +29,10 @@ async function tryEachHelper(originalUrls, f) {
     urls.push(...failed)
   }
 
-  return [result, urls]
-}
-
-RpcUrlsManager.prototype.tryEach = async function(chain, f) {
-  if (chain !== 'home' && chain !== 'foreign') {
-    throw new Error(`Invalid argument chain: '${chain}'`)
-  }
-
-  const urls = chain === 'home' ? this.homeUrls : this.foreignUrls
-
-  const [result, newUrls] = await tryEachHelper(urls, f)
-
   if (chain === 'home') {
-    this.homeUrls = newUrls
+    this.homeUrls = urls
   } else {
-    this.foreignUrls = newUrls
+    this.foreignUrls = urls
   }
 
   return result
