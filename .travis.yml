@@ -17,5 +17,4 @@ script:
   - cd e2e && ./run-tests.sh
 
 env:
-  - HOME_RPC_URL=http://example.com
-  - FOREIGN_RPC_URL=http://example.com
+  - HOME_RPC_URL=http://example.com FOREIGN_RPC_URL=http://example.com
