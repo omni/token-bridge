@@ -4,7 +4,6 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "postinstall": "cd submodules/poa-bridge-contracts && npm install && ./node_modules/.bin/truffle compile && cd deploy && npm install",
     "deploy": "node deploy.js",
     "start": "mocha"
   },

@@ -5,7 +5,7 @@ function strip0x(input) {
   return input.replace(/^0x/, '')
 }
 
-function createMessage({ recipient, value, transactionHash }) {
+function createMessage({ recipient, value, transactionHash, bridgeAddress }) {
   recipient = strip0x(recipient)
   assert.equal(recipient.length, 20 * 2)
 
@@ -18,8 +18,11 @@ function createMessage({ recipient, value, transactionHash }) {
   transactionHash = strip0x(transactionHash)
   assert.equal(transactionHash.length, 32 * 2)
 
-  const message = `0x${recipient}${value}${transactionHash}`
-  const expectedMessageLength = (20 + 32 + 32) * 2 + 2
+  bridgeAddress = strip0x(bridgeAddress)
+  assert.equal(bridgeAddress.length, 20 * 2)
+
+  const message = `0x${recipient}${value}${transactionHash}${bridgeAddress}`
+  const expectedMessageLength = (20 + 32 + 32 + 20) * 2 + 2
   assert.equal(message.length, expectedMessageLength)
   return message
 }
