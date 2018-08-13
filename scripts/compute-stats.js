@@ -32,16 +32,40 @@ function computeSignatureRequestStats(signatureRequests, senderHome) {
   }
 }
 
+function computeCollectedSignaturesStats(collectedSignatures, senderForeign) {
+  const processingLogs = collectedSignatures.filter(x => x.eventTransactionHash)
+  const txSentMap = senderForeign.filter(x => x.eventTransactionHash).reduce((acc, x) => {
+    acc[x.eventTransactionHash] = x
+    return acc
+  }, {})
+
+  const times = processingLogs.map(x => txSentMap[x.eventTransactionHash].time - x.time)
+
+  return {
+    mean: mean(times),
+    median: median(times),
+    min: min(times),
+    max: max(times)
+  }
+}
+
 async function main() {
   const signatureRequests = await readFile(__dirname, '../logs/watcher-signature-request.txt')
-  // const collectedSignatures = await readFile(__dirname, 'logs/watcher-collected-signatures.txt')
-  // const affirmationRequests = await readFile(__dirname, 'logs/watcher-affirmation-request.txt')
+  const collectedSignatures = await readFile(__dirname, '../logs/watcher-collected-signatures.txt')
+  // const affirmationRequests = await readFile(__dirname, '../logs/watcher-affirmation-request.txt')
   const senderHome = await readFile(__dirname, '../logs/sender-home.txt')
-  // const senderForeign = await readFile(__dirname, 'logs/sender-foreign.txt')
+  const senderForeign = await readFile(__dirname, '../logs/sender-foreign.txt')
 
   const signatureRequestsStats = computeSignatureRequestStats(signatureRequests, senderHome)
-
+  console.log('Signature Requests')
   console.log(signatureRequestsStats)
+
+  const collectedSignaturesStats = computeCollectedSignaturesStats(
+    collectedSignatures,
+    senderForeign
+  )
+  console.log('Collected Signatures')
+  console.log(collectedSignaturesStats)
 }
 
 main()
