@@ -1,7 +1,7 @@
 require('dotenv').config()
 const Web3 = require('web3')
 const Web3Utils = require('web3-utils')
-const HttpListProvider = require('../src/utils/HttpListProvider')
+const HttpListProvider = require('http-list-provider')
 const { sendTx, sendRawTx } = require('../src/tx/sendTx')
 const rpcUrlsManager = require('../src/services/getRpcUrlsManager')
 

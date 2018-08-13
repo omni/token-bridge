@@ -1,7 +1,7 @@
 require('dotenv').config()
 const Web3 = require('web3')
 const fetch = require('node-fetch')
-const HttpListProvider = require('../utils/HttpListProvider')
+const HttpListProvider = require('http-list-provider')
 const { isErcToErc } = require('../../config/base.config')
 const HomeNativeABI = require('../../abis/HomeBridgeNativeToErc.abi')
 const ForeignNativeABI = require('../../abis/ForeignBridgeNativeToErc.abi')

@@ -1,6 +1,6 @@
 require('dotenv').config()
 const Web3 = require('web3')
-const HttpListProvider = require('../utils/HttpListProvider')
+const HttpListProvider = require('http-list-provider')
 const logger = require('../services/logger')
 const rpcUrlsManager = require('../services/getRpcUrlsManager')
 const { signatureToVRS } = require('../utils/message')

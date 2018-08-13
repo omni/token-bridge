@@ -1,7 +1,7 @@
 require('dotenv').config()
 const path = require('path')
 const Web3 = require('web3')
-const HttpListProvider = require('./utils/HttpListProvider')
+const HttpListProvider = require('http-list-provider')
 const { connectSenderToQueue } = require('./services/amqpClient')
 const { redis, redlock } = require('./services/redisClient')
 const GasPrice = require('./services/gasPrice')
