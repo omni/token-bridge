@@ -10,8 +10,7 @@ const {
 } = require('../submodules/poa-bridge-contracts/deploy/src/deploymentUtils')
 const {
   web3Foreign,
-  deploymentPrivateKey,
-  FOREIGN_RPC_URL
+  deploymentPrivateKey
 } = require('../submodules/poa-bridge-contracts/deploy/src/web3')
 const POA20 = require('../submodules/poa-bridge-contracts/build/contracts/ERC677BridgeToken.json')
 const { user } = require('../constants.json')
@@ -38,7 +37,7 @@ async function deployErc20() {
       nonce: foreignNonce,
       to: poa20foreign.options.address,
       privateKey: deploymentPrivateKey,
-      url: FOREIGN_RPC_URL
+      url: process.env.FOREIGN_RPC_URL
     })
   } catch (e) {
     console.log(e)

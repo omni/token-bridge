@@ -1,10 +1,12 @@
 require('dotenv').config()
 const path = require('path')
 const Web3 = require('web3')
+const HttpListProvider = require('http-list-provider')
 const { connectWatcherToQueue, connection } = require('./services/amqpClient')
 const { getBlockNumber } = require('./tx/web3')
 const { redis } = require('./services/redisClient')
 const logger = require('./services/logger')
+const rpcUrlsManager = require('./services/getRpcUrlsManager')
 const { getRequiredBlockConfirmations, getEvents } = require('./tx/web3')
 const { checkHTTPS } = require('./utils/utils')
 
@@ -20,7 +22,7 @@ const processCollectedSignatures = require('./events/processCollectedSignatures'
 const processAffirmationRequests = require('./events/processAffirmationRequests')(config)
 const processTransfers = require('./events/processTransfers')(config)
 
-const provider = new Web3.providers.HttpProvider(config.url)
+const provider = new HttpListProvider(config.urls)
 const web3Instance = new Web3(provider)
 const bridgeContract = new web3Instance.eth.Contract(config.bridgeAbi, config.bridgeContractAddress)
 const eventContract = new web3Instance.eth.Contract(config.eventAbi, config.eventContractAddress)
@@ -31,8 +33,8 @@ async function initialize() {
   try {
     const checkHttps = checkHTTPS(process.env.ALLOW_HTTP)
 
-    checkHttps(process.env.HOME_RPC_URL)
-    checkHttps(process.env.FOREIGN_RPC_URL)
+    rpcUrlsManager.homeUrls.forEach(checkHttps)
+    rpcUrlsManager.foreignUrls.forEach(checkHttps)
 
     await getLastProcessedBlock()
     connectWatcherToQueue({
@@ -101,6 +103,7 @@ async function main({ sendToQueue }) {
   try {
     const lastBlockToProcess = await getLastBlockToProcess()
     if (lastBlockToProcess <= lastProcessedBlock) {
+      logger.info('All blocks already processed')
       return
     }
     const events = await getEvents({
