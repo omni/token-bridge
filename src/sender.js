@@ -1,10 +1,12 @@
 require('dotenv').config()
 const path = require('path')
 const Web3 = require('web3')
+const HttpListProvider = require('http-list-provider')
 const { connectSenderToQueue } = require('./services/amqpClient')
 const { redis, redlock } = require('./services/redisClient')
 const GasPrice = require('./services/gasPrice')
 const logger = require('./services/logger')
+const rpcUrlsManager = require('./services/getRpcUrlsManager')
 const { sendTx } = require('./tx/sendTx')
 const { getNonce, getChainId } = require('./tx/web3')
 const { addExtraGas, checkHTTPS, syncForEach, waitForFunds } = require('./utils/utils')
@@ -19,7 +21,7 @@ if (process.argv.length < 3) {
 
 const config = require(path.join('../config/', process.argv[2]))
 
-const provider = new Web3.providers.HttpProvider(config.url)
+const provider = new HttpListProvider(config.urls)
 const web3Instance = new Web3(provider)
 const nonceLock = `lock:${config.id}:nonce`
 const nonceKey = `${config.id}:nonce`
@@ -29,8 +31,8 @@ async function initialize() {
   try {
     const checkHttps = checkHTTPS(process.env.ALLOW_HTTP)
 
-    checkHttps(process.env.HOME_RPC_URL)
-    checkHttps(process.env.FOREIGN_RPC_URL)
+    rpcUrlsManager.homeUrls.forEach(checkHttps)
+    rpcUrlsManager.foreignUrls.forEach(checkHttps)
 
     GasPrice.start(config.id)
 
@@ -89,7 +91,7 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
 
       try {
         const txHash = await sendTx({
-          rpcUrl: config.url,
+          chain: config.id,
           data: job.data,
           nonce,
           gasPrice: gasPrice.toString(10),

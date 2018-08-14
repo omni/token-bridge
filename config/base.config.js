@@ -6,6 +6,8 @@ const foreignNativeAbi = require('../abis/ForeignBridgeNativeToErc.abi')
 const homeErcAbi = require('../abis/HomeBridgeErcToErc.abi')
 const foreignErcAbi = require('../abis/ForeignBridgeErcToErc.abi')
 
+const rpcUrlsManager = require('../src/services/getRpcUrlsManager')
+
 const isErcToErc = process.env.BRIDGE_MODE && process.env.BRIDGE_MODE === 'ERC_TO_ERC'
 
 const homeAbi = isErcToErc ? homeErcAbi : homeNativeAbi
@@ -20,7 +22,7 @@ const bridgeConfig = {
 }
 
 const homeConfig = {
-  url: process.env.HOME_RPC_URL,
+  urls: rpcUrlsManager.homeUrls,
   eventContractAddress: process.env.HOME_BRIDGE_ADDRESS,
   eventAbi: homeAbi,
   bridgeContractAddress: process.env.HOME_BRIDGE_ADDRESS,
@@ -30,7 +32,7 @@ const homeConfig = {
 }
 
 const foreignConfig = {
-  url: process.env.FOREIGN_RPC_URL,
+  urls: rpcUrlsManager.foreignUrls,
   eventContractAddress: process.env.FOREIGN_BRIDGE_ADDRESS,
   eventAbi: foreignAbi,
   bridgeContractAddress: process.env.FOREIGN_BRIDGE_ADDRESS,
