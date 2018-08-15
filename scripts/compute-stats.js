@@ -25,6 +25,7 @@ function computeSignatureRequestStats(signatureRequests, senderHome) {
   const times = processingLogs.map(x => txSentMap[x.eventTransactionHash].time - x.time)
 
   return {
+    count: times.length,
     mean: mean(times),
     median: median(times),
     min: min(times),
@@ -42,6 +43,7 @@ function computeCollectedSignaturesStats(collectedSignatures, senderForeign) {
   const times = processingLogs.map(x => txSentMap[x.eventTransactionHash].time - x.time)
 
   return {
+    count: times.length,
     mean: mean(times),
     median: median(times),
     min: min(times),
