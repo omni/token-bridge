@@ -70,4 +70,4 @@ async function main() {
   console.log(collectedSignaturesStats)
 }
 
-main()
+main().catch(console.error)
