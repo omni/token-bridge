@@ -52,11 +52,11 @@ function computeCollectedSignaturesStats(collectedSignatures, senderForeign) {
 }
 
 async function main() {
-  const signatureRequests = await readFile(__dirname, '../logs/watcher-signature-request.txt')
-  const collectedSignatures = await readFile(__dirname, '../logs/watcher-collected-signatures.txt')
-  // const affirmationRequests = await readFile(__dirname, '../logs/watcher-affirmation-request.txt')
-  const senderHome = await readFile(__dirname, '../logs/sender-home.txt')
-  const senderForeign = await readFile(__dirname, '../logs/sender-foreign.txt')
+  const signatureRequests = await readFile(__dirname, '../logs/signature-request-watcher.txt')
+  const collectedSignatures = await readFile(__dirname, '../logs/collected-signatures-watcher.txt')
+  // const affirmationRequests = await readFile(__dirname, '../logs/affirmation-request-watcher.txt')
+  const senderHome = await readFile(__dirname, '../logs/home-sender.txt')
+  const senderForeign = await readFile(__dirname, '../logs/foreign-sender.txt')
 
   const signatureRequestsStats = computeSignatureRequestStats(signatureRequests, senderHome)
   console.log('Signature Requests')
