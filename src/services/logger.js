@@ -6,7 +6,6 @@ const config =
 
 const logger = pino({
   enabled: process.env.NODE_ENV !== 'test',
-  prettyPrint: process.env.NODE_ENV !== 'production',
   name: config.name,
   base:
     process.env.NODE_ENV === 'production'
