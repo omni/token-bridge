@@ -60,9 +60,9 @@ On `.env` file set `BRIDGE_MODE=ERC_TO_ERC`
   - `npm run sender:home`
   - `npm run sender:foreign`
 
-To send deposits to home contract run `node tests/sendUserTxToErcHome.js`
+To deposit from Foreign to Home contract run `node scripts/sendUserTxToErcForeign.js 10` where `10` is how many tx you would like to send out
 
-To send withdrawals to foreign contract run `node tests/sendUserTxToErcForeign.js`
+To withdrawal to Home to Foreign contract run `node scripts/sendUserTxToErcHome.js 10` where `10` is how many tx you would like to send out
 
 ### Run with Docker
 
