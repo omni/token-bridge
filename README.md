@@ -31,7 +31,7 @@ There are two Senders:
 2. Install [RabbitMQ](https://www.rabbitmq.com/) and [Redis](https://redis.io/)
   - RabbitMQ version: `3.7`
   - Redis version: `4.0`
-
+  
 3. Create a `.env` file: `cp .env.example .env` and fill in the information using the output data from previous deploy step. Check the `.env.example` file to see the required variables.
 
 ## Run the processes
@@ -84,6 +84,8 @@ Command | Description
 --- | ---
 `rabbitmqctl list_queues` | List all queues
 `rabbitmqctl purge_queue home` | Remove all messages from `home` queue
+`rabbitmqctl status` | check if rabbitmq server is currently running  
+`rabbitmq-server`    | start rabbitMQ server  
 
 #### Redis
 Use `redis-cli`
@@ -95,6 +97,8 @@ Command | Description
 `GET signature-request:lastProcessedBlock` | Get the value of key.
 `DEL signature-request:lastProcessedBlock` | Removes the specified key.
 `FLUSHALL` | Delete all the keys of all the existing databases
+`redis-cli ping`     | check if redis is running  
+`redis-server`       | starts redis server  
 
 
 ### Env Variables
