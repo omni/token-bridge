@@ -7,6 +7,8 @@ const { createMessage } = require('../utils/message')
 
 const { VALIDATOR_ADDRESS, VALIDATOR_ADDRESS_PRIVATE_KEY } = process.env
 
+let expectedMessageLength = null
+
 function processSignatureRequestsBuilder(config) {
   const homeProvider = new HttpListProvider(rpcUrlsManager.homeUrls)
   const web3Home = new Web3(homeProvider)
@@ -15,7 +17,9 @@ function processSignatureRequestsBuilder(config) {
   return async function processSignatureRequests(signatureRequests) {
     const txToSend = []
 
-    const expectedMessageLength = await homeBridge.methods.requiredMessageLength().call()
+    if (expectedMessageLength === null) {
+      expectedMessageLength = await homeBridge.methods.requiredMessageLength().call()
+    }
 
     const callbacks = signatureRequests.map(async signatureRequest => {
       const { recipient, value } = signatureRequest.returnValues
