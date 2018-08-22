@@ -31,7 +31,7 @@ There are two Senders:
 2. Install [RabbitMQ](https://www.rabbitmq.com/) and [Redis](https://redis.io/)
   - RabbitMQ version: `3.7`
   - Redis version: `4.0`
-
+  
 3. Create a `.env` file: `cp .env.example .env` and fill in the information using the output data from previous deploy step. Check the `.env.example` file to see the required variables.
 
 ## Run the processes
@@ -60,9 +60,9 @@ On `.env` file set `BRIDGE_MODE=ERC_TO_ERC`
   - `npm run sender:home`
   - `npm run sender:foreign`
 
-To send deposits to home contract run `node tests/sendUserTxToErcHome.js`
+To deposit from Foreign to Home contract run `node scripts/sendUserTxToErcForeign.js 10` where `10` is how many tx you would like to send out
 
-To send withdrawals to foreign contract run `node tests/sendUserTxToErcForeign.js`
+To withdrawal to Home to Foreign contract run `node scripts/sendUserTxToErcHome.js 10` where `10` is how many tx you would like to send out
 
 ### Run with Docker
 
@@ -84,6 +84,8 @@ Command | Description
 --- | ---
 `rabbitmqctl list_queues` | List all queues
 `rabbitmqctl purge_queue home` | Remove all messages from `home` queue
+`rabbitmqctl status` | check if rabbitmq server is currently running  
+`rabbitmq-server`    | start rabbitMQ server  
 
 #### Redis
 Use `redis-cli`
@@ -95,6 +97,8 @@ Command | Description
 `GET signature-request:lastProcessedBlock` | Get the value of key.
 `DEL signature-request:lastProcessedBlock` | Removes the specified key.
 `FLUSHALL` | Delete all the keys of all the existing databases
+`redis-cli ping`     | check if redis is running  
+`redis-server`       | starts redis server  
 
 
 ### Env Variables
