@@ -1,11 +1,36 @@
 require('dotenv').config()
 const Web3 = require('web3')
 const HttpListProvider = require('http-list-provider')
+const bridgeValidatorsABI = require('../../abis/BridgeValidators.abi')
 const logger = require('../services/logger')
 const rpcUrlsManager = require('../services/getRpcUrlsManager')
 const { createMessage } = require('../utils/message')
+const { AlreadyProcessedError, InvalidValidatorError } = require('../utils/errors')
 
 const { VALIDATOR_ADDRESS, VALIDATOR_ADDRESS_PRIVATE_KEY } = process.env
+const { HttpListProviderError } = HttpListProvider
+
+async function estimateGas(web3, bridgeContract, address, method, options) {
+  try {
+    const gasEstimate = await method.estimateGas(options)
+    return gasEstimate
+  } catch (e) {
+    if (e instanceof HttpListProviderError) {
+      throw e
+    }
+
+    const validatorContractAddress = await bridgeContract.methods.validatorContract().call()
+    const validatorContract = new web3.eth.Contract(bridgeValidatorsABI, validatorContractAddress)
+
+    const isValidator = await validatorContract.methods.isValidator(address).call()
+
+    if (!isValidator) {
+      throw new InvalidValidatorError(`${address} is not a validator`)
+    }
+
+    throw new AlreadyProcessedError(e.message)
+  }
+}
 
 function processSignatureRequestsBuilder(config) {
   const homeProvider = new HttpListProvider(rpcUrlsManager.homeUrls)
@@ -34,18 +59,32 @@ function processSignatureRequestsBuilder(config) {
 
       let gasEstimate
       try {
-        gasEstimate = await homeBridge.methods
-          .submitSignature(signature.signature, message)
-          .estimateGas({ from: VALIDATOR_ADDRESS })
-      } catch (e) {
-        if (e.message.includes('Invalid JSON RPC response')) {
-          throw new Error(`RPC Connection Error: submitSignature Gas Estimate cannot be obtained.`)
-        }
-        logger.info(
-          { eventTransactionHash: signatureRequest.transactionHash },
-          `Already processed signatureRequest ${signatureRequest.transactionHash}`
+        gasEstimate = await estimateGas(
+          web3Home,
+          homeBridge,
+          VALIDATOR_ADDRESS,
+          homeBridge.methods.submitSignature(signature.signature, message),
+          {
+            from: VALIDATOR_ADDRESS
+          }
         )
-        return
+        logger.info(`gasEstimate: ${gasEstimate}`)
+      } catch (e) {
+        if (e instanceof HttpListProviderError) {
+          throw new Error(`RPC Connection Error: submitSignature Gas Estimate cannot be obtained.`)
+        } else if (e instanceof InvalidValidatorError) {
+          logger.warn({ address: VALIDATOR_ADDRESS }, 'Invalid validator')
+          throw new Error('Current address does not correspond to a validator')
+        } else if (e instanceof AlreadyProcessedError) {
+          logger.info(
+            { eventTransactionHash: signatureRequest.transactionHash },
+            `Already processed signatureRequest ${signatureRequest.transactionHash}`
+          )
+          return
+        } else {
+          logger.error(e, 'Unknown error while processing transaction')
+          return
+        }
       }
 
       const data = await homeBridge.methods
