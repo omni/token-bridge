@@ -1,11 +1,18 @@
 const assert = require('assert')
 const Web3Utils = require('web3-utils')
+
 // strips leading "0x" if present
 function strip0x(input) {
   return input.replace(/^0x/, '')
 }
 
-function createMessage({ recipient, value, transactionHash, bridgeAddress }) {
+function createMessage({
+  recipient,
+  value,
+  transactionHash,
+  bridgeAddress,
+  expectedMessageLength
+}) {
   recipient = strip0x(recipient)
   assert.equal(recipient.length, 20 * 2)
 
@@ -22,8 +29,7 @@ function createMessage({ recipient, value, transactionHash, bridgeAddress }) {
   assert.equal(bridgeAddress.length, 20 * 2)
 
   const message = `0x${recipient}${value}${transactionHash}${bridgeAddress}`
-  const expectedMessageLength = (20 + 32 + 32 + 20) * 2 + 2
-  assert.equal(message.length, expectedMessageLength)
+  assert.equal(message.length, 2 + 2 * expectedMessageLength)
   return message
 }
 
