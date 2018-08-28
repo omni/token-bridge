@@ -39,7 +39,7 @@ async function sendTx({
 async function sendRawTx({ chain, params, method }) {
   const result = await rpcUrlsManager.tryEach(chain, async url => {
     // curl -X POST --data '{"jsonrpc":"2.0","method":"eth_sendRawTransaction","params":[{see above}],"id":1}'
-    return fetch(url, {
+    const response = await fetch(url, {
       headers: {
         'Content-type': 'application/json'
       },
@@ -51,6 +51,12 @@ async function sendRawTx({ chain, params, method }) {
         id: Math.floor(Math.random() * 100) + 1
       })
     })
+
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+
+    return response
   })
 
   const json = await result.json()
