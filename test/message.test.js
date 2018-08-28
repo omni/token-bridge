@@ -3,6 +3,8 @@ const { createMessage, signatureToVRS } = require('../src/utils/message')
 
 describe('message utils', () => {
   describe('createMessage', () => {
+    const expectedMessageLength = 104
+
     it('should create a message when receiving valid values', () => {
       // given
       const recipient = '0xe3D952Ad4B96A756D65790393128FA359a7CD888'
@@ -11,7 +13,13 @@ describe('message utils', () => {
       const bridgeAddress = '0xfA79875FB0828c1FBD438583ED23fF5a956D80a1'
 
       // when
-      const message = createMessage({ recipient, value, transactionHash, bridgeAddress })
+      const message = createMessage({
+        recipient,
+        value,
+        transactionHash,
+        bridgeAddress,
+        expectedMessageLength
+      })
 
       // then
       expect(message).to.equal(
@@ -32,7 +40,13 @@ describe('message utils', () => {
       const bridgeAddress = '0xfA79875FB0828c1FBD438583ED23fF5a956D80a1'
 
       // when
-      const message = createMessage({ recipient, value, transactionHash, bridgeAddress })
+      const message = createMessage({
+        recipient,
+        value,
+        transactionHash,
+        bridgeAddress,
+        expectedMessageLength
+      })
 
       // then
       expect(message).to.equal(
@@ -53,7 +67,13 @@ describe('message utils', () => {
       const bridgeAddress = '0xfA79875FB0828c1FBD438583ED23fF5a956D80a1'
 
       // when
-      const message = createMessage({ recipient, value, transactionHash, bridgeAddress })
+      const message = createMessage({
+        recipient,
+        value,
+        transactionHash,
+        bridgeAddress,
+        expectedMessageLength
+      })
 
       // then
       expect(message).to.equal(
@@ -74,7 +94,13 @@ describe('message utils', () => {
       const bridgeAddress = '0xfA79875FB0828c1FBD438583ED23fF5a956D80a1'
 
       // when
-      const message = createMessage({ recipient, value, transactionHash, bridgeAddress })
+      const message = createMessage({
+        recipient,
+        value,
+        transactionHash,
+        bridgeAddress,
+        expectedMessageLength
+      })
 
       // then
       expect(message).to.equal(
@@ -95,7 +121,13 @@ describe('message utils', () => {
       const bridgeAddress = 'fA79875FB0828c1FBD438583ED23fF5a956D80a1'
 
       // when
-      const message = createMessage({ recipient, value, transactionHash, bridgeAddress })
+      const message = createMessage({
+        recipient,
+        value,
+        transactionHash,
+        bridgeAddress,
+        expectedMessageLength
+      })
 
       // then
       expect(message).to.equal(
@@ -115,7 +147,8 @@ describe('message utils', () => {
       const transactionHash = '0x4a298455c1ccb17de77718fc045a876e1b4e063afaad361dcdef142a8ee48d5a'
 
       // when
-      const messageThunk = () => createMessage({ recipient, value, transactionHash })
+      const messageThunk = () =>
+        createMessage({ recipient, value, transactionHash, expectedMessageLength })
 
       // then
       expect(messageThunk).to.throw()
@@ -128,7 +161,8 @@ describe('message utils', () => {
       const transactionHash = '0x4a298455c1ccb17de77718fc045a876e1b4e063afaad361dcdef142a8ee48d5a'
 
       // when
-      const messageThunk = () => createMessage({ recipient, value, transactionHash })
+      const messageThunk = () =>
+        createMessage({ recipient, value, transactionHash, expectedMessageLength })
 
       // then
       expect(messageThunk).to.throw()
@@ -141,7 +175,8 @@ describe('message utils', () => {
       const transactionHash = '0x4a298455c1ccb17de77718fc045a876e1b4e063afaad361dcdef142a8ee48d5'
 
       // when
-      const messageThunk = () => createMessage({ recipient, value, transactionHash })
+      const messageThunk = () =>
+        createMessage({ recipient, value, transactionHash, expectedMessageLength })
 
       // then
       expect(messageThunk).to.throw()
@@ -154,7 +189,8 @@ describe('message utils', () => {
       const transactionHash = '0x4a298455c1ccb17de77718fc045a876e1b4e063afaad361dcdef142a8ee48d5aa'
 
       // when
-      const messageThunk = () => createMessage({ recipient, value, transactionHash })
+      const messageThunk = () =>
+        createMessage({ recipient, value, transactionHash, expectedMessageLength })
 
       // then
       expect(messageThunk).to.throw()
@@ -168,7 +204,8 @@ describe('message utils', () => {
       const bridgeAddress = '0xfA79875FB0828c1FBD438583ED23fF5a956D80a'
 
       // when
-      const messageThunk = () => createMessage({ recipient, value, transactionHash, bridgeAddress })
+      const messageThunk = () =>
+        createMessage({ recipient, value, transactionHash, bridgeAddress, expectedMessageLength })
 
       // then
       expect(messageThunk).to.throw()
@@ -182,7 +219,8 @@ describe('message utils', () => {
       const bridgeAddress = '0xfA79875FB0828c1FBD438583ED23fF5a956D80a11'
 
       // when
-      const messageThunk = () => createMessage({ recipient, value, transactionHash, bridgeAddress })
+      const messageThunk = () =>
+        createMessage({ recipient, value, transactionHash, bridgeAddress, expectedMessageLength })
 
       // then
       expect(messageThunk).to.throw()
