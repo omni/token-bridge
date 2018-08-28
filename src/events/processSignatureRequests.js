@@ -32,6 +32,8 @@ async function estimateGas(web3, bridgeContract, address, method, options) {
   }
 }
 
+let expectedMessageLength = null
+
 function processSignatureRequestsBuilder(config) {
   const homeProvider = new HttpListProvider(rpcUrlsManager.homeUrls)
   const web3Home = new Web3(homeProvider)
@@ -39,6 +41,10 @@ function processSignatureRequestsBuilder(config) {
 
   return async function processSignatureRequests(signatureRequests) {
     const txToSend = []
+
+    if (expectedMessageLength === null) {
+      expectedMessageLength = await homeBridge.methods.requiredMessageLength().call()
+    }
 
     const callbacks = signatureRequests.map(async signatureRequest => {
       const { recipient, value } = signatureRequest.returnValues
@@ -52,7 +58,8 @@ function processSignatureRequestsBuilder(config) {
         recipient,
         value,
         transactionHash: signatureRequest.transactionHash,
-        bridgeAddress: config.foreignBridgeAddress
+        bridgeAddress: config.foreignBridgeAddress,
+        expectedMessageLength
       })
 
       const signature = web3Home.eth.accounts.sign(message, `0x${VALIDATOR_ADDRESS_PRIVATE_KEY}`)
