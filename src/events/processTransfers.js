@@ -1,13 +1,9 @@
 require('dotenv').config()
-const Web3 = require('web3')
-const HttpListProvider = require('http-list-provider')
-const rpcUrlsManager = require('../services/getRpcUrlsManager')
+const { web3Home } = require('../services/web3')
 
 const { VALIDATOR_ADDRESS } = process.env
 
 function processTransfersBuilder(config) {
-  const homeProvider = new HttpListProvider(rpcUrlsManager.homeUrls)
-  const web3Home = new Web3(homeProvider)
   const homeBridge = new web3Home.eth.Contract(config.homeBridgeAbi, config.homeBridgeAddress)
 
   return async function processTransfers(transfers) {

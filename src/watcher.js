@@ -1,7 +1,5 @@
 require('dotenv').config()
 const path = require('path')
-const Web3 = require('web3')
-const HttpListProvider = require('http-list-provider')
 const { connectWatcherToQueue, connection } = require('./services/amqpClient')
 const { getBlockNumber } = require('./tx/web3')
 const { redis } = require('./services/redisClient')
@@ -22,8 +20,7 @@ const processCollectedSignatures = require('./events/processCollectedSignatures'
 const processAffirmationRequests = require('./events/processAffirmationRequests')(config)
 const processTransfers = require('./events/processTransfers')(config)
 
-const provider = new HttpListProvider(config.urls)
-const web3Instance = new Web3(provider)
+const web3Instance = config.web3
 const bridgeContract = new web3Instance.eth.Contract(config.bridgeAbi, config.bridgeContractAddress)
 const eventContract = new web3Instance.eth.Contract(config.eventAbi, config.eventContractAddress)
 const lastBlockRedisKey = `${config.id}:lastProcessedBlock`

@@ -1,7 +1,5 @@
 require('dotenv').config()
 const path = require('path')
-const Web3 = require('web3')
-const HttpListProvider = require('http-list-provider')
 const { connectSenderToQueue } = require('./services/amqpClient')
 const { redis, redlock } = require('./services/redisClient')
 const GasPrice = require('./services/gasPrice')
@@ -21,8 +19,7 @@ if (process.argv.length < 3) {
 
 const config = require(path.join('../config/', process.argv[2]))
 
-const provider = new HttpListProvider(config.urls)
-const web3Instance = new Web3(provider)
+const web3Instance = config.web3
 const nonceLock = `lock:${config.id}:nonce`
 const nonceKey = `${config.id}:nonce`
 let chainId = 0
