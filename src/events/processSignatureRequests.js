@@ -38,7 +38,8 @@ function processSignatureRequestsBuilder(config) {
           recipient,
           value,
           transactionHash: signatureRequest.transactionHash,
-          bridgeAddress: config.foreignBridgeAddress
+          bridgeAddress: config.foreignBridgeAddress,
+          expectedMessageLength
         })
 
         const signature = web3Home.eth.accounts.sign(message, `0x${VALIDATOR_ADDRESS_PRIVATE_KEY}`)
