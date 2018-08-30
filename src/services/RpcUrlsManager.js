@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const promiseRetry = require('promise-retry')
 const tryEach = require('../utils/tryEach')
+const { RETRY_CONFIG } = require('../utils/constants')
 
 function RpcUrlsManager(homeUrls, foreignUrls) {
   if (!homeUrls) {
@@ -25,7 +26,7 @@ RpcUrlsManager.prototype.tryEach = async function(chain, f) {
   const [result, index] = await promiseRetry(retry =>
     tryEach(urls, f).catch(() => {
       retry()
-    })
+    }, RETRY_CONFIG)
   )
 
   if (index > 0) {
