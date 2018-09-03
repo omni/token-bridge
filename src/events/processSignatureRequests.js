@@ -16,13 +16,11 @@ const { MAX_CONCURRENT_EVENTS } = require('../utils/constants')
 const { VALIDATOR_ADDRESS, VALIDATOR_ADDRESS_PRIVATE_KEY } = process.env
 const { HttpListProviderError } = HttpListProvider
 
-async function estimateGas(web3, bridgeContract, signature, message, address) {
+async function estimateGas({ web3, homeBridge, validatorContract, signature, message, address }) {
   try {
-    const gasEstimate = await bridgeContract.methods
-      .submitSignature(signature, message)
-      .estimateGas({
-        from: address
-      })
+    const gasEstimate = await homeBridge.methods.submitSignature(signature, message).estimateGas({
+      from: address
+    })
     return gasEstimate
   } catch (e) {
     if (e instanceof HttpListProviderError) {
@@ -30,9 +28,6 @@ async function estimateGas(web3, bridgeContract, signature, message, address) {
     }
 
     // Check if address is validator
-    const validatorContractAddress = await bridgeContract.methods.validatorContract().call()
-    const validatorContract = new web3.eth.Contract(bridgeValidatorsABI, validatorContractAddress)
-
     const isValidator = await validatorContract.methods.isValidator(address).call()
 
     if (!isValidator) {
@@ -41,7 +36,7 @@ async function estimateGas(web3, bridgeContract, signature, message, address) {
 
     // Check if transaction was already signed by this validator
     const validatorMessageHash = web3.utils.soliditySha3(address, web3.utils.soliditySha3(message))
-    const alreadySigned = await bridgeContract.methods.messagesSigned(validatorMessageHash).call()
+    const alreadySigned = await homeBridge.methods.messagesSigned(validatorMessageHash).call()
 
     if (alreadySigned) {
       throw new AlreadySignedError(e.message)
@@ -49,10 +44,8 @@ async function estimateGas(web3, bridgeContract, signature, message, address) {
 
     // Check if minimum number of validations was already reached
     const messageHash = web3.utils.soliditySha3(message)
-    const numMessagesSigned = await bridgeContract.methods.numMessagesSigned(messageHash).call()
-    const alreadyProcessed = await bridgeContract.methods
-      .isAlreadyProcessed(numMessagesSigned)
-      .call()
+    const numMessagesSigned = await homeBridge.methods.numMessagesSigned(messageHash).call()
+    const alreadyProcessed = await homeBridge.methods.isAlreadyProcessed(numMessagesSigned).call()
 
     if (alreadyProcessed) {
       throw new AlreadyProcessedError(e.message)
@@ -65,6 +58,7 @@ async function estimateGas(web3, bridgeContract, signature, message, address) {
 const limit = promiseLimit(MAX_CONCURRENT_EVENTS)
 
 let expectedMessageLength = null
+let validatorContract = null
 
 function processSignatureRequestsBuilder(config) {
   const homeProvider = new HttpListProvider(rpcUrlsManager.homeUrls)
@@ -76,6 +70,11 @@ function processSignatureRequestsBuilder(config) {
 
     if (expectedMessageLength === null) {
       expectedMessageLength = await homeBridge.methods.requiredMessageLength().call()
+    }
+
+    if (validatorContract === null) {
+      const validatorContractAddress = await homeBridge.methods.validatorContract().call()
+      validatorContract = new web3Home.eth.Contract(bridgeValidatorsABI, validatorContractAddress)
     }
 
     const callbacks = signatureRequests.map(signatureRequest =>
@@ -99,13 +98,14 @@ function processSignatureRequestsBuilder(config) {
 
         let gasEstimate
         try {
-          gasEstimate = await estimateGas(
-            web3Home,
+          gasEstimate = await estimateGas({
+            web3: web3Home,
             homeBridge,
-            signature.signature,
+            validatorContract,
+            signature: signature.signature,
             message,
-            VALIDATOR_ADDRESS
-          )
+            address: VALIDATOR_ADDRESS
+          })
           logger.info(`gasEstimate: ${gasEstimate}`)
         } catch (e) {
           if (e instanceof HttpListProviderError) {
