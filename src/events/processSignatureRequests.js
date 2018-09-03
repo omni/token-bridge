@@ -6,21 +6,30 @@ const bridgeValidatorsABI = require('../../abis/BridgeValidators.abi')
 const logger = require('../services/logger')
 const rpcUrlsManager = require('../services/getRpcUrlsManager')
 const { createMessage } = require('../utils/message')
-const { AlreadyProcessedError, InvalidValidatorError } = require('../utils/errors')
+const {
+  AlreadyProcessedError,
+  AlreadySignedError,
+  InvalidValidatorError
+} = require('../utils/errors')
 const { MAX_CONCURRENT_EVENTS } = require('../utils/constants')
 
 const { VALIDATOR_ADDRESS, VALIDATOR_ADDRESS_PRIVATE_KEY } = process.env
 const { HttpListProviderError } = HttpListProvider
 
-async function estimateGas(web3, bridgeContract, address, method, options) {
+async function estimateGas(web3, bridgeContract, signature, message, address) {
   try {
-    const gasEstimate = await method.estimateGas(options)
+    const gasEstimate = await bridgeContract.methods
+      .submitSignature(signature, message)
+      .estimateGas({
+        from: address
+      })
     return gasEstimate
   } catch (e) {
     if (e instanceof HttpListProviderError) {
       throw e
     }
 
+    // Check if address is validator
     const validatorContractAddress = await bridgeContract.methods.validatorContract().call()
     const validatorContract = new web3.eth.Contract(bridgeValidatorsABI, validatorContractAddress)
 
@@ -30,7 +39,26 @@ async function estimateGas(web3, bridgeContract, address, method, options) {
       throw new InvalidValidatorError(`${address} is not a validator`)
     }
 
-    throw new AlreadyProcessedError(e.message)
+    // Check if transaction was already signed by this validator
+    const validatorMessageHash = web3.utils.soliditySha3(address, web3.utils.soliditySha3(message))
+    const alreadySigned = await bridgeContract.methods.messagesSigned(validatorMessageHash).call()
+
+    if (alreadySigned) {
+      throw new AlreadySignedError(e.message)
+    }
+
+    // Check if minimum number of validations was already reached
+    const messageHash = web3.utils.soliditySha3(message)
+    const numMessagesSigned = await bridgeContract.methods.numMessagesSigned(messageHash).call()
+    const alreadyProcessed = await bridgeContract.methods
+      .isAlreadyProcessed(numMessagesSigned)
+      .call()
+
+    if (alreadyProcessed) {
+      throw new AlreadyProcessedError(e.message)
+    }
+
+    throw new Error('Unknown error while processing message')
   }
 }
 
@@ -74,30 +102,36 @@ function processSignatureRequestsBuilder(config) {
           gasEstimate = await estimateGas(
             web3Home,
             homeBridge,
-            VALIDATOR_ADDRESS,
-            homeBridge.methods.submitSignature(signature.signature, message),
-            {
-              from: VALIDATOR_ADDRESS
-            }
+            signature.signature,
+            message,
+            VALIDATOR_ADDRESS
           )
           logger.info(`gasEstimate: ${gasEstimate}`)
         } catch (e) {
           if (e instanceof HttpListProviderError) {
             throw new Error(
-              `RPC Connection Error: submitSignature Gas Estimate cannot be obtained.`
+              'RPC Connection Error: submitSignature Gas Estimate cannot be obtained.'
             )
           } else if (e instanceof InvalidValidatorError) {
             logger.warn({ address: VALIDATOR_ADDRESS }, 'Invalid validator')
             throw new Error('Current address does not correspond to a validator')
+          } else if (e instanceof AlreadySignedError) {
+            logger.info(
+              { eventTransactionHash: signatureRequest.transactionHash },
+              `Already signed signatureRequest ${signatureRequest.transactionHash}`
+            )
+            return
           } else if (e instanceof AlreadyProcessedError) {
             logger.info(
               { eventTransactionHash: signatureRequest.transactionHash },
-              `Already processed signatureRequest ${signatureRequest.transactionHash}`
+              `signatureRequest ${
+                signatureRequest.transactionHash
+              } was already processed by other validators`
             )
             return
           } else {
             logger.error(e, 'Unknown error while processing transaction')
-            return
+            throw e
           }
         }
 
