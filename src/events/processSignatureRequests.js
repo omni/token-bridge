@@ -1,9 +1,7 @@
 require('dotenv').config()
-const Web3 = require('web3')
-const HttpListProvider = require('http-list-provider')
 const promiseLimit = require('promise-limit')
 const logger = require('../services/logger')
-const rpcUrlsManager = require('../services/getRpcUrlsManager')
+const { web3Home } = require('../services/web3')
 const { createMessage } = require('../utils/message')
 const { MAX_CONCURRENT_EVENTS } = require('../utils/constants')
 
@@ -14,8 +12,6 @@ const limit = promiseLimit(MAX_CONCURRENT_EVENTS)
 let expectedMessageLength = null
 
 function processSignatureRequestsBuilder(config) {
-  const homeProvider = new HttpListProvider(rpcUrlsManager.homeUrls)
-  const web3Home = new Web3(homeProvider)
   const homeBridge = new web3Home.eth.Contract(config.homeBridgeAbi, config.homeBridgeAddress)
 
   return async function processSignatureRequests(signatureRequests) {

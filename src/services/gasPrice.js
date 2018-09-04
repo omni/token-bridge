@@ -1,14 +1,12 @@
 require('dotenv').config()
-const Web3 = require('web3')
 const fetch = require('node-fetch')
-const HttpListProvider = require('http-list-provider')
+const { web3Home, web3Foreign } = require('../services/web3')
 const { isErcToErc } = require('../../config/base.config')
 const HomeNativeABI = require('../../abis/HomeBridgeNativeToErc.abi')
 const ForeignNativeABI = require('../../abis/ForeignBridgeNativeToErc.abi')
 const HomeErcABI = require('../../abis/HomeBridgeErcToErc.abi')
 const ForeignErcABI = require('../../abis/ForeignBridgeErcToErc.abi')
 const logger = require('../services/logger')
-const rpcUrlsManager = require('../services/getRpcUrlsManager')
 
 const HomeABI = isErcToErc ? HomeErcABI : HomeNativeABI
 const ForeignABI = isErcToErc ? ForeignNativeABI : ForeignErcABI
@@ -26,12 +24,8 @@ const {
   HOME_GAS_PRICE_UPDATE_INTERVAL
 } = process.env
 
-const homeProvider = new HttpListProvider(rpcUrlsManager.homeUrls)
-const web3Home = new Web3(homeProvider)
 const homeBridge = new web3Home.eth.Contract(HomeABI, HOME_BRIDGE_ADDRESS)
 
-const foreignProvider = new HttpListProvider(rpcUrlsManager.foreignUrls)
-const web3Foreign = new Web3(foreignProvider)
 const foreignBridge = new web3Foreign.eth.Contract(ForeignABI, FOREIGN_BRIDGE_ADDRESS)
 
 let cachedGasPrice = null

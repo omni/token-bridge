@@ -1,5 +1,7 @@
 const _ = require('lodash')
+const promiseRetry = require('promise-retry')
 const tryEach = require('../utils/tryEach')
+const { RETRY_CONFIG } = require('../utils/constants')
 
 function RpcUrlsManager(homeUrls, foreignUrls) {
   if (!homeUrls) {
@@ -21,7 +23,11 @@ RpcUrlsManager.prototype.tryEach = async function(chain, f) {
   // save homeUrls to avoid race condition
   const urls = chain === 'home' ? _.cloneDeep(this.homeUrls) : _.cloneDeep(this.foreignUrls)
 
-  const [result, index] = await tryEach(urls, f)
+  const [result, index] = await promiseRetry(retry =>
+    tryEach(urls, f).catch(() => {
+      retry()
+    }, RETRY_CONFIG)
+  )
 
   if (index > 0) {
     // rotate urls
