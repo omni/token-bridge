@@ -1,8 +1,6 @@
 require('dotenv').config()
-const Web3 = require('web3')
 const Web3Utils = require('web3-utils')
-const HttpListProvider = require('http-list-provider')
-const rpcUrlsManager = require('../src/services/getRpcUrlsManager')
+const { web3Foreign } = require('../src/services/web3')
 const { sendTx, sendRawTx } = require('../src/tx/sendTx')
 
 const {
@@ -45,9 +43,6 @@ const ERC20_ABI = [
     type: 'function'
   }
 ]
-
-const foreignProvider = new HttpListProvider(rpcUrlsManager.foreignUrls)
-const web3Foreign = new Web3(foreignProvider)
 
 const poa20 = new web3Foreign.eth.Contract(ERC20_ABI, ERC20_TOKEN_ADDRESS)
 

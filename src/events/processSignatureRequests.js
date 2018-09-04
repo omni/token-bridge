@@ -1,10 +1,9 @@
 require('dotenv').config()
-const Web3 = require('web3')
-const HttpListProvider = require('http-list-provider')
 const promiseLimit = require('promise-limit')
+const { HttpListProviderError } = require('http-list-provider')
 const bridgeValidatorsABI = require('../../abis/BridgeValidators.abi')
 const logger = require('../services/logger')
-const rpcUrlsManager = require('../services/getRpcUrlsManager')
+const { web3Home } = require('../services/web3')
 const { createMessage } = require('../utils/message')
 const {
   AlreadyProcessedError,
@@ -14,7 +13,6 @@ const {
 const { MAX_CONCURRENT_EVENTS } = require('../utils/constants')
 
 const { VALIDATOR_ADDRESS, VALIDATOR_ADDRESS_PRIVATE_KEY } = process.env
-const { HttpListProviderError } = HttpListProvider
 
 async function estimateGas({ web3, homeBridge, validatorContract, signature, message, address }) {
   try {
@@ -61,8 +59,6 @@ let expectedMessageLength = null
 let validatorContract = null
 
 function processSignatureRequestsBuilder(config) {
-  const homeProvider = new HttpListProvider(rpcUrlsManager.homeUrls)
-  const web3Home = new Web3(homeProvider)
   const homeBridge = new web3Home.eth.Contract(config.homeBridgeAbi, config.homeBridgeAddress)
 
   return async function processSignatureRequests(signatureRequests) {

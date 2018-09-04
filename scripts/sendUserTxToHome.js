@@ -1,9 +1,7 @@
 require('dotenv').config()
-const Web3 = require('web3')
 const Web3Utils = require('web3-utils')
-const HttpListProvider = require('http-list-provider')
+const { web3Home } = require('../src/services/web3')
 const { sendTx, sendRawTx } = require('../src/tx/sendTx')
-const rpcUrlsManager = require('../src/services/getRpcUrlsManager')
 
 const {
   USER_ADDRESS,
@@ -13,9 +11,6 @@ const {
 } = process.env
 
 const NUMBER_OF_DEPOSITS_TO_SEND = process.argv[2] || 1
-
-const homeProvider = HttpListProvider(rpcUrlsManager.homeUrls)
-const web3Home = new Web3(homeProvider)
 
 async function main() {
   try {

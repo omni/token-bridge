@@ -1,10 +1,10 @@
 require('dotenv').config()
 
-const rpcUrlsManager = require('../src/services/getRpcUrlsManager')
+const { web3Foreign } = require('../src/services/web3')
 
 module.exports = {
-  urls: rpcUrlsManager.foreignUrls,
   queue: 'foreign',
   id: 'foreign',
-  name: 'sender-foreign'
+  name: 'sender-foreign',
+  web3: web3Foreign
 }
