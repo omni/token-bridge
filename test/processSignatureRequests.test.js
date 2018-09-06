@@ -11,7 +11,7 @@ const { expect } = chai
 
 const web3 = new Web3()
 
-describe.only('processSignatureRequests', () => {
+describe('processSignatureRequests', () => {
   describe('estimateGas', () => {
     const address = '0x02B18eF56cE0FE39F3bEEc8becA8bF2c78579596'
 
