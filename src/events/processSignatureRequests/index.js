@@ -71,8 +71,8 @@ function processSignatureRequestsBuilder(config) {
               'RPC Connection Error: submitSignature Gas Estimate cannot be obtained.'
             )
           } else if (e instanceof InvalidValidatorError) {
-            logger.warn({ address: VALIDATOR_ADDRESS }, 'Invalid validator')
-            throw new Error('Current address does not correspond to a validator')
+            logger.fatal({ address: VALIDATOR_ADDRESS }, 'Invalid validator')
+            process.exit(10)
           } else if (e instanceof AlreadySignedError) {
             logger.info(
               { eventTransactionHash: signatureRequest.transactionHash },
