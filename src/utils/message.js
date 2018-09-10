@@ -33,6 +33,22 @@ function createMessage({
   return message
 }
 
+function parseMessage(message) {
+  message = strip0x(message)
+
+  const recipient = '0x' + message.slice(0, 40)
+  const amount = '0x' + message.slice(40, 40 + 32 * 2)
+  const txHash = '0x' + message.slice(40 + 32 * 2, 40 + 32 * 2 + 32 * 2)
+  const contractAddress = '0x' + message.slice(40 + 32 * 2 + 32 * 2, message.length)
+
+  return {
+    recipient,
+    amount,
+    txHash,
+    contractAddress
+  }
+}
+
 function signatureToVRS(signature) {
   assert.equal(signature.length, 2 + 32 * 2 + 32 * 2 + 2)
   signature = strip0x(signature)
@@ -44,5 +60,6 @@ function signatureToVRS(signature) {
 
 module.exports = {
   createMessage,
+  parseMessage,
   signatureToVRS
 }
