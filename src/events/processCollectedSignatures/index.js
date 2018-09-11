@@ -32,7 +32,10 @@ function processCollectedSignaturesBuilder(config) {
 
     if (validatorContract === null) {
       const validatorContractAddress = await foreignBridge.methods.validatorContract().call()
-      validatorContract = new web3Foreign.eth.Contract(bridgeValidatorsABI, validatorContractAddress)
+      validatorContract = new web3Foreign.eth.Contract(
+        bridgeValidatorsABI,
+        validatorContractAddress
+      )
     }
 
     const callbacks = signatures.map(colSignature =>
