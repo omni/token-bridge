@@ -30,19 +30,21 @@ async function estimateGas({
     const messageHash = web3.utils.soliditySha3(recipient, value, txHash)
     const senderHash = web3.utils.soliditySha3(address, messageHash)
 
+    // Check if minimum number of validations was already reached
+    const numAffirmationsSigned = await homeBridge.methods.numAffirmationsSigned(messageHash).call()
+    const alreadyProcessed = await homeBridge.methods
+      .isAlreadyProcessed(numAffirmationsSigned)
+      .call()
+
+    if (alreadyProcessed) {
+      throw new AlreadyProcessedError(e.message)
+    }
+
     // Check if the message was already signed by this validator
     const alreadySigned = await homeBridge.methods.affirmationsSigned(senderHash).call()
 
     if (alreadySigned) {
       throw new AlreadySignedError(e.message)
-    }
-
-    // Check if minimum number of validations was already reached
-    const numMessagesSigned = await homeBridge.methods.numAffirmationsSigned(messageHash).call()
-    const alreadyProcessed = await homeBridge.methods.isAlreadyProcessed(numMessagesSigned).call()
-
-    if (alreadyProcessed) {
-      throw new AlreadyProcessedError(e.message)
     }
 
     // Check if address is validator

@@ -53,26 +53,6 @@ describe('processAffirmationRequests', () => {
       await expect(result).to.be.rejectedWith(HttpListProviderError)
     })
 
-    it('should throw an AlreadySignedError if the transaction was already signed by this validator', async () => {
-      // given
-      const estimateGasStub = sinon.stub()
-      estimateGasStub.rejects(new Error())
-      const homeBridge = {
-        methods: {
-          executeAffirmation: () => ({ estimateGas: estimateGasStub }),
-          // numAffirmationsSigned: () => ({ call: sinon.stub().resolves(1) }),
-          // isAlreadyProcessed: () => ({ call: sinon.stub().resolves(false) }),
-          affirmationsSigned: () => ({ call: sinon.stub().resolves(true) })
-        }
-      }
-
-      // when
-      const result = estimateGas({ web3, homeBridge, address, recipient, value, txHash })
-
-      // then
-      await expect(result).to.be.rejectedWith(errors.AlreadySignedError)
-    })
-
     it('should throw an AlreadyProcessedError if the transaction was already procesed', async () => {
       // given
       const estimateGasStub = sinon.stub()
@@ -81,7 +61,6 @@ describe('processAffirmationRequests', () => {
         methods: {
           executeAffirmation: () => ({ estimateGas: estimateGasStub }),
           numAffirmationsSigned: () => ({ call: sinon.stub().resolves(1) }),
-          affirmationsSigned: () => ({ call: sinon.stub().resolves(false) }),
           isAlreadyProcessed: () => ({ call: sinon.stub().resolves(true) })
         }
       }
@@ -91,6 +70,26 @@ describe('processAffirmationRequests', () => {
 
       // then
       await expect(result).to.be.rejectedWith(errors.AlreadyProcessedError)
+    })
+
+    it('should throw an AlreadySignedError if the transaction was already signed by this validator', async () => {
+      // given
+      const estimateGasStub = sinon.stub()
+      estimateGasStub.rejects(new Error())
+      const homeBridge = {
+        methods: {
+          executeAffirmation: () => ({ estimateGas: estimateGasStub }),
+          numAffirmationsSigned: () => ({ call: sinon.stub().resolves(1) }),
+          isAlreadyProcessed: () => ({ call: sinon.stub().resolves(false) }),
+          affirmationsSigned: () => ({ call: sinon.stub().resolves(true) })
+        }
+      }
+
+      // when
+      const result = estimateGas({ web3, homeBridge, address, recipient, value, txHash })
+
+      // then
+      await expect(result).to.be.rejectedWith(errors.AlreadySignedError)
     })
 
     it('should throw an InvalidValidatorError if the transaction was not processed nor signed, by the validator is invalid', async () => {
