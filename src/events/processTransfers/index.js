@@ -4,55 +4,34 @@ const { HttpListProviderError } = require('http-list-provider')
 const bridgeValidatorsABI = require('../../../abis/BridgeValidators.abi')
 const logger = require('../../services/logger')
 const { web3Home } = require('../../services/web3')
-const { createMessage } = require('../../utils/message')
-const estimateGas = require('./estimateGas')
 const {
   AlreadyProcessedError,
   AlreadySignedError,
   InvalidValidatorError
 } = require('../../utils/errors')
 const { MAX_CONCURRENT_EVENTS } = require('../../utils/constants')
+const estimateGas = require('../processAffirmationRequests/estimateGas')
 
-const { VALIDATOR_ADDRESS, VALIDATOR_ADDRESS_PRIVATE_KEY } = process.env
+const { VALIDATOR_ADDRESS } = process.env
 
 const limit = promiseLimit(MAX_CONCURRENT_EVENTS)
 
-let expectedMessageLength = null
 let validatorContract = null
 
-function processSignatureRequestsBuilder(config) {
+function processTransfersBuilder(config) {
   const homeBridge = new web3Home.eth.Contract(config.homeBridgeAbi, config.homeBridgeAddress)
 
-  return async function processSignatureRequests(signatureRequests) {
+  return async function processTransfers(transfers) {
     const txToSend = []
-
-    if (expectedMessageLength === null) {
-      expectedMessageLength = await homeBridge.methods.requiredMessageLength().call()
-    }
 
     if (validatorContract === null) {
       const validatorContractAddress = await homeBridge.methods.validatorContract().call()
       validatorContract = new web3Home.eth.Contract(bridgeValidatorsABI, validatorContractAddress)
     }
 
-    const callbacks = signatureRequests.map(signatureRequest =>
+    const callbacks = transfers.map(transfer =>
       limit(async () => {
-        const { recipient, value } = signatureRequest.returnValues
-
-        logger.info(
-          { eventTransactionHash: signatureRequest.transactionHash, sender: recipient, value },
-          `Processing signatureRequest ${signatureRequest.transactionHash}`
-        )
-
-        const message = createMessage({
-          recipient,
-          value,
-          transactionHash: signatureRequest.transactionHash,
-          bridgeAddress: config.foreignBridgeAddress,
-          expectedMessageLength
-        })
-
-        const signature = web3Home.eth.accounts.sign(message, `0x${VALIDATOR_ADDRESS_PRIVATE_KEY}`)
+        const { from, value } = transfer.returnValues
 
         let gasEstimate
         try {
@@ -60,8 +39,9 @@ function processSignatureRequestsBuilder(config) {
             web3: web3Home,
             homeBridge,
             validatorContract,
-            signature: signature.signature,
-            message,
+            recipient: from,
+            value,
+            txHash: transfer.transactionHash,
             address: VALIDATOR_ADDRESS
           })
         } catch (e) {
@@ -74,16 +54,14 @@ function processSignatureRequestsBuilder(config) {
             process.exit(10)
           } else if (e instanceof AlreadySignedError) {
             logger.info(
-              { eventTransactionHash: signatureRequest.transactionHash },
-              `Already signed signatureRequest ${signatureRequest.transactionHash}`
+              { eventTransactionHash: transfer.transactionHash },
+              `Already signed transfer ${transfer.transactionHash}`
             )
             return
           } else if (e instanceof AlreadyProcessedError) {
             logger.info(
-              { eventTransactionHash: signatureRequest.transactionHash },
-              `signatureRequest ${
-                signatureRequest.transactionHash
-              } was already processed by other validators`
+              { eventTransactionHash: transfer.transactionHash },
+              `transfer ${transfer.transactionHash} was already processed by other validators`
             )
             return
           } else {
@@ -93,13 +71,13 @@ function processSignatureRequestsBuilder(config) {
         }
 
         const data = await homeBridge.methods
-          .submitSignature(signature.signature, message)
+          .executeAffirmation(from, value, transfer.transactionHash)
           .encodeABI({ from: VALIDATOR_ADDRESS })
 
         txToSend.push({
           data,
           gasEstimate,
-          transactionReference: signatureRequest.transactionHash,
+          transactionReference: transfer.transactionHash,
           to: config.homeBridgeAddress
         })
       })
@@ -110,4 +88,4 @@ function processSignatureRequestsBuilder(config) {
   }
 }
 
-module.exports = processSignatureRequestsBuilder
+module.exports = processTransfersBuilder

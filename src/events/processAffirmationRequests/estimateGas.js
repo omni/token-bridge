@@ -1,8 +1,8 @@
 const { HttpListProviderError } = require('http-list-provider')
 const {
-  InvalidValidatorError,
   AlreadyProcessedError,
-  AlreadySignedError
+  AlreadySignedError,
+  InvalidValidatorError
 } = require('../../utils/errors')
 
 async function estimateGas({
