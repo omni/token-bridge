@@ -46,24 +46,6 @@ describe('processCollectedSignatures', () => {
       await expect(result).to.be.rejectedWith(HttpListProviderError)
     })
 
-    it("should throw an IncompatibleContractError if the number of signatures doesn't match", async () => {
-      // given
-      const estimateGasStub = sinon.stub()
-      estimateGasStub.rejects(new Error())
-      const foreignBridge = {
-        methods: {
-          executeSignatures: () => ({ estimateGas: estimateGasStub }),
-          requiredSignatures: () => ({ call: sinon.stub().resolves(2) })
-        }
-      }
-
-      // when
-      const result = estimateGas({ web3, foreignBridge, numberOfCollectedSignatures: 1 })
-
-      // then
-      await expect(result).to.be.rejectedWith(errors.IncompatibleContractError)
-    })
-
     it('should throw an AlreadyProcessedError if the transaction was already procesed', async () => {
       // given
       const estimateGasStub = sinon.stub()
@@ -71,7 +53,6 @@ describe('processCollectedSignatures', () => {
       const foreignBridge = {
         methods: {
           executeSignatures: () => ({ estimateGas: estimateGasStub }),
-          requiredSignatures: () => ({ call: sinon.stub().resolves(1) }),
           relayedMessages: () => ({ call: sinon.stub().resolves(true) })
         }
       }
@@ -88,20 +69,19 @@ describe('processCollectedSignatures', () => {
       await expect(result).to.be.rejectedWith(errors.AlreadyProcessedError)
     })
 
-    it('should throw an InvalidValidatorError if the validator is not valid', async () => {
+    it('should throw an IncompatibleContractError if the number of signatures is less than required', async () => {
       // given
       const estimateGasStub = sinon.stub()
       estimateGasStub.rejects(new Error())
       const foreignBridge = {
         methods: {
           executeSignatures: () => ({ estimateGas: estimateGasStub }),
-          requiredSignatures: () => ({ call: sinon.stub().resolves(1) }),
           relayedMessages: () => ({ call: sinon.stub().resolves(false) })
         }
       }
       const validatorContract = {
         methods: {
-          isValidator: () => ({ call: sinon.stub().resolves(false) })
+          requiredSignatures: () => ({ call: sinon.stub().resolves(2) })
         }
       }
 
@@ -115,25 +95,31 @@ describe('processCollectedSignatures', () => {
       })
 
       // then
-      await expect(result).to.be.rejectedWith(errors.InvalidValidatorError)
+      await expect(result).to.be.rejectedWith(errors.IncompatibleContractError)
     })
 
-    it('should throw an Error if the validator is valid', async () => {
+    it('should throw an IncompatibleContractError if the signature is invalid', async () => {
       // given
       const estimateGasStub = sinon.stub()
       estimateGasStub.rejects(new Error())
       const foreignBridge = {
         methods: {
           executeSignatures: () => ({ estimateGas: estimateGasStub }),
-          requiredSignatures: () => ({ call: sinon.stub().resolves(1) }),
           relayedMessages: () => ({ call: sinon.stub().resolves(false) })
         }
       }
       const validatorContract = {
         methods: {
-          isValidator: () => ({ call: sinon.stub().resolves(true) })
+          requiredSignatures: () => ({ call: sinon.stub().resolves(1) }),
+          isValidator: () => ({ call: sinon.stub().resolves(false) })
         }
       }
+
+      const message = randomMessage()
+      const { signature } = web3.eth.accounts.sign(
+        message,
+        '0xf41510ea3e58c22cbabe881c9c87e60078dac25b23f93319e355c9ae0562987a'
+      )
 
       // when
       const result = estimateGas({
@@ -141,7 +127,45 @@ describe('processCollectedSignatures', () => {
         foreignBridge,
         validatorContract,
         numberOfCollectedSignatures: 1,
-        message: randomMessage()
+        signatures: [signature],
+        message
+      })
+
+      // then
+      await expect(result).to.be.rejectedWith(errors.IncompatibleContractError)
+    })
+
+    it('should throw an Error if the signature is valid', async () => {
+      // given
+      const estimateGasStub = sinon.stub()
+      estimateGasStub.rejects(new Error())
+      const foreignBridge = {
+        methods: {
+          executeSignatures: () => ({ estimateGas: estimateGasStub }),
+          relayedMessages: () => ({ call: sinon.stub().resolves(false) })
+        }
+      }
+      const validatorContract = {
+        methods: {
+          requiredSignatures: () => ({ call: sinon.stub().resolves(1) }),
+          isValidator: () => ({ call: sinon.stub().resolves(true) })
+        }
+      }
+
+      const message = randomMessage()
+      const { signature } = web3.eth.accounts.sign(
+        message,
+        '0xf41510ea3e58c22cbabe881c9c87e60078dac25b23f93319e355c9ae0562987a'
+      )
+
+      // when
+      const result = estimateGas({
+        web3,
+        foreignBridge,
+        validatorContract,
+        numberOfCollectedSignatures: 1,
+        signatures: [signature],
+        message
       })
 
       // then

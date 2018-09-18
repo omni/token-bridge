@@ -6,11 +6,7 @@ const logger = require('../../services/logger')
 const { web3Home, web3Foreign } = require('../../services/web3')
 const { signatureToVRS } = require('../../utils/message')
 const estimateGas = require('./estimateGas')
-const {
-  AlreadyProcessedError,
-  IncompatibleContractError,
-  InvalidValidatorError
-} = require('../../utils/errors')
+const { AlreadyProcessedError, IncompatibleContractError } = require('../../utils/errors')
 const { MAX_CONCURRENT_EVENTS } = require('../../utils/constants')
 
 const { VALIDATOR_ADDRESS } = process.env
@@ -57,10 +53,12 @@ function processCollectedSignaturesBuilder(config) {
           requiredSignatures.length = NumberOfCollectedSignatures
           requiredSignatures.fill(0)
 
+          const signatures = []
           const [v, r, s] = [[], [], []]
           const signaturePromises = requiredSignatures.map(async (el, index) => {
             const signature = await homeBridge.methods.signature(messageHash, index).call()
             const recover = signatureToVRS(signature)
+            signatures.push(signature)
             v.push(recover.v)
             r.push(recover.r)
             s.push(recover.s)
@@ -73,12 +71,12 @@ function processCollectedSignaturesBuilder(config) {
             gasEstimate = await estimateGas({
               foreignBridge,
               validatorContract,
+              signatures,
               v,
               r,
               s,
               message,
-              numberOfCollectedSignatures: NumberOfCollectedSignatures,
-              address: VALIDATOR_ADDRESS
+              numberOfCollectedSignatures: NumberOfCollectedSignatures
             })
           } catch (e) {
             if (e instanceof HttpListProviderError) {
@@ -92,11 +90,8 @@ function processCollectedSignaturesBuilder(config) {
               )
               return
             } else if (e instanceof IncompatibleContractError) {
-              logger.fatal(`The contract is not compatible: ${e.message}`)
-              process.exit(10)
-            } else if (e instanceof InvalidValidatorError) {
-              logger.fatal({ address: VALIDATOR_ADDRESS }, 'Invalid validator')
-              process.exit(10)
+              logger.error(`The contract is not compatible: ${e.message}`)
+              return
             } else {
               logger.error(e, 'Unknown error while processing transaction')
               throw e
