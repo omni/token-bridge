@@ -116,7 +116,7 @@ describe('processCollectedSignatures', () => {
       }
 
       const message = randomMessage()
-      const { signature } = web3.eth.accounts.sign(
+      const { v, r, s } = web3.eth.accounts.sign(
         message,
         '0xf41510ea3e58c22cbabe881c9c87e60078dac25b23f93319e355c9ae0562987a'
       )
@@ -127,7 +127,9 @@ describe('processCollectedSignatures', () => {
         foreignBridge,
         validatorContract,
         numberOfCollectedSignatures: 1,
-        signatures: [signature],
+        v: [v],
+        r: [r],
+        s: [s],
         message
       })
 
@@ -153,7 +155,7 @@ describe('processCollectedSignatures', () => {
       }
 
       const message = randomMessage()
-      const { signature } = web3.eth.accounts.sign(
+      const { v, r, s } = web3.eth.accounts.sign(
         message,
         '0xf41510ea3e58c22cbabe881c9c87e60078dac25b23f93319e355c9ae0562987a'
       )
@@ -164,7 +166,9 @@ describe('processCollectedSignatures', () => {
         foreignBridge,
         validatorContract,
         numberOfCollectedSignatures: 1,
-        signatures: [signature],
+        v: [v],
+        r: [r],
+        s: [s],
         message
       })
 

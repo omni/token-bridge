@@ -57,12 +57,10 @@ function processCollectedSignaturesBuilder(config) {
           requiredSignatures.length = NumberOfCollectedSignatures
           requiredSignatures.fill(0)
 
-          const signatures = []
           const [v, r, s] = [[], [], []]
           const signaturePromises = requiredSignatures.map(async (el, index) => {
             const signature = await homeBridge.methods.signature(messageHash, index).call()
             const recover = signatureToVRS(signature)
-            signatures.push(signature)
             v.push(recover.v)
             r.push(recover.r)
             s.push(recover.s)
@@ -75,7 +73,6 @@ function processCollectedSignaturesBuilder(config) {
             gasEstimate = await estimateGas({
               foreignBridge,
               validatorContract,
-              signatures,
               v,
               r,
               s,
