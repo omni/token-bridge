@@ -6,7 +6,11 @@ const logger = require('../../services/logger')
 const { web3Home, web3Foreign } = require('../../services/web3')
 const { signatureToVRS } = require('../../utils/message')
 const estimateGas = require('./estimateGas')
-const { AlreadyProcessedError, IncompatibleContractError } = require('../../utils/errors')
+const {
+  AlreadyProcessedError,
+  IncompatibleContractError,
+  InvalidValidatorError
+} = require('../../utils/errors')
 const { MAX_CONCURRENT_EVENTS } = require('../../utils/constants')
 
 const { VALIDATOR_ADDRESS } = process.env
@@ -89,8 +93,14 @@ function processCollectedSignaturesBuilder(config) {
                 `Already processed CollectedSignatures ${colSignature.transactionHash}`
               )
               return
-            } else if (e instanceof IncompatibleContractError) {
-              logger.error(`The contract is not compatible: ${e.message}`)
+            } else if (
+              e instanceof IncompatibleContractError ||
+              e instanceof InvalidValidatorError
+            ) {
+              logger.error(
+                { eventTransactionHash: colSignature.transactionHash },
+                `The message couldn't be processed; skipping: ${e.message}`
+              )
               return
             } else {
               logger.error(e, 'Unknown error while processing transaction')

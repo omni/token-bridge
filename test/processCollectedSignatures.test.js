@@ -132,7 +132,7 @@ describe('processCollectedSignatures', () => {
       })
 
       // then
-      await expect(result).to.be.rejectedWith(errors.IncompatibleContractError)
+      await expect(result).to.be.rejectedWith(errors.InvalidValidatorError)
     })
 
     it('should throw an Error if the signature is valid', async () => {

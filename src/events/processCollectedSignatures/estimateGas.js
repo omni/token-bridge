@@ -1,6 +1,10 @@
 const Web3 = require('web3')
 const { HttpListProviderError } = require('http-list-provider')
-const { AlreadyProcessedError, IncompatibleContractError } = require('../../utils/errors')
+const {
+  AlreadyProcessedError,
+  IncompatibleContractError,
+  InvalidValidatorError
+} = require('../../utils/errors')
 const { parseMessage } = require('../../utils/message')
 
 const web3 = new Web3()
@@ -45,7 +49,7 @@ async function estimateGas({
       const isValidator = await validatorContract.methods.isValidator(address).call()
 
       if (!isValidator) {
-        throw new IncompatibleContractError(`Message signed by ${address} that is not a validator`)
+        throw new InvalidValidatorError(`Message signed by ${address} that is not a validator`)
       }
     }
 
