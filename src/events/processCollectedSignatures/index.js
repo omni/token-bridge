@@ -1,13 +1,23 @@
 require('dotenv').config()
 const promiseLimit = require('promise-limit')
-const logger = require('../services/logger')
-const { web3Home, web3Foreign } = require('../services/web3')
-const { signatureToVRS } = require('../utils/message')
-const { MAX_CONCURRENT_EVENTS } = require('../utils/constants')
+const { HttpListProviderError } = require('http-list-provider')
+const bridgeValidatorsABI = require('../../../abis/BridgeValidators.abi')
+const logger = require('../../services/logger')
+const { web3Home, web3Foreign } = require('../../services/web3')
+const { signatureToVRS } = require('../../utils/message')
+const estimateGas = require('./estimateGas')
+const {
+  AlreadyProcessedError,
+  IncompatibleContractError,
+  InvalidValidatorError
+} = require('../../utils/errors')
+const { MAX_CONCURRENT_EVENTS } = require('../../utils/constants')
 
 const { VALIDATOR_ADDRESS } = process.env
 
 const limit = promiseLimit(MAX_CONCURRENT_EVENTS)
+
+let validatorContract = null
 
 function processCollectedSignaturesBuilder(config) {
   const homeBridge = new web3Home.eth.Contract(config.homeBridgeAbi, config.homeBridgeAddress)
@@ -19,6 +29,14 @@ function processCollectedSignaturesBuilder(config) {
 
   return async function processCollectedSignatures(signatures) {
     const txToSend = []
+
+    if (validatorContract === null) {
+      const validatorContractAddress = await foreignBridge.methods.validatorContract().call()
+      validatorContract = new web3Foreign.eth.Contract(
+        bridgeValidatorsABI,
+        validatorContractAddress
+      )
+    }
 
     const callbacks = signatures.map(colSignature =>
       limit(async () => {
@@ -52,20 +70,39 @@ function processCollectedSignaturesBuilder(config) {
 
           let gasEstimate
           try {
-            gasEstimate = await foreignBridge.methods
-              .executeSignatures(v, r, s, message)
-              .estimateGas()
+            gasEstimate = await estimateGas({
+              foreignBridge,
+              validatorContract,
+              v,
+              r,
+              s,
+              message,
+              numberOfCollectedSignatures: NumberOfCollectedSignatures
+            })
           } catch (e) {
-            if (e.message.includes('Invalid JSON RPC response')) {
+            if (e instanceof HttpListProviderError) {
               throw new Error(
-                `RPC Connection Error: executeSignatures Gas Estimate cannot be obtained.`
+                'RPC Connection Error: submitSignature Gas Estimate cannot be obtained.'
               )
+            } else if (e instanceof AlreadyProcessedError) {
+              logger.info(
+                { eventTransactionHash: colSignature.transactionHash },
+                `Already processed CollectedSignatures ${colSignature.transactionHash}`
+              )
+              return
+            } else if (
+              e instanceof IncompatibleContractError ||
+              e instanceof InvalidValidatorError
+            ) {
+              logger.error(
+                { eventTransactionHash: colSignature.transactionHash },
+                `The message couldn't be processed; skipping: ${e.message}`
+              )
+              return
+            } else {
+              logger.error(e, 'Unknown error while processing transaction')
+              throw e
             }
-            logger.info(
-              { eventTransactionHash: colSignature.transactionHash },
-              `Already processed CollectedSignatures ${colSignature.transactionHash}`
-            )
-            return
           }
           const data = await foreignBridge.methods.executeSignatures(v, r, s, message).encodeABI()
           txToSend.push({

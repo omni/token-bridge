@@ -1,10 +1,11 @@
-const { expect } = require('chai')
-const { createMessage, signatureToVRS } = require('../src/utils/message')
+const { BN, toBN } = require('web3').utils
+const { expect } = require('chai').use(require('bn-chai')(BN))
+const { createMessage, parseMessage, signatureToVRS } = require('../src/utils/message')
 
 describe('message utils', () => {
-  describe('createMessage', () => {
-    const expectedMessageLength = 104
+  const expectedMessageLength = 104
 
+  describe('createMessage', () => {
     it('should create a message when receiving valid values', () => {
       // given
       const recipient = '0xe3D952Ad4B96A756D65790393128FA359a7CD888'
@@ -224,6 +225,32 @@ describe('message utils', () => {
 
       // then
       expect(messageThunk).to.throw()
+    })
+  })
+  describe('parseMessage', () => {
+    it('should return the same values that were used to create the message', () => {
+      // given
+      const originalRecipient = '0xe3D952Ad4B96A756D65790393128FA359a7CD888'
+      const originalValue = '0x2a'
+      const originalTransactionHash =
+        '0x4a298455c1ccb17de77718fc045a876e1b4e063afaad361dcdef142a8ee48d5a'
+      const originalBridgeAddress = '0xfA79875FB0828c1FBD438583ED23fF5a956D80a1'
+
+      // when
+      const message = createMessage({
+        recipient: originalRecipient,
+        value: originalValue,
+        transactionHash: originalTransactionHash,
+        bridgeAddress: originalBridgeAddress,
+        expectedMessageLength
+      })
+      const { recipient, amount, txHash, contractAddress } = parseMessage(message)
+
+      // then
+      expect(recipient).to.equal(originalRecipient)
+      expect(toBN(amount)).to.eq.BN(toBN(originalValue))
+      expect(txHash).to.equal(originalTransactionHash)
+      expect(contractAddress).to.equal(originalBridgeAddress)
     })
   })
   describe('signatureToVRS', () => {

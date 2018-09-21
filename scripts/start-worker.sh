@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -o pipefail
+
 WORKERS_DIR="src/"
 LOGS_DIR="logs/"
 
