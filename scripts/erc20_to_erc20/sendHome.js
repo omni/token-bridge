@@ -1,11 +1,11 @@
 const path = require('path')
 require('dotenv').config({
-  path: path.join(__dirname, '../.env')
+  path: path.join(__dirname, '../../.env')
 })
 const Web3 = require('web3')
 const Web3Utils = require('web3-utils')
-const rpcUrlsManager = require('../src/services/getRpcUrlsManager')
-const { sendTx, sendRawTx } = require('../src/tx/sendTx')
+const rpcUrlsManager = require('../../src/services/getRpcUrlsManager')
+const { sendTx, sendRawTx } = require('../../src/tx/sendTx')
 
 const {
   USER_ADDRESS,

@@ -1,10 +1,10 @@
 const path = require('path')
 require('dotenv').config({
-  path: path.join(__dirname, '../.env')
+  path: path.join(__dirname, '../../.env')
 })
 const Web3Utils = require('web3-utils')
-const { web3Home } = require('../src/services/web3')
-const { sendTx, sendRawTx } = require('../src/tx/sendTx')
+const { web3Home } = require('../../src/services/web3')
+const { sendTx, sendRawTx } = require('../../src/tx/sendTx')
 
 const {
   USER_ADDRESS,
@@ -37,7 +37,7 @@ async function main() {
         nonce,
         gasPrice: '1',
         amount: HOME_MIN_AMOUNT_PER_TX,
-        gasLimit: 50000,
+        gasLimit: 100000,
         to: HOME_BRIDGE_ADDRESS,
         web3: web3Home,
         chainId: homeChaindId

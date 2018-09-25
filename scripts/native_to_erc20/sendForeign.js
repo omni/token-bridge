@@ -1,10 +1,10 @@
 const path = require('path')
 require('dotenv').config({
-  path: path.join(__dirname, '../.env')
+  path: path.join(__dirname, '../../.env')
 })
 const Web3Utils = require('web3-utils')
-const { web3Foreign } = require('../src/services/web3')
-const { sendTx, sendRawTx } = require('../src/tx/sendTx')
+const { web3Foreign } = require('../../src/services/web3')
+const { sendTx, sendRawTx } = require('../../src/tx/sendTx')
 
 const {
   USER_ADDRESS,
