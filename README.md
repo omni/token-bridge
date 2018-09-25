@@ -22,11 +22,13 @@ There are two Senders:
 1. Deploy bridge contracts
     1. Clone repo: `git clone https://github.com/poanetwork/poa-bridge-contracts`
     2. `cd poa-bridge-contracts`
-    3. Checkout branch `v2` : `git checkout v2`
-    4. Compile contracts: `truffle compile`
-    5. Go to deploy folder: `cd deploy`
-    6. create a `.env` file: `cp .env.example .env` (look at `.env.example` to see the variables that need to be present)
-    7. Execute `node deploy.js`
+    3. Checkout branch `refactor_v1` : `git checkout refactor_v1`
+    4. Install dependencies: `npm install`
+    5. Compile contracts: `npm run compile`
+    6. Go to deploy folder: `cd deploy`
+    7. Install deploy dependencies: `npm install`
+    8. create a `.env` file: `cp .env.example .env` (look at `.env.example` to see the variables that need to be present)
+    9. Execute `node deploy.js`
 
 2. Install [RabbitMQ](https://www.rabbitmq.com/) and [Redis](https://redis.io/)
   - RabbitMQ version: `3.7`
@@ -37,17 +39,18 @@ There are two Senders:
 ## Run the processes
 
 ### Native to Erc mode
+
+On `.env` file set `BRIDGE_MODE=NATIVE_TO_ERC`
+
   - `npm run watcher:signature-request`
   - `npm run watcher:collected-signatures`
   - `npm run watcher:affirmation-request`
   - `npm run sender:home`
   - `npm run sender:foreign`
 
-To send deposits to home contract run `node tests/sendUserTxToHome.js`
+To send deposits to home contract run `node scripts/native_to_erc20/sendHome.js 10` where `10` is how many tx you would like to send out
 
-To send withdrawals to foreign contract run `node tests/sendUserTxToForeign.js`
-
-Make sure your `HOME_MIN_AMOUNT_PER_TX` and `FOREIGN_MIN_AMOUNT_PER_TX` is same as in your .env deployment contract
+To send withdrawals to foreign contract run `node scripts/native_to_erc20/sendForeign.js 10 ` where `10` is how many tx you would like to send out
 
 
 ### Erc to Erc mode
@@ -60,9 +63,23 @@ On `.env` file set `BRIDGE_MODE=ERC_TO_ERC`
   - `npm run sender:home`
   - `npm run sender:foreign`
 
-To deposit from Foreign to Home contract run `node scripts/sendUserTxToErcForeign.js 10` where `10` is how many tx you would like to send out
+To deposit from Foreign to Home contract run `node scripts/erc20_to_erc20/sendForeign.js 10` where `10` is how many tx you would like to send out
 
-To withdrawal to Home to Foreign contract run `node scripts/sendUserTxToErcHome.js 10` where `10` is how many tx you would like to send out
+To withdrawal to Home to Foreign contract run `node scripts/erc20_to_erc20/sendHome.js 10` where `10` is how many tx you would like to send out
+
+### Erc to Native mode
+
+On `.env` file set `BRIDGE_MODE=ERC_TO_NATIVE`
+
+  - `npm run watcher:signature-request`
+  - `npm run watcher:collected-signatures`
+  - `npm run watcher:affirmation-request`
+  - `npm run sender:home`
+  - `npm run sender:foreign`
+
+To deposit from Foreign to Home contract run `node scripts/erc20_to_native/sendForeign.js 10` where `10` is how many tx you would like to send out
+
+To withdrawal to Home to Foreign contract run `node scripts/erc20_to_native/sendHome.js 10` where `10` is how many tx you would like to send out
 
 ### Run with Docker
 
