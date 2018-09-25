@@ -70,15 +70,18 @@ function updateLastProcessedBlock(lastBlockNumber) {
 
 function processEvents(events) {
   switch (config.id) {
-    case 'signature-request':
-    case 'erc-signature-request':
+    case 'native-erc-signature-request':
+    case 'erc-erc-signature-request':
+    case 'erc-native-signature-request':
       return processSignatureRequests(events)
-    case 'collected-signatures':
-    case 'erc-collected-signatures':
+    case 'native-erc-collected-signatures':
+    case 'erc-erc-collected-signatures':
+    case 'erc-native-collected-signatures':
       return processCollectedSignatures(events)
-    case 'affirmation-request':
+    case 'native-erc-affirmation-request':
       return processAffirmationRequests(events)
-    case 'erc-affirmation-request':
+    case 'erc-erc-affirmation-request':
+    case 'erc-native-affirmation-request':
       return processTransfers(events)
     default:
       return []
