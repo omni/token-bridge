@@ -11,7 +11,8 @@ RUN git clone https://github.com/poanetwork/poa-bridge-contracts.git
 RUN mkdir submodules && \
   mv poa-bridge-contracts submodules && \
   cd submodules/poa-bridge-contracts && \
-  git checkout refactor_v1
+  git fetch && \
+  git checkout erc20-to-native-#79
 
 RUN npm install --unsafe-perm
 
