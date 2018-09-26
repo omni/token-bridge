@@ -74,6 +74,7 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
     const txArray = JSON.parse(msg.content)
     logger.info(`Msg received with ${txArray.length} Tx to send`)
     const gasPrice = await GasPrice.getPrice()
+    logger.info(`Gas price used for the transaction: ${gasPrice}`)
 
     const ttl = REDIS_LOCK_TTL * txArray.length
     const lock = await redlock.lock(nonceLock, ttl)
@@ -91,7 +92,7 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
           chain: config.id,
           data: job.data,
           nonce,
-          gasPrice: gasPrice.toString(10),
+          gasPrice,
           amount: '0',
           gasLimit,
           privateKey: VALIDATOR_ADDRESS_PRIVATE_KEY,

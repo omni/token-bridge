@@ -89,6 +89,7 @@ async function start(chainId) {
       oracleFn: () => fetchGasPriceFromOracle(oracleUrl, speedType)
     })
     cachedGasPrice = gasPrice || cachedGasPrice
+    logger.info(`Updated gas price: ${cachedGasPrice}`)
   }, updateInterval)
 }
 

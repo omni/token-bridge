@@ -105,3 +105,5 @@ Command | Description
 Variable | Description | Values
 --- | --- | ---
 `ALLOW_HTTP` | Explicitly allows the usage of `http` connections instead of `https`. | `yes` / `no`
+`HOME_GAS_PRICE_FALLBACK` | The gas price value (in Wei) which will be used for transactions in Home network if neither the gas price oracle nor gas price set in the HomeBridge contract are available. | integer
+`FOREIGN_GAS_PRICE_FALLBACK` | The gs price value (in Wei) which will be used for transactions in Foreign network if neither the gas price oracle nor gas price set in the ForeignBridge contract are available. | integer
