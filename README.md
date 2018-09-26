@@ -22,7 +22,7 @@ There are two Senders:
 1. Deploy bridge contracts
     1. Clone repo: `git clone https://github.com/poanetwork/poa-bridge-contracts`
     2. `cd poa-bridge-contracts`
-    3. Checkout branch `refactor_v1` : `git checkout refactor_v1`
+    3. Checkout branch `refactor_v1`: `git checkout refactor_v1`
     4. Install dependencies: `npm install`
     5. Compile contracts: `npm run compile`
     6. Go to deploy folder: `cd deploy`
