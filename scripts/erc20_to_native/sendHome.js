@@ -35,7 +35,7 @@ async function main() {
         privateKey: USER_ADDRESS_PRIVATE_KEY,
         data: '0x',
         nonce,
-        gasPrice: '1',
+        gasPrice: '1000000000',
         amount: HOME_MIN_AMOUNT_PER_TX,
         gasLimit: 100000,
         to: HOME_BRIDGE_ADDRESS,

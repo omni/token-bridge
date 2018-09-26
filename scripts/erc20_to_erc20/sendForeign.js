@@ -75,7 +75,7 @@ async function main() {
         privateKey: USER_ADDRESS_PRIVATE_KEY,
         data,
         nonce,
-        gasPrice: '1',
+        gasPrice: '1000000000',
         amount: '0',
         gasLimit,
         to: ERC20_TOKEN_ADDRESS,

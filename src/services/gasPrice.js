@@ -1,5 +1,6 @@
 require('dotenv').config()
 const fetch = require('node-fetch')
+const Web3Utils = require('web3-utils')
 const { web3Home, web3Foreign } = require('../services/web3')
 const { bridgeConfig } = require('../../config/base.config')
 const logger = require('../services/logger')
@@ -33,7 +34,7 @@ async function fetchGasPriceFromOracle(oracleUrl, speedType) {
   if (!gasPrice) {
     throw new Error(`Response from Oracle didn't include gas price for ${speedType} type.`)
   }
-  return gasPrice
+  return Web3Utils.toWei(gasPrice, 'gwei')
 }
 
 async function fetchGasPrice({ bridgeContract, oracleFn }) {
