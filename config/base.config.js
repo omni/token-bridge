@@ -32,7 +32,13 @@ switch (process.env.BRIDGE_MODE) {
     id = 'erc-native'
     break
   default:
-    throw new Error(`Bridge Mode: ${process.env.BRIDGE_MODE} not supported.`)
+    if (process.env.NODE_ENV !== 'test') {
+      throw new Error(`Bridge Mode: ${process.env.BRIDGE_MODE} not supported.`)
+    } else {
+      homeAbi = homeErcNativeAbi
+      foreignAbi = foreignErcNativeAbi
+      id = 'erc-native'
+    }
 }
 
 const bridgeConfig = {
