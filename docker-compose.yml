@@ -18,8 +18,7 @@ services:
       - NODE_ENV=production
       - QUEUE_URL=amqp://rabbit
       - REDIS_URL=redis://redis
-    volumes: 
-      - ${PWD}/.env:${PWD}/.env
+    env_file: ./.env
     command: "true"
 
 volumes:
