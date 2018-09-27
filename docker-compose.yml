@@ -19,7 +19,7 @@ services:
       - QUEUE_URL=amqp://rabbit
       - REDIS_URL=redis://redis
     volumes: 
-      - ./env:./env
+      - ${PWD}/.env:${PWD}/.env
     command: "true"
 
 volumes:
