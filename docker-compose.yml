@@ -2,12 +2,26 @@ version: "3"
 services:
   redis:
     image: "redis"
+    command: ["redis-server", "--appendonly", "yes"]
+    hostname: redis
+    volumes:
+      - redis-data:/data
   rabbit:
     image: "rabbitmq:3-management"
+    environment:
+      - RABBITMQ_NODENAME=node@rabbitmq
+    volumes:
+      - rabbit-data:/data/mnesia
   bridge:
     build: .
     environment:
       - NODE_ENV=production
       - QUEUE_URL=amqp://rabbit
       - REDIS_URL=redis://redis
+    volumes: 
+      - ./env:./env
     command: "true"
+
+volumes:
+  rabbit-data:
+  redis-data:
