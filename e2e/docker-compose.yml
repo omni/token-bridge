@@ -9,7 +9,7 @@ services:
     ports:
       - "8542:8545"
   redis:
-    image: "redis"
+    image: "redis:4"
   rabbit:
     image: "rabbitmq:3-management"
     ports:
