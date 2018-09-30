@@ -1,3 +1,5 @@
 node_modules
 e2e
 .git
+logs
+*.log
