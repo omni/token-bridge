@@ -86,7 +86,7 @@ async function main() {
       })
       if (txHash !== undefined) {
         actualSent++
-        console.log(`${actualSent}: NOnce: ${nonce}, gas: {gasLimit}, tx: ${txHash}`)
+        console.log(`${actualSent}: NOnce: ${nonce}, gas: ${gasLimit}, tx: ${txHash}`)
         nonce++
       }
     }
