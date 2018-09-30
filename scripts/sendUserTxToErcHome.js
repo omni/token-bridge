@@ -8,6 +8,7 @@ const rpcUrlsManager = require('../src/services/getRpcUrlsManager')
 const { sendTx, sendRawTx } = require('../src/tx/sendTx')
 
 const {
+  HOME_GAS_PRICE_FALLBACK,
   USER_ADDRESS,
   USER_ADDRESS_PRIVATE_KEY,
   HOME_BRIDGE_ADDRESS,
@@ -69,9 +70,10 @@ async function main() {
     nonce = Web3Utils.hexToNumber(nonce)
     let actualSent = 0
     for (let i = 0; i < Number(NUMBER_OF_WITHDRAWALS_TO_SEND); i++) {
-      const gasLimit = await erc677.methods
+      let gasLimit = await erc677.methods
         .transferAndCall(HOME_BRIDGE_ADDRESS, Web3Utils.toWei(HOME_MIN_AMOUNT_PER_TX), '0x')
         .estimateGas({ from: USER_ADDRESS })
+      gasLimit = Math.round(gasLimit*1.2)
       const data = await erc677.methods
         .transferAndCall(HOME_BRIDGE_ADDRESS, Web3Utils.toWei(HOME_MIN_AMOUNT_PER_TX), '0x')
         .encodeABI({ from: USER_ADDRESS })
@@ -80,7 +82,7 @@ async function main() {
         privateKey: USER_ADDRESS_PRIVATE_KEY,
         data,
         nonce,
-        gasPrice: '1',
+        gasPrice: HOME_GAS_PRICE_FALLBACK,
         amount: '0',
         gasLimit,
         to: BRIDGEABLE_TOKEN_ADDRESS,
@@ -88,9 +90,9 @@ async function main() {
         chainId: homeChainId
       })
       if (txHash !== undefined) {
-        nonce++
         actualSent++
-        console.log(actualSent, ' # ', txHash)
+        console.log(`${actualSent}: NOnce: ${nonce}, gas: {gasLimit}, tx: ${txHash}`)
+        nonce++
       }
     }
   } catch (e) {

@@ -8,6 +8,7 @@ const rpcUrlsManager = require('../src/services/getRpcUrlsManager')
 const { sendTx, sendRawTx } = require('../src/tx/sendTx')
 
 const {
+  FOREIGN_GAS_PRICE_FALLBACK,
   USER_ADDRESS,
   USER_ADDRESS_PRIVATE_KEY,
   FOREIGN_BRIDGE_ADDRESS,
@@ -67,6 +68,7 @@ async function main() {
       const gasLimit = await poa20.methods
         .transfer(FOREIGN_BRIDGE_ADDRESS, Web3Utils.toWei(FOREIGN_MIN_AMOUNT_PER_TX))
         .estimateGas({ from: USER_ADDRESS })
+      gasLimit = Math.round(gasLimit*1.2)
       const data = await poa20.methods
         .transfer(FOREIGN_BRIDGE_ADDRESS, Web3Utils.toWei(FOREIGN_MIN_AMOUNT_PER_TX))
         .encodeABI({ from: USER_ADDRESS })
@@ -75,7 +77,7 @@ async function main() {
         privateKey: USER_ADDRESS_PRIVATE_KEY,
         data,
         nonce,
-        gasPrice: '1',
+        gasPrice: FOREIGN_GAS_PRICE_FALLBACK,
         amount: '0',
         gasLimit,
         to: ERC20_TOKEN_ADDRESS,
@@ -83,9 +85,9 @@ async function main() {
         chainId: foreignChaindId
       })
       if (txHash !== undefined) {
-        nonce++
         actualSent++
-        console.log(actualSent, ' # ', txHash)
+        console.log(`${actualSent}: NOnce: ${nonce}, gas: {gasLimit}, tx: ${txHash}`)
+        nonce++
       }
     }
   } catch (e) {
