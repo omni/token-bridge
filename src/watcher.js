@@ -24,7 +24,7 @@ const web3Instance = config.web3
 const bridgeContract = new web3Instance.eth.Contract(config.bridgeAbi, config.bridgeContractAddress)
 const eventContract = new web3Instance.eth.Contract(config.eventAbi, config.eventContractAddress)
 const lastBlockRedisKey = `${config.id}:lastProcessedBlock`
-let lastProcessedBlock = config.startBlock || 0
+let lastProcessedBlock = Number(config.startBlock) || 0
 
 async function initialize() {
   try {
@@ -103,6 +103,7 @@ async function main({ sendToQueue }) {
       logger.info('All blocks already processed')
       return
     }
+    logger.info(`Inspecting blocks from ${lastProcessedBlock+1} to ${lastBlockToProcess}`)
     const events = await getEvents({
       contract: eventContract,
       event: config.event,
