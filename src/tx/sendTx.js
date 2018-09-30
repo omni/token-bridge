@@ -39,18 +39,23 @@ async function sendTx({
 async function sendRawTx({ chain, params, method }) {
   const result = await rpcUrlsManager.tryEach(chain, async url => {
     // curl -X POST --data '{"jsonrpc":"2.0","method":"eth_sendRawTransaction","params":[{see above}],"id":1}'
+    const jsonbody = JSON.stringify({
+        jsonrpc: '2.0',
+        method,
+        params,
+        id: Math.floor(Math.random() * 100) + 1
+    })
     const response = await fetch(url, {
       headers: {
         'Content-type': 'application/json'
       },
       method: 'POST',
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        method,
-        params,
-        id: Math.floor(Math.random() * 100) + 1
-      })
+      body: jsonbody
     })
+
+    if (process.env.LOG_RPC_CALLS === 'true') {
+      console.log(`JSON body: ${jsonbody}`)
+    }
 
     if (!response.ok) {
       throw new Error(response.statusText)
