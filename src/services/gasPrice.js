@@ -7,6 +7,7 @@ const ForeignNativeABI = require('../../abis/ForeignBridgeNativeToErc.abi')
 const HomeErcABI = require('../../abis/HomeBridgeErcToErc.abi')
 const ForeignErcABI = require('../../abis/ForeignBridgeErcToErc.abi')
 const logger = require('../services/logger')
+const { setIntervalAndRun } = require('../utils/utils')
 
 const HomeABI = isErcToErc ? HomeErcABI : HomeNativeABI
 const ForeignABI = isErcToErc ? ForeignNativeABI : ForeignErcABI
@@ -83,7 +84,7 @@ async function start(chainId) {
     throw new Error(`Unrecognized chainId '${chainId}'`)
   }
 
-  fetchGasPriceInterval = setInterval(async () => {
+  fetchGasPriceInterval = setIntervalAndRun(async () => {
     const gasPrice = await fetchGasPrice({
       bridgeContract,
       oracleFn: () => fetchGasPriceFromOracle(oracleUrl, speedType)

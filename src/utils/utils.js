@@ -46,9 +46,16 @@ function addExtraGas(gas, extraPercentage) {
   return BigNumber(gasWithExtra)
 }
 
+function setIntervalAndRun(f, interval) {
+  const handler = setInterval(f, interval)
+  f()
+  return handler
+}
+
 module.exports = {
   syncForEach,
   checkHTTPS,
   waitForFunds,
-  addExtraGas
+  addExtraGas,
+  setIntervalAndRun
 }
