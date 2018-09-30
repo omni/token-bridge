@@ -107,5 +107,5 @@ Variable | Description | Values
 `ALLOW_HTTP` | Explicitly allows the usage of `http` connections instead of `https`. | `yes` / `no`
 `HOME_GAS_PRICE_FALLBACK` | The gas price value (in Wei) which will be used for transactions in Home network if neither the gas price oracle nor gas price set in the HomeBridge contract are available. | integer
 `FOREIGN_GAS_PRICE_FALLBACK` | The gs price value (in Wei) which will be used for transactions in Foreign network if neither the gas price oracle nor gas price set in the ForeignBridge contract are available. | integer
-`FORCE_NONCE_UPDATE` | Forces to update the nonce by requesting it from the RPC node rather than reading it from Redis DB`. It is possible to specify this only for one sender by executing `env FORCE_NONCE_UPDATE=true npm run sender:home` | `true` / `false`
+`FORCE_NONCE_UPDATE` | Forces to update the nonce by requesting it from the RPC node rather than reading it from Redis DB. It is possible to specify this only for one sender by executing `env FORCE_NONCE_UPDATE=true npm run sender:home` | `true` / `false`
 `LOG_RPC_CALLS` | Outputs every RPC call on the console. It makes sense to specify this variable only for senders or for scripts generating transactions. E.g. `env LOG_RPC_CALLS=true node scripts/sendUserTxToErcHome.js 10`  | `true` / `false` 
