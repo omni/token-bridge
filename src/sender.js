@@ -52,12 +52,14 @@ function resume(newBalance) {
 }
 
 async function readNonce(forceUpdate) {
-  if (forceUpdate) {
-    return getNonce(web3Instance, VALIDATOR_ADDRESS)
+  if (forceUpdate || process.env.FORCE_NONCE_UPDATE === 'true') {
+    const result = await getNonce(web3Instance, VALIDATOR_ADDRESS)
+    logger.info(`NOnce updated: ${result}`)
+    return result
   }
 
   const result = await redis.get(nonceKey)
-  return result ? Number(result) : getNonce(web3Instance, VALIDATOR_ADDRESS)
+  return result ? Number(result) : await readNonce(true)
 }
 
 function updateNonce(nonce) {
@@ -101,11 +103,11 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
           web3: web3Instance
         })
 
-        nonce++
         logger.info(
           { eventTransactionHash: job.transactionReference, generatedTransactionHash: txHash },
-          `Tx generated ${txHash} for event Tx ${job.transactionReference}`
+          `NOnce: ${nonce}, gas limit: ${gasLimit}, Tx generated ${txHash} for event Tx ${job.transactionReference}`
         )
+        nonce++
       } catch (e) {
         logger.error(
           { eventTransactionHash: job.transactionReference, error: e.message },
