@@ -4,6 +4,7 @@ services:
     image: "redis"
     command: ["redis-server", "--appendonly", "yes"]
     hostname: redis
+    restart: on-failure
     volumes:
       - ~/bridge_data/redis:/data
   rabbit:
@@ -13,6 +14,7 @@ services:
       - RABBITMQ_NODENAME=node@rabbit
     volumes:
       - ~/bridge_data/rabbitmq:/var/lib/rabbitmq
+    restart: on-failure
   bridge:
     build: .
     env_file: ./.env
@@ -21,3 +23,4 @@ services:
       - QUEUE_URL=amqp://rabbit
       - REDIS_URL=redis://redis
     command: "true"
+    restart: on-failure
