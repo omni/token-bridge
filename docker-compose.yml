@@ -5,22 +5,19 @@ services:
     command: ["redis-server", "--appendonly", "yes"]
     hostname: redis
     volumes:
-      - ~/bridge_data:/data
+      - ~/bridge_data/redis:/data
   rabbit:
     image: "rabbitmq:3-management"
+    hostname: rabbit
     environment:
-      - RABBITMQ_NODENAME=node@rabbitmq
+      - RABBITMQ_NODENAME=node@rabbit
     volumes:
-      - ~/bridge_data:/data/mnesia
+      - ~/bridge_data/rabbitmq:/var/lib/rabbitmq
   bridge:
     build: .
+    env_file: ./.env
     environment:
       - NODE_ENV=production
       - QUEUE_URL=amqp://rabbit
       - REDIS_URL=redis://redis
-    env_file: ./.env
     command: "true"
-
-volumes:
-  rabbit-data:
-  redis-data:
