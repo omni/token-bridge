@@ -1,7 +1,7 @@
 version: "3"
 services:
   redis:
-    image: "redis"
+    image: "redis:4"
     command: ["redis-server", "--appendonly", "yes"]
     hostname: redis
     restart: on-failure
