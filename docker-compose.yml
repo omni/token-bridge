@@ -13,7 +13,7 @@ services:
     environment:
       - RABBITMQ_NODENAME=node@rabbit
     volumes:
-      - ~/bridge_data/rabbitmq:/var/lib/rabbitmq
+      - ~/bridge_data/rabbitmq:/var/lib/rabbitmq/mnesia
     restart: on-failure
   bridge:
     build: .
