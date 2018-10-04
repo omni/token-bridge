@@ -65,7 +65,7 @@ async function start(chainId) {
   let bridgeContract = null
   let oracleUrl = null
   let speedType = null
-  let updateInterval = null
+  let updateInterval = 600000
   if (chainId === 'home') {
     bridgeContract = homeBridge
     oracleUrl = HOME_GAS_PRICE_ORACLE_URL
