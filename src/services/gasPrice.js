@@ -4,6 +4,7 @@ const Web3Utils = require('web3-utils')
 const { web3Home, web3Foreign } = require('../services/web3')
 const { bridgeConfig } = require('../../config/base.config')
 const logger = require('../services/logger')
+const { setIntervalAndRun } = require('../utils/utils')
 
 const HomeABI = bridgeConfig.homeBridgeAbi
 const ForeignABI = bridgeConfig.foreignBridgeAbi
@@ -80,7 +81,7 @@ async function start(chainId) {
     throw new Error(`Unrecognized chainId '${chainId}'`)
   }
 
-  fetchGasPriceInterval = setInterval(async () => {
+  fetchGasPriceInterval = setIntervalAndRun(async () => {
     const gasPrice = await fetchGasPrice({
       bridgeContract,
       oracleFn: () => fetchGasPriceFromOracle(oracleUrl, speedType)

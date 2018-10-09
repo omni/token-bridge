@@ -30,8 +30,8 @@ async function initialize() {
   try {
     const checkHttps = checkHTTPS(process.env.ALLOW_HTTP)
 
-    rpcUrlsManager.homeUrls.forEach(checkHttps)
-    rpcUrlsManager.foreignUrls.forEach(checkHttps)
+    rpcUrlsManager.homeUrls.forEach(checkHttps('home'))
+    rpcUrlsManager.foreignUrls.forEach(checkHttps('foreign'))
 
     await getLastProcessedBlock()
     connectWatcherToQueue({
