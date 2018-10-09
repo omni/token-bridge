@@ -1,9 +1,10 @@
 const Web3Utils = require('web3-utils')
 const fetch = require('node-fetch')
+const rpcUrlsManager = require('../services/getRpcUrlsManager')
 
 // eslint-disable-next-line consistent-return
 async function sendTx({
-  rpcUrl,
+  chain,
   privateKey,
   data,
   nonce,
@@ -28,28 +29,37 @@ async function sendTx({
   )
 
   return sendRawTx({
-    url: rpcUrl,
+    chain,
     method: 'eth_sendRawTransaction',
     params: [serializedTx.rawTransaction]
   })
 }
 
 // eslint-disable-next-line consistent-return
-async function sendRawTx({ url, params, method }) {
-  // curl -X POST --data '{"jsonrpc":"2.0","method":"eth_sendRawTransaction","params":[{see above}],"id":1}'
-  const request = await fetch(url, {
-    headers: {
-      'Content-type': 'application/json'
-    },
-    method: 'POST',
-    body: JSON.stringify({
-      jsonrpc: '2.0',
-      method,
-      params,
-      id: Math.floor(Math.random() * 100) + 1
+async function sendRawTx({ chain, params, method }) {
+  const result = await rpcUrlsManager.tryEach(chain, async url => {
+    // curl -X POST --data '{"jsonrpc":"2.0","method":"eth_sendRawTransaction","params":[{see above}],"id":1}'
+    const response = await fetch(url, {
+      headers: {
+        'Content-type': 'application/json'
+      },
+      method: 'POST',
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        method,
+        params,
+        id: Math.floor(Math.random() * 100) + 1
+      })
     })
+
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+
+    return response
   })
-  const json = await request.json()
+
+  const json = await result.json()
   if (json.error) {
     throw json.error
   }

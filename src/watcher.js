@@ -1,13 +1,10 @@
 require('dotenv').config()
 const path = require('path')
-const Web3 = require('web3')
 const { connectWatcherToQueue, connection } = require('./services/amqpClient')
 const { getBlockNumber } = require('./tx/web3')
-const processDeposits = require('./events/processDeposits')
-const processCollectedSignatures = require('./events/processCollectedSignatures')
-const processWithdraw = require('./events/processWithdraw')
 const { redis } = require('./services/redisClient')
 const logger = require('./services/logger')
+const rpcUrlsManager = require('./services/getRpcUrlsManager')
 const { getRequiredBlockConfirmations, getEvents } = require('./tx/web3')
 const { checkHTTPS } = require('./utils/utils')
 
@@ -18,9 +15,14 @@ if (process.argv.length < 3) {
 
 const config = require(path.join('../config/', process.argv[2]))
 
-const provider = new Web3.providers.HttpProvider(config.url)
-const web3Instance = new Web3(provider)
-const bridgeContract = new web3Instance.eth.Contract(config.abi, config.contractAddress)
+const processSignatureRequests = require('./events/processSignatureRequests')(config)
+const processCollectedSignatures = require('./events/processCollectedSignatures')(config)
+const processAffirmationRequests = require('./events/processAffirmationRequests')(config)
+const processTransfers = require('./events/processTransfers')(config)
+
+const web3Instance = config.web3
+const bridgeContract = new web3Instance.eth.Contract(config.bridgeAbi, config.bridgeContractAddress)
+const eventContract = new web3Instance.eth.Contract(config.eventAbi, config.eventContractAddress)
 const lastBlockRedisKey = `${config.id}:lastProcessedBlock`
 let lastProcessedBlock = config.startBlock || 0
 
@@ -28,8 +30,8 @@ async function initialize() {
   try {
     const checkHttps = checkHTTPS(process.env.ALLOW_HTTP)
 
-    checkHttps(process.env.HOME_RPC_URL)
-    checkHttps(process.env.FOREIGN_RPC_URL)
+    rpcUrlsManager.homeUrls.forEach(checkHttps('home'))
+    rpcUrlsManager.foreignUrls.forEach(checkHttps('foreign'))
 
     await getLastProcessedBlock()
     connectWatcherToQueue({
@@ -68,12 +70,16 @@ function updateLastProcessedBlock(lastBlockNumber) {
 
 function processEvents(events) {
   switch (config.id) {
-    case 'deposit':
-      return processDeposits(events)
+    case 'signature-request':
+    case 'erc-signature-request':
+      return processSignatureRequests(events)
     case 'collected-signatures':
+    case 'erc-collected-signatures':
       return processCollectedSignatures(events)
-    case 'withdraw':
-      return processWithdraw(events)
+    case 'affirmation-request':
+      return processAffirmationRequests(events)
+    case 'erc-affirmation-request':
+      return processTransfers(events)
     default:
       return []
   }
@@ -94,13 +100,15 @@ async function main({ sendToQueue }) {
   try {
     const lastBlockToProcess = await getLastBlockToProcess()
     if (lastBlockToProcess <= lastProcessedBlock) {
+      logger.info('All blocks already processed')
       return
     }
     const events = await getEvents({
-      contract: bridgeContract,
+      contract: eventContract,
       event: config.event,
       fromBlock: lastProcessedBlock + 1,
-      toBlock: lastBlockToProcess
+      toBlock: lastBlockToProcess,
+      filter: config.eventFilter
     })
     logger.info(`Found ${events.length} ${config.event} events`)
 

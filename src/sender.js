@@ -1,10 +1,10 @@
 require('dotenv').config()
 const path = require('path')
-const Web3 = require('web3')
 const { connectSenderToQueue } = require('./services/amqpClient')
 const { redis, redlock } = require('./services/redisClient')
 const GasPrice = require('./services/gasPrice')
 const logger = require('./services/logger')
+const rpcUrlsManager = require('./services/getRpcUrlsManager')
 const { sendTx } = require('./tx/sendTx')
 const { getNonce, getChainId } = require('./tx/web3')
 const { addExtraGas, checkHTTPS, syncForEach, waitForFunds } = require('./utils/utils')
@@ -19,8 +19,7 @@ if (process.argv.length < 3) {
 
 const config = require(path.join('../config/', process.argv[2]))
 
-const provider = new Web3.providers.HttpProvider(config.url)
-const web3Instance = new Web3(provider)
+const web3Instance = config.web3
 const nonceLock = `lock:${config.id}:nonce`
 const nonceKey = `${config.id}:nonce`
 let chainId = 0
@@ -29,8 +28,8 @@ async function initialize() {
   try {
     const checkHttps = checkHTTPS(process.env.ALLOW_HTTP)
 
-    checkHttps(process.env.HOME_RPC_URL)
-    checkHttps(process.env.FOREIGN_RPC_URL)
+    rpcUrlsManager.homeUrls.forEach(checkHttps('home'))
+    rpcUrlsManager.foreignUrls.forEach(checkHttps('foreign'))
 
     GasPrice.start(config.id)
 
@@ -89,14 +88,14 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
 
       try {
         const txHash = await sendTx({
-          rpcUrl: config.url,
+          chain: config.id,
           data: job.data,
           nonce,
           gasPrice: gasPrice.toString(10),
           amount: '0',
           gasLimit,
           privateKey: VALIDATOR_ADDRESS_PRIVATE_KEY,
-          to: config.contractAddress,
+          to: job.to,
           chainId,
           web3: web3Instance
         })
@@ -112,7 +111,9 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
           `Tx Failed for event Tx ${job.transactionReference}.`,
           e.message
         )
-        failedTx.push(job)
+        if (!e.message.includes('Transaction with the same hash was already imported')) {
+          failedTx.push(job)
+        }
 
         if (e.message.includes('Insufficient funds')) {
           insufficientFunds = true

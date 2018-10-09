@@ -3,6 +3,62 @@
     "constant": true,
     "inputs": [
       {
+        "name": "_message",
+        "type": "bytes32"
+      }
+    ],
+    "name": "numMessagesSigned",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_hash",
+        "type": "bytes32"
+      },
+      {
+        "name": "_index",
+        "type": "uint256"
+      }
+    ],
+    "name": "signature",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "erc677token",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
         "name": "_day",
         "type": "uint256"
       }
@@ -63,11 +119,118 @@
   {
     "constant": true,
     "inputs": [],
+    "name": "requiredMessageLength",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_hash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "message",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "signature",
+        "type": "bytes"
+      },
+      {
+        "name": "message",
+        "type": "bytes"
+      }
+    ],
+    "name": "submitSignature",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
     "name": "dailyLimit",
     "outputs": [
       {
         "name": "",
         "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "_token",
+        "type": "address"
+      },
+      {
+        "name": "_to",
+        "type": "address"
+      }
+    ],
+    "name": "claimTokens",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_withdrawal",
+        "type": "bytes32"
+      }
+    ],
+    "name": "numAffirmationsSigned",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_withdrawal",
+        "type": "bytes32"
+      }
+    ],
+    "name": "affirmationsSigned",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
       }
     ],
     "payable": false,
@@ -90,6 +253,25 @@
   },
   {
     "constant": true,
+    "inputs": [
+      {
+        "name": "_message",
+        "type": "bytes32"
+      }
+    ],
+    "name": "messagesSigned",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
     "inputs": [],
     "name": "validatorContract",
     "outputs": [
@@ -100,6 +282,28 @@
     ],
     "payable": false,
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "recipient",
+        "type": "address"
+      },
+      {
+        "name": "value",
+        "type": "uint256"
+      },
+      {
+        "name": "transactionHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "executeAffirmation",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -126,6 +330,33 @@
     ],
     "name": "setMinPerTx",
     "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "_from",
+        "type": "address"
+      },
+      {
+        "name": "_value",
+        "type": "uint256"
+      },
+      {
+        "name": "",
+        "type": "bytes"
+      }
+    ],
+    "name": "onTokenTransfer",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
     "payable": false,
     "stateMutability": "nonpayable",
     "type": "function"
@@ -248,6 +479,47 @@
     "type": "function"
   },
   {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_number",
+        "type": "uint256"
+      }
+    ],
+    "name": "isAlreadyProcessed",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "fallback"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "recipient",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "value",
+        "type": "uint256"
+      }
+    ],
+    "name": "UserRequestForSignature",
+    "type": "event"
+  },
+  {
     "anonymous": false,
     "inputs": [
       {
@@ -266,24 +538,41 @@
         "type": "bytes32"
       }
     ],
-    "name": "Deposit",
+    "name": "AffirmationCompleted",
     "type": "event"
   },
   {
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
-        "name": "recipient",
+        "indexed": true,
+        "name": "signer",
         "type": "address"
       },
       {
         "indexed": false,
-        "name": "value",
-        "type": "uint256"
+        "name": "messageHash",
+        "type": "bytes32"
       }
     ],
-    "name": "Withdraw",
+    "name": "SignedForUserRequest",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "name": "signer",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "transactionHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "SignedForAffirmation",
     "type": "event"
   },
   {
@@ -291,16 +580,21 @@
     "inputs": [
       {
         "indexed": false,
-        "name": "gasLimitDepositRelay",
-        "type": "uint256"
+        "name": "authorityResponsibleForRelay",
+        "type": "address"
       },
       {
         "indexed": false,
-        "name": "gasLimitWithdrawConfirm",
+        "name": "messageHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "name": "NumberOfCollectedSignatures",
         "type": "uint256"
       }
     ],
-    "name": "GasConsumptionLimitsUpdated",
+    "name": "CollectedSignatures",
     "type": "event"
   },
   {
@@ -336,7 +630,7 @@
         "type": "uint256"
       }
     ],
-    "name": "DailyLimit",
+    "name": "DailyLimitChanged",
     "type": "event"
   },
   {
@@ -344,10 +638,6 @@
     "inputs": [
       {
         "name": "_validatorContract",
-        "type": "address"
-      },
-      {
-        "name": "_erc677token",
         "type": "address"
       },
       {
@@ -363,12 +653,16 @@
         "type": "uint256"
       },
       {
-        "name": "_foreignGasPrice",
+        "name": "_homeGasPrice",
         "type": "uint256"
       },
       {
         "name": "_requiredBlockConfirmations",
         "type": "uint256"
+      },
+      {
+        "name": "_erc677token",
+        "type": "address"
       }
     ],
     "name": "initialize",
@@ -380,174 +674,6 @@
     ],
     "payable": false,
     "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "name": "_from",
-        "type": "address"
-      },
-      {
-        "name": "_value",
-        "type": "uint256"
-      },
-      {
-        "name": "",
-        "type": "bytes"
-      }
-    ],
-    "name": "onTokenTransfer",
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "name": "_token",
-        "type": "address"
-      },
-      {
-        "name": "_to",
-        "type": "address"
-      }
-    ],
-    "name": "claimTokens",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "name": "_token",
-        "type": "address"
-      },
-      {
-        "name": "_to",
-        "type": "address"
-      }
-    ],
-    "name": "claimTokensFromErc677",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "gasLimitDepositRelay",
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "gasLimitWithdrawConfirm",
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "erc677token",
-    "outputs": [
-      {
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "name": "_gasLimitDepositRelay",
-        "type": "uint256"
-      },
-      {
-        "name": "_gasLimitWithdrawConfirm",
-        "type": "uint256"
-      }
-    ],
-    "name": "setGasLimits",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "name": "vs",
-        "type": "uint8[]"
-      },
-      {
-        "name": "rs",
-        "type": "bytes32[]"
-      },
-      {
-        "name": "ss",
-        "type": "bytes32[]"
-      },
-      {
-        "name": "message",
-        "type": "bytes"
-      }
-    ],
-    "name": "deposit",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "name": "_withdraw",
-        "type": "bytes32"
-      }
-    ],
-    "name": "deposits",
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
     "type": "function"
   }
 ]

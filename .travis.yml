@@ -15,3 +15,6 @@ script:
   - npm run lint
   - npm test
   - cd e2e && ./run-tests.sh
+
+env:
+  - HOME_RPC_URL=http://example.com FOREIGN_RPC_URL=http://example.com

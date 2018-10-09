@@ -1,11 +1,18 @@
 const assert = require('assert')
 const Web3Utils = require('web3-utils')
+
 // strips leading "0x" if present
 function strip0x(input) {
   return input.replace(/^0x/, '')
 }
 
-function createMessage({ recipient, value, transactionHash }) {
+function createMessage({
+  recipient,
+  value,
+  transactionHash,
+  bridgeAddress,
+  expectedMessageLength
+}) {
   recipient = strip0x(recipient)
   assert.equal(recipient.length, 20 * 2)
 
@@ -18,10 +25,42 @@ function createMessage({ recipient, value, transactionHash }) {
   transactionHash = strip0x(transactionHash)
   assert.equal(transactionHash.length, 32 * 2)
 
-  const message = `0x${recipient}${value}${transactionHash}`
-  const expectedMessageLength = (20 + 32 + 32) * 2 + 2
-  assert.equal(message.length, expectedMessageLength)
+  bridgeAddress = strip0x(bridgeAddress)
+  assert.equal(bridgeAddress.length, 20 * 2)
+
+  const message = `0x${recipient}${value}${transactionHash}${bridgeAddress}`
+  assert.equal(message.length, 2 + 2 * expectedMessageLength)
   return message
+}
+
+function parseMessage(message) {
+  message = strip0x(message)
+
+  const recipientStart = 0
+  const recipientLength = 40
+  const recipient = `0x${message.slice(recipientStart, recipientStart + recipientLength)}`
+
+  const amountStart = recipientStart + recipientLength
+  const amountLength = 32 * 2
+  const amount = `0x${message.slice(amountStart, amountStart + amountLength)}`
+
+  const txHashStart = amountStart + amountLength
+  const txHashLength = 32 * 2
+  const txHash = `0x${message.slice(txHashStart, txHashStart + txHashLength)}`
+
+  const contractAddressStart = txHashStart + txHashLength
+  const contractAddressLength = 32 * 2
+  const contractAddress = `0x${message.slice(
+    contractAddressStart,
+    contractAddressStart + contractAddressLength
+  )}`
+
+  return {
+    recipient,
+    amount,
+    txHash,
+    contractAddress
+  }
 }
 
 function signatureToVRS(signature) {
@@ -35,5 +74,6 @@ function signatureToVRS(signature) {
 
 module.exports = {
   createMessage,
+  parseMessage,
   signatureToVRS
 }

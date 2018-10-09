@@ -13,8 +13,8 @@ COPY package-lock.json .
 RUN npm install
 COPY . .
 CMD echo "To start a bridge process run:" \
-  "docker-compose run bridge npm run watcher:deposit" \
+  "docker-compose run bridge npm run watcher:signature-request" \
   "docker-compose run bridge npm run watcher:collected-signatures" \
-  "docker-compose run bridge npm run watcher:withdraw" \
+  "docker-compose run bridge npm run watcher:affirmation-request" \
   "docker-compose run bridge npm run sender:home" \
   "docker-compose run bridge npm run sender:foreign"

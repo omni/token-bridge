@@ -9,12 +9,16 @@ async function syncForEach(array, callback) {
 }
 
 function checkHTTPS(ALLOW_HTTP) {
-  return function(url) {
-    if (!/^https.*/.test(url)) {
-      if (ALLOW_HTTP !== 'yes') {
-        throw new Error(`http is not allowed: ${url}`)
-      } else {
-        logger.warn(`You are using http (${url}). In production https must be used instead.`)
+  return function(network) {
+    return function(url) {
+      if (!/^https.*/.test(url)) {
+        if (ALLOW_HTTP !== 'yes') {
+          throw new Error(`http is not allowed: ${url}`)
+        } else {
+          logger.warn(
+            `You are using http (${url}) on ${network} network. In production https must be used instead.`
+          )
+        }
       }
     }
   }
@@ -46,9 +50,16 @@ function addExtraGas(gas, extraPercentage) {
   return BigNumber(gasWithExtra)
 }
 
+function setIntervalAndRun(f, interval) {
+  const handler = setInterval(f, interval)
+  f()
+  return handler
+}
+
 module.exports = {
   syncForEach,
   checkHTTPS,
   waitForFunds,
-  addExtraGas
+  addExtraGas,
+  setIntervalAndRun
 }
