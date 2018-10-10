@@ -35,7 +35,7 @@ async function fetchGasPriceFromOracle(oracleUrl, speedType) {
   if (!gasPrice) {
     throw new Error(`Response from Oracle didn't include gas price for ${speedType} type.`)
   }
-  return Web3Utils.toWei(gasPrice, 'gwei')
+  return Web3Utils.toWei(Web3Utils.toBN(gasPrice), 'gwei')
 }
 
 async function fetchGasPrice({ bridgeContract, oracleFn }) {
