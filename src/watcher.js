@@ -1,5 +1,6 @@
 require('dotenv').config()
 const path = require('path')
+const { toBN } = require('web3').utils
 const { connectWatcherToQueue, connection } = require('./services/amqpClient')
 const { getBlockNumber } = require('./tx/web3')
 const { redis } = require('./services/redisClient')
@@ -103,11 +104,15 @@ async function main({ sendToQueue }) {
       logger.info('All blocks already processed')
       return
     }
+
+    const fromBlock = toBN(lastProcessedBlock).add(toBN(1))
+    const toBlock = toBN(lastBlockToProcess)
+
     const events = await getEvents({
       contract: eventContract,
       event: config.event,
-      fromBlock: lastProcessedBlock + 1,
-      toBlock: lastBlockToProcess,
+      fromBlock,
+      toBlock,
       filter: config.eventFilter
     })
     logger.info(`Found ${events.length} ${config.event} events`)
