@@ -1,5 +1,6 @@
 require('dotenv').config()
 
+const { toBN } = require('web3').utils
 const { web3Home, web3Foreign } = require('../src/services/web3')
 
 const homeNativeAbi = require('../abis/HomeBridgeNativeToErc.abi')
@@ -27,7 +28,7 @@ const homeConfig = {
   bridgeContractAddress: process.env.HOME_BRIDGE_ADDRESS,
   bridgeAbi: homeAbi,
   pollingInterval: process.env.HOME_POLLING_INTERVAL,
-  startBlock: process.env.HOME_START_BLOCK,
+  startBlock: toBN(process.env.HOME_START_BLOCK || 0),
   web3: web3Home
 }
 
@@ -37,7 +38,7 @@ const foreignConfig = {
   bridgeContractAddress: process.env.FOREIGN_BRIDGE_ADDRESS,
   bridgeAbi: foreignAbi,
   pollingInterval: process.env.FOREIGN_POLLING_INTERVAL,
-  startBlock: process.env.FOREIGN_START_BLOCK,
+  startBlock: toBN(process.env.FOREIGN_START_BLOCK || 0),
   web3: web3Foreign
 }
 

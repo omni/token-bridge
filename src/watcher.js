@@ -1,6 +1,6 @@
 require('dotenv').config()
 const path = require('path')
-const { toBN } = require('web3').utils
+const { BN, toBN } = require('web3').utils
 const { connectWatcherToQueue, connection } = require('./services/amqpClient')
 const { getBlockNumber } = require('./tx/web3')
 const { redis } = require('./services/redisClient')
@@ -21,11 +21,14 @@ const processCollectedSignatures = require('./events/processCollectedSignatures'
 const processAffirmationRequests = require('./events/processAffirmationRequests')(config)
 const processTransfers = require('./events/processTransfers')(config)
 
+const ZERO = toBN(0)
+const ONE = toBN(1)
+
 const web3Instance = config.web3
 const bridgeContract = new web3Instance.eth.Contract(config.bridgeAbi, config.bridgeContractAddress)
 const eventContract = new web3Instance.eth.Contract(config.eventAbi, config.eventContractAddress)
 const lastBlockRedisKey = `${config.id}:lastProcessedBlock`
-let lastProcessedBlock = config.startBlock || 0
+let lastProcessedBlock = BN.max(config.startBlock.sub(ONE), ZERO)
 
 async function initialize() {
   try {
@@ -61,12 +64,12 @@ async function runMain({ sendToQueue }) {
 
 async function getLastProcessedBlock() {
   const result = await redis.get(lastBlockRedisKey)
-  lastProcessedBlock = result ? Number(result) : lastProcessedBlock
+  lastProcessedBlock = result ? toBN(result) : lastProcessedBlock
 }
 
 function updateLastProcessedBlock(lastBlockNumber) {
   lastProcessedBlock = lastBlockNumber
-  return redis.set(lastBlockRedisKey, lastProcessedBlock)
+  return redis.set(lastBlockRedisKey, lastProcessedBlock.toString())
 }
 
 function processEvents(events) {
@@ -87,26 +90,26 @@ function processEvents(events) {
 }
 
 async function getLastBlockToProcess() {
-  const lastBlockNumberPromise = getBlockNumber(web3Instance)
-  const requiredBlockConfirmationsPromise = getRequiredBlockConfirmations(bridgeContract)
+  const lastBlockNumberPromise = getBlockNumber(web3Instance).then(toBN)
+  const requiredBlockConfirmationsPromise = getRequiredBlockConfirmations(bridgeContract).then(toBN)
   const [lastBlockNumber, requiredBlockConfirmations] = await Promise.all([
     lastBlockNumberPromise,
     requiredBlockConfirmationsPromise
   ])
 
-  return lastBlockNumber - requiredBlockConfirmations
+  return lastBlockNumber.sub(requiredBlockConfirmations)
 }
 
 async function main({ sendToQueue }) {
   try {
     const lastBlockToProcess = await getLastBlockToProcess()
-    if (lastBlockToProcess <= lastProcessedBlock) {
+    if (lastBlockToProcess.lte(lastProcessedBlock)) {
       logger.info('All blocks already processed')
       return
     }
 
-    const fromBlock = toBN(lastProcessedBlock).add(toBN(1))
-    const toBlock = toBN(lastBlockToProcess)
+    const fromBlock = lastProcessedBlock.add(ONE)
+    const toBlock = lastBlockToProcess
 
     const events = await getEvents({
       contract: eventContract,
