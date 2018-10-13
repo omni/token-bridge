@@ -10,27 +10,26 @@ const {
   USER_ADDRESS,
   USER_ADDRESS_PRIVATE_KEY,
   FOREIGN_BRIDGE_ADDRESS,
-  FOREIGN_MIN_AMOUNT_PER_TX,
-  ERC20_TOKEN_ADDRESS
+  FOREIGN_MIN_AMOUNT_PER_TX
 } = process.env
 
 const NUMBER_OF_WITHDRAWALS_TO_SEND =
   process.argv[2] || process.env.NUMBER_OF_WITHDRAWALS_TO_SEND || 1
 
-const ERC20_ABI = [
+const ERC677_ABI = [
   {
     constant: false,
     inputs: [
       {
-        name: '_to',
+        name: '',
         type: 'address'
       },
       {
-        name: '_value',
+        name: '',
         type: 'uint256'
       },
       {
-        name: '_data',
+        name: '',
         type: 'bytes'
       }
     ],
@@ -46,10 +45,13 @@ const ERC20_ABI = [
     type: 'function'
   }
 ]
-
-const poa20 = new web3Foreign.eth.Contract(ERC20_ABI, ERC20_TOKEN_ADDRESS)
+const BRIDGE_ABI = require('../../abis/ForeignBridgeNativeToErc.abi')
 
 async function main() {
+  const bridge = new web3Foreign.eth.Contract(BRIDGE_ABI, FOREIGN_BRIDGE_ADDRESS)
+  const ERC20_TOKEN_ADDRESS = await bridge.methods.erc677token().call()
+  const poa20 = new web3Foreign.eth.Contract(ERC677_ABI, ERC20_TOKEN_ADDRESS)
+
   try {
     const foreignChaindId = await sendRawTx({
       chain: 'foreign',

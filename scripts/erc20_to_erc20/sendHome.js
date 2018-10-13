@@ -11,8 +11,7 @@ const {
   USER_ADDRESS,
   USER_ADDRESS_PRIVATE_KEY,
   HOME_BRIDGE_ADDRESS,
-  HOME_MIN_AMOUNT_PER_TX,
-  BRIDGEABLE_TOKEN_ADDRESS
+  HOME_MIN_AMOUNT_PER_TX
 } = process.env
 
 const NUMBER_OF_WITHDRAWALS_TO_SEND =
@@ -48,13 +47,17 @@ const BRIDGEABLE_TOKEN_ABI = [
   }
 ]
 
+const BRIDGE_ABI = require('../../abis/HomeBridgeErcToErc.abi')
+
 const homeRpcUrl = rpcUrlsManager.homeUrls[0]
 const homeProvider = new Web3.providers.HttpProvider(homeRpcUrl)
 const web3Home = new Web3(homeProvider)
 
-const erc677 = new web3Home.eth.Contract(BRIDGEABLE_TOKEN_ABI, BRIDGEABLE_TOKEN_ADDRESS)
-
 async function main() {
+  const bridge = new web3Home.eth.Contract(BRIDGE_ABI, HOME_BRIDGE_ADDRESS)
+  const BRIDGEABLE_TOKEN_ADDRESS = await bridge.methods.erc677token().call()
+  const erc677 = new web3Home.eth.Contract(BRIDGEABLE_TOKEN_ABI, BRIDGEABLE_TOKEN_ADDRESS)
+
   try {
     const homeChainId = await sendRawTx({
       chain: 'home',
