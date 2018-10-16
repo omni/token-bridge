@@ -2,7 +2,7 @@ require('dotenv').config()
 const promiseLimit = require('promise-limit')
 const { HttpListProviderError } = require('http-list-provider')
 const bridgeValidatorsABI = require('../../../abis/BridgeValidators.abi')
-const logger = require('../../services/logger')
+const rootLogger = require('../../services/logger')
 const { web3Home, web3Foreign } = require('../../services/web3')
 const { signatureToVRS } = require('../../utils/message')
 const estimateGas = require('./estimateGas')
@@ -38,6 +38,7 @@ function processCollectedSignaturesBuilder(config) {
       )
     }
 
+    rootLogger.debug(`Processing ${signatures.length} CollectedSignatures events`)
     const callbacks = signatures.map(colSignature =>
       limit(async () => {
         const {
@@ -46,11 +47,12 @@ function processCollectedSignaturesBuilder(config) {
           NumberOfCollectedSignatures
         } = colSignature.returnValues
 
+        const logger = rootLogger.child({
+          eventTransactionHash: colSignature.transactionHash
+        })
+
         if (authorityResponsibleForRelay === web3Home.utils.toChecksumAddress(VALIDATOR_ADDRESS)) {
-          logger.info(
-            { eventTransactionHash: colSignature.transactionHash },
-            `Processing CollectedSignatures ${colSignature.transactionHash}`
-          )
+          logger.info(`Processing CollectedSignatures ${colSignature.transactionHash}`)
           const message = await homeBridge.methods.message(messageHash).call()
 
           const requiredSignatures = []
@@ -85,19 +87,13 @@ function processCollectedSignaturesBuilder(config) {
                 'RPC Connection Error: submitSignature Gas Estimate cannot be obtained.'
               )
             } else if (e instanceof AlreadyProcessedError) {
-              logger.info(
-                { eventTransactionHash: colSignature.transactionHash },
-                `Already processed CollectedSignatures ${colSignature.transactionHash}`
-              )
+              logger.info(`Already processed CollectedSignatures ${colSignature.transactionHash}`)
               return
             } else if (
               e instanceof IncompatibleContractError ||
               e instanceof InvalidValidatorError
             ) {
-              logger.error(
-                { eventTransactionHash: colSignature.transactionHash },
-                `The message couldn't be processed; skipping: ${e.message}`
-              )
+              logger.error(`The message couldn't be processed; skipping: ${e.message}`)
               return
             } else {
               logger.error(e, 'Unknown error while processing transaction')
@@ -113,7 +109,6 @@ function processCollectedSignaturesBuilder(config) {
           })
         } else {
           logger.info(
-            { eventTransactionHash: colSignature.transactionHash },
             `Validator not responsible for relaying CollectedSignatures ${
               colSignature.transactionHash
             }`

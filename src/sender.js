@@ -76,17 +76,22 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
     const gasPrice = await GasPrice.getPrice()
 
     const ttl = REDIS_LOCK_TTL * txArray.length
+
+    logger.debug('Acquiring lock')
     const lock = await redlock.lock(nonceLock, ttl)
 
+    logger.debug('Reading nonce')
     let nonce = await readNonce()
     let insufficientFunds = false
     let minimumBalance = null
     const failedTx = []
 
+    logger.debug(`Sending ${txArray.length} transactions`)
     await syncForEach(txArray, async job => {
       const gasLimit = addExtraGas(job.gasEstimate, EXTRA_GAS_PERCENTAGE)
 
       try {
+        logger.debug(`Sendint transaction with nonce ${nonce}`)
         const txHash = await sendTx({
           chain: config.id,
           data: job.data,
@@ -131,7 +136,10 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
       }
     })
 
+    logger.debug('Updating nonce')
     await updateNonce(nonce)
+
+    logger.debug('Releasing lock')
     await lock.unlock()
 
     if (failedTx.length) {
@@ -142,6 +150,9 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
     logger.info(`Finished processing msg`)
 
     if (insufficientFunds) {
+      logger.warn(
+        'Insufficient funds. Stop sendint transactions until the account has the minimum balance'
+      )
       channel.close()
       waitForFunds(web3Instance, VALIDATOR_ADDRESS, minimumBalance, resume)
     }
@@ -149,6 +160,8 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
     logger.error(e)
     nackMsg(msg)
   }
+
+  logger.debug('Finished')
 }
 
 initialize()

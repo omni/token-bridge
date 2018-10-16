@@ -101,11 +101,15 @@ async function getLastBlockToProcess() {
 
 async function main({ sendToQueue }) {
   try {
+    logger.debug('Getting last block')
     const lastBlockToProcess = await getLastBlockToProcess()
+
     if (lastBlockToProcess <= lastProcessedBlock) {
-      logger.info('All blocks already processed')
+      logger.debug('All blocks already processed')
       return
     }
+
+    logger.debug(`Getting events between block ${lastProcessedBlock + 1} and ${lastBlockToProcess}`)
     const events = await getEvents({
       contract: eventContract,
       event: config.event,
@@ -124,10 +128,13 @@ async function main({ sendToQueue }) {
       }
     }
 
+    logger.debug('Updating last processed block')
     await updateLastProcessedBlock(lastBlockToProcess)
   } catch (e) {
     logger.error(e)
   }
+
+  logger.debug('Finished')
 }
 
 initialize()

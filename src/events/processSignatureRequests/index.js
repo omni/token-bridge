@@ -2,7 +2,7 @@ require('dotenv').config()
 const promiseLimit = require('promise-limit')
 const { HttpListProviderError } = require('http-list-provider')
 const bridgeValidatorsABI = require('../../../abis/BridgeValidators.abi')
-const logger = require('../../services/logger')
+const rootLogger = require('../../services/logger')
 const { web3Home } = require('../../services/web3')
 const { createMessage } = require('../../utils/message')
 const estimateGas = require('./estimateGas')
@@ -35,12 +35,17 @@ function processSignatureRequestsBuilder(config) {
       validatorContract = new web3Home.eth.Contract(bridgeValidatorsABI, validatorContractAddress)
     }
 
+    rootLogger.debug(`Processing ${signatureRequests.length} SignatureRequest events`)
     const callbacks = signatureRequests.map(signatureRequest =>
       limit(async () => {
         const { recipient, value } = signatureRequest.returnValues
 
+        const logger = rootLogger.child({
+          eventTransactionHash: signatureRequest.transactionHash
+        })
+
         logger.info(
-          { eventTransactionHash: signatureRequest.transactionHash, sender: recipient, value },
+          { sender: recipient, value },
           `Processing signatureRequest ${signatureRequest.transactionHash}`
         )
 
@@ -73,14 +78,10 @@ function processSignatureRequestsBuilder(config) {
             logger.fatal({ address: VALIDATOR_ADDRESS }, 'Invalid validator')
             process.exit(10)
           } else if (e instanceof AlreadySignedError) {
-            logger.info(
-              { eventTransactionHash: signatureRequest.transactionHash },
-              `Already signed signatureRequest ${signatureRequest.transactionHash}`
-            )
+            logger.info(`Already signed signatureRequest ${signatureRequest.transactionHash}`)
             return
           } else if (e instanceof AlreadyProcessedError) {
             logger.info(
-              { eventTransactionHash: signatureRequest.transactionHash },
               `signatureRequest ${
                 signatureRequest.transactionHash
               } was already processed by other validators`

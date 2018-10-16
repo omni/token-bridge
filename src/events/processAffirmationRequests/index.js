@@ -1,5 +1,5 @@
 require('dotenv').config()
-const logger = require('../../services/logger')
+const rootLogger = require('../../services/logger')
 const { web3Home } = require('../../services/web3')
 const promiseLimit = require('promise-limit')
 const bridgeValidatorsABI = require('../../../abis/BridgeValidators.abi')
@@ -29,12 +29,17 @@ function processAffirmationRequestsBuilder(config) {
       validatorContract = new web3Home.eth.Contract(bridgeValidatorsABI, validatorContractAddress)
     }
 
+    rootLogger.debug(`Processing ${affirmationRequests.length} AffirmationRequest events`)
     const callbacks = affirmationRequests.map(affirmationRequest =>
       limit(async () => {
         const { recipient, value } = affirmationRequest.returnValues
 
+        const logger = rootLogger.child({
+          eventTransactionHash: affirmationRequest.transactionHash
+        })
+
         logger.info(
-          { eventTransactionHash: affirmationRequest.transactionHash, sender: recipient, value },
+          { sender: recipient, value },
           `Processing affirmationRequest ${affirmationRequest.transactionHash}`
         )
 
@@ -58,14 +63,10 @@ function processAffirmationRequestsBuilder(config) {
             logger.fatal({ address: VALIDATOR_ADDRESS }, 'Invalid validator')
             process.exit(10)
           } else if (e instanceof AlreadySignedError) {
-            logger.info(
-              { eventTransactionHash: affirmationRequest.transactionHash },
-              `Already signed affirmationRequest ${affirmationRequest.transactionHash}`
-            )
+            logger.info(`Already signed affirmationRequest ${affirmationRequest.transactionHash}`)
             return
           } else if (e instanceof AlreadyProcessedError) {
             logger.info(
-              { eventTransactionHash: affirmationRequest.transactionHash },
               `affirmationRequest ${
                 affirmationRequest.transactionHash
               } was already processed by other validators`

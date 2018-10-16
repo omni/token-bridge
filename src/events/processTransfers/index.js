@@ -2,7 +2,7 @@ require('dotenv').config()
 const promiseLimit = require('promise-limit')
 const { HttpListProviderError } = require('http-list-provider')
 const bridgeValidatorsABI = require('../../../abis/BridgeValidators.abi')
-const logger = require('../../services/logger')
+const rootLogger = require('../../services/logger')
 const { web3Home } = require('../../services/web3')
 const {
   AlreadyProcessedError,
@@ -29,9 +29,14 @@ function processTransfersBuilder(config) {
       validatorContract = new web3Home.eth.Contract(bridgeValidatorsABI, validatorContractAddress)
     }
 
+    rootLogger.debug(`Processing ${transfers.length} Transfer events`)
     const callbacks = transfers.map(transfer =>
       limit(async () => {
         const { from, value } = transfer.returnValues
+
+        const logger = rootLogger.child({
+          eventTransactionHash: transfer.transactionHash
+        })
 
         let gasEstimate
         try {
@@ -53,14 +58,10 @@ function processTransfersBuilder(config) {
             logger.fatal({ address: VALIDATOR_ADDRESS }, 'Invalid validator')
             process.exit(10)
           } else if (e instanceof AlreadySignedError) {
-            logger.info(
-              { eventTransactionHash: transfer.transactionHash },
-              `Already signed transfer ${transfer.transactionHash}`
-            )
+            logger.info(`Already signed transfer ${transfer.transactionHash}`)
             return
           } else if (e instanceof AlreadyProcessedError) {
             logger.info(
-              { eventTransactionHash: transfer.transactionHash },
               `transfer ${transfer.transactionHash} was already processed by other validators`
             )
             return

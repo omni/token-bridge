@@ -7,6 +7,7 @@ const config =
 const logger = pino({
   enabled: process.env.NODE_ENV !== 'test',
   name: config.name,
+  level: 'debug',
   base:
     process.env.NODE_ENV === 'production'
       ? {
