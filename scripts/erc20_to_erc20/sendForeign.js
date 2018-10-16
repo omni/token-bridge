@@ -6,6 +6,7 @@ const Web3 = require('web3')
 const Web3Utils = require('web3-utils')
 const rpcUrlsManager = require('../../src/services/getRpcUrlsManager')
 const { sendTx, sendRawTx } = require('../../src/tx/sendTx')
+const { isValidAmount } = require('../utils/utils')
 
 const {
   USER_ADDRESS,
@@ -30,6 +31,8 @@ async function main() {
   const poa20 = new web3Foreign.eth.Contract(ERC20_ABI, ERC20_TOKEN_ADDRESS)
 
   try {
+    await isValidAmount(FOREIGN_MIN_AMOUNT_PER_TX, bridge)
+
     const foreignChaindId = await sendRawTx({
       chain: 'foreign',
       params: [],

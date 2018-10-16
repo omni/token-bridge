@@ -6,6 +6,7 @@ const Web3 = require('web3')
 const Web3Utils = require('web3-utils')
 const rpcUrlsManager = require('../../src/services/getRpcUrlsManager')
 const { sendTx, sendRawTx } = require('../../src/tx/sendTx')
+const { isValidAmount } = require('../utils/utils')
 
 const {
   USER_ADDRESS,
@@ -60,6 +61,8 @@ async function main() {
   const erc677 = new web3Home.eth.Contract(BRIDGEABLE_TOKEN_ABI, BRIDGEABLE_TOKEN_ADDRESS)
 
   try {
+    await isValidAmount(HOME_MIN_AMOUNT_PER_TX, bridge)
+
     const homeChainId = await sendRawTx({
       chain: 'home',
       params: [],

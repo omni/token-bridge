@@ -5,6 +5,7 @@ require('dotenv').config({
 const Web3Utils = require('web3-utils')
 const { web3Foreign } = require('../../src/services/web3')
 const { sendTx, sendRawTx } = require('../../src/tx/sendTx')
+const { isValidAmount } = require('../utils/utils')
 
 const {
   USER_ADDRESS,
@@ -54,6 +55,8 @@ async function main() {
   const poa20 = new web3Foreign.eth.Contract(ERC677_ABI, ERC20_TOKEN_ADDRESS)
 
   try {
+    await isValidAmount(FOREIGN_MIN_AMOUNT_PER_TX, bridge)
+
     const foreignChaindId = await sendRawTx({
       chain: 'foreign',
       params: [],
