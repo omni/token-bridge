@@ -8,6 +8,7 @@ const HomeErcABI = require('../../abis/HomeBridgeErcToErc.abi')
 const ForeignErcABI = require('../../abis/ForeignBridgeErcToErc.abi')
 const logger = require('../services/logger')
 const { setIntervalAndRun } = require('../utils/utils')
+const { DEFAULT_UPDATE_INTERVAL } = require('../utils/constants')
 
 const HomeABI = isErcToErc ? HomeErcABI : HomeNativeABI
 const ForeignABI = isErcToErc ? ForeignNativeABI : ForeignErcABI
@@ -70,14 +71,14 @@ async function start(chainId) {
     bridgeContract = homeBridge
     oracleUrl = HOME_GAS_PRICE_ORACLE_URL
     speedType = HOME_GAS_PRICE_SPEED_TYPE
-    updateInterval = HOME_GAS_PRICE_UPDATE_INTERVAL
+    updateInterval = HOME_GAS_PRICE_UPDATE_INTERVAL || DEFAULT_UPDATE_INTERVAL
 
     cachedGasPrice = HOME_GAS_PRICE_FALLBACK
   } else if (chainId === 'foreign') {
     bridgeContract = foreignBridge
     oracleUrl = FOREIGN_GAS_PRICE_ORACLE_URL
     speedType = FOREIGN_GAS_PRICE_SPEED_TYPE
-    updateInterval = FOREIGN_GAS_PRICE_UPDATE_INTERVAL
+    updateInterval = FOREIGN_GAS_PRICE_UPDATE_INTERVAL || DEFAULT_UPDATE_INTERVAL
 
     cachedGasPrice = FOREIGN_GAS_PRICE_FALLBACK
   } else {

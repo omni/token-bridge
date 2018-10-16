@@ -6,5 +6,6 @@ module.exports = {
     factor: 1.4,
     maxTimeout: 360000,
     randomize: true
-  }
+  },
+  DEFAULT_UPDATE_INTERVAL: 600000
 }
