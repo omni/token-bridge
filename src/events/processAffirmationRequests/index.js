@@ -12,8 +12,6 @@ const {
 } = require('../../utils/errors')
 const { HttpListProviderError } = require('http-list-provider')
 
-const { VALIDATOR_ADDRESS } = process.env
-
 const limit = promiseLimit(MAX_CONCURRENT_EVENTS)
 
 let validatorContract = null
@@ -52,7 +50,7 @@ function processAffirmationRequestsBuilder(config) {
             recipient,
             value,
             txHash: affirmationRequest.transactionHash,
-            address: VALIDATOR_ADDRESS
+            address: config.validatorAddress
           })
         } catch (e) {
           if (e instanceof HttpListProviderError) {
@@ -60,7 +58,7 @@ function processAffirmationRequestsBuilder(config) {
               'RPC Connection Error: submitSignature Gas Estimate cannot be obtained.'
             )
           } else if (e instanceof InvalidValidatorError) {
-            logger.fatal({ address: VALIDATOR_ADDRESS }, 'Invalid validator')
+            logger.fatal({ address: config.validatorAddress }, 'Invalid validator')
             process.exit(10)
           } else if (e instanceof AlreadySignedError) {
             logger.info(`Already signed affirmationRequest ${affirmationRequest.transactionHash}`)
@@ -80,7 +78,7 @@ function processAffirmationRequestsBuilder(config) {
 
         const data = await homeBridge.methods
           .executeAffirmation(recipient, value, affirmationRequest.transactionHash)
-          .encodeABI({ from: VALIDATOR_ADDRESS })
+          .encodeABI({ from: config.validatorAddress })
 
         txToSend.push({
           data,

@@ -1,6 +1,7 @@
 require('dotenv').config()
 
 const { web3Home, web3Foreign } = require('../src/services/web3')
+const { privateKeyToAddress } = require('../src/utils/utils')
 
 const homeNativeErcAbi = require('../abis/HomeBridgeNativeToErc.abi')
 const foreignNativeErcAbi = require('../abis/ForeignBridgeNativeToErc.abi')
@@ -10,6 +11,8 @@ const foreignErcErcAbi = require('../abis/ForeignBridgeErcToErc.abi')
 
 const homeErcNativeAbi = require('../abis/HomeBridgeErcToNative.abi')
 const foreignErcNativeAbi = require('../abis/ForeignBridgeErcToNative.abi')
+
+const { VALIDATOR_ADDRESS, VALIDATOR_ADDRESS_PRIVATE_KEY } = process.env
 
 let homeAbi
 let foreignAbi
@@ -46,7 +49,8 @@ const bridgeConfig = {
   homeBridgeAbi: homeAbi,
   foreignBridgeAddress: process.env.FOREIGN_BRIDGE_ADDRESS,
   foreignBridgeAbi: foreignAbi,
-  eventFilter: {}
+  eventFilter: {},
+  validatorAddress: VALIDATOR_ADDRESS || privateKeyToAddress(VALIDATOR_ADDRESS_PRIVATE_KEY)
 }
 
 const homeConfig = {

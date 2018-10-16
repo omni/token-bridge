@@ -13,7 +13,7 @@ const {
 } = require('../../utils/errors')
 const { MAX_CONCURRENT_EVENTS } = require('../../utils/constants')
 
-const { VALIDATOR_ADDRESS, VALIDATOR_ADDRESS_PRIVATE_KEY } = process.env
+const { VALIDATOR_ADDRESS_PRIVATE_KEY } = process.env
 
 const limit = promiseLimit(MAX_CONCURRENT_EVENTS)
 
@@ -67,7 +67,7 @@ function processSignatureRequestsBuilder(config) {
             validatorContract,
             signature: signature.signature,
             message,
-            address: VALIDATOR_ADDRESS
+            address: config.validatorAddress
           })
         } catch (e) {
           if (e instanceof HttpListProviderError) {
@@ -75,7 +75,7 @@ function processSignatureRequestsBuilder(config) {
               'RPC Connection Error: submitSignature Gas Estimate cannot be obtained.'
             )
           } else if (e instanceof InvalidValidatorError) {
-            logger.fatal({ address: VALIDATOR_ADDRESS }, 'Invalid validator')
+            logger.fatal({ address: config.validatorAddress }, 'Invalid validator')
             process.exit(10)
           } else if (e instanceof AlreadySignedError) {
             logger.info(`Already signed signatureRequest ${signatureRequest.transactionHash}`)
@@ -95,7 +95,7 @@ function processSignatureRequestsBuilder(config) {
 
         const data = await homeBridge.methods
           .submitSignature(signature.signature, message)
-          .encodeABI({ from: VALIDATOR_ADDRESS })
+          .encodeABI({ from: config.validatorAddress })
 
         txToSend.push({
           data,

@@ -12,8 +12,6 @@ const {
 const { MAX_CONCURRENT_EVENTS } = require('../../utils/constants')
 const estimateGas = require('../processAffirmationRequests/estimateGas')
 
-const { VALIDATOR_ADDRESS } = process.env
-
 const limit = promiseLimit(MAX_CONCURRENT_EVENTS)
 
 let validatorContract = null
@@ -47,7 +45,7 @@ function processTransfersBuilder(config) {
             recipient: from,
             value,
             txHash: transfer.transactionHash,
-            address: VALIDATOR_ADDRESS
+            address: config.validatorAddress
           })
         } catch (e) {
           if (e instanceof HttpListProviderError) {
@@ -55,7 +53,7 @@ function processTransfersBuilder(config) {
               'RPC Connection Error: submitSignature Gas Estimate cannot be obtained.'
             )
           } else if (e instanceof InvalidValidatorError) {
-            logger.fatal({ address: VALIDATOR_ADDRESS }, 'Invalid validator')
+            logger.fatal({ address: config.validatorAddress }, 'Invalid validator')
             process.exit(10)
           } else if (e instanceof AlreadySignedError) {
             logger.info(`Already signed transfer ${transfer.transactionHash}`)
@@ -73,7 +71,7 @@ function processTransfersBuilder(config) {
 
         const data = await homeBridge.methods
           .executeAffirmation(from, value, transfer.transactionHash)
-          .encodeABI({ from: VALIDATOR_ADDRESS })
+          .encodeABI({ from: config.validatorAddress })
 
         txToSend.push({
           data,

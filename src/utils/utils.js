@@ -56,10 +56,23 @@ function setIntervalAndRun(f, interval) {
   return handler
 }
 
+function add0xPrefix(s) {
+  if (s.indexOf('0x') === 0) {
+    return s
+  }
+
+  return `0x${s}`
+}
+
+function privateKeyToAddress(privateKey) {
+  return new Web3().eth.accounts.privateKeyToAccount(add0xPrefix(privateKey)).address
+}
+
 module.exports = {
   syncForEach,
   checkHTTPS,
   waitForFunds,
   addExtraGas,
-  setIntervalAndRun
+  setIntervalAndRun,
+  privateKeyToAddress
 }

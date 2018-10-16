@@ -13,8 +13,6 @@ const {
 } = require('../../utils/errors')
 const { MAX_CONCURRENT_EVENTS } = require('../../utils/constants')
 
-const { VALIDATOR_ADDRESS } = process.env
-
 const limit = promiseLimit(MAX_CONCURRENT_EVENTS)
 
 let validatorContract = null
@@ -51,7 +49,9 @@ function processCollectedSignaturesBuilder(config) {
           eventTransactionHash: colSignature.transactionHash
         })
 
-        if (authorityResponsibleForRelay === web3Home.utils.toChecksumAddress(VALIDATOR_ADDRESS)) {
+        if (
+          authorityResponsibleForRelay === web3Home.utils.toChecksumAddress(config.validatorAddress)
+        ) {
           logger.info(`Processing CollectedSignatures ${colSignature.transactionHash}`)
           const message = await homeBridge.methods.message(messageHash).call()
 
