@@ -44,22 +44,22 @@ describe('utils', () => {
     })
 
     it('should do nothing if HTTP is allowed and the URL is https', () => {
-      utils.checkHTTPS('yes')('home')('https://www.google.com')
+      utils.checkHTTPS('yes', logger)('home')('https://www.google.com')
       expect(logger.warn.called).to.equal(false)
     })
 
     it('should emit a warning if HTTP is allowed and the URL is http', () => {
-      utils.checkHTTPS('yes')('home')('http://www.google.com')
+      utils.checkHTTPS('yes', logger)('home')('http://www.google.com')
       expect(logger.warn.called).to.equal(true)
     })
 
     it('should do nothing if HTTP is not allowed and the URL is https', () => {
-      utils.checkHTTPS('no')('home')('https://www.google.com')
+      utils.checkHTTPS('no', logger)('home')('https://www.google.com')
       expect(logger.warn.called).to.equal(false)
     })
 
     it('should throw an error if HTTP is not allowed and the URL is http', () => {
-      expect(() => utils.checkHTTPS('no')('home')('http://www.google.com')).to.throw()
+      expect(() => utils.checkHTTPS('no', logger)('home')('http://www.google.com')).to.throw()
     })
   })
 

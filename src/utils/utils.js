@@ -1,6 +1,6 @@
 const BigNumber = require('bignumber.js')
 const promiseRetry = require('promise-retry')
-const logger = require('../services/logger')
+const Web3 = require('web3')
 
 async function syncForEach(array, callback) {
   for (let index = 0; index < array.length; index++) {
@@ -8,7 +8,7 @@ async function syncForEach(array, callback) {
   }
 }
 
-function checkHTTPS(ALLOW_HTTP) {
+function checkHTTPS(ALLOW_HTTP, logger) {
   return function(network) {
     return function(url) {
       if (!/^https.*/.test(url)) {

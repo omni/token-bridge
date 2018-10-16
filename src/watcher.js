@@ -28,7 +28,7 @@ let lastProcessedBlock = config.startBlock || 0
 
 async function initialize() {
   try {
-    const checkHttps = checkHTTPS(process.env.ALLOW_HTTP)
+    const checkHttps = checkHTTPS(process.env.ALLOW_HTTP, logger)
 
     rpcUrlsManager.homeUrls.forEach(checkHttps('home'))
     rpcUrlsManager.foreignUrls.forEach(checkHttps('foreign'))
