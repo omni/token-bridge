@@ -11,7 +11,8 @@ const {
   USER_ADDRESS,
   USER_ADDRESS_PRIVATE_KEY,
   FOREIGN_BRIDGE_ADDRESS,
-  FOREIGN_MIN_AMOUNT_PER_TX
+  FOREIGN_MIN_AMOUNT_PER_TX,
+  FOREIGN_TEST_TX_GAS_PRICE
 } = process.env
 
 const NUMBER_OF_DEPOSITS_TO_SEND = process.argv[2] || process.env.NUMBER_OF_DEPOSITS_TO_SEND || 1
@@ -53,7 +54,7 @@ async function main() {
         privateKey: USER_ADDRESS_PRIVATE_KEY,
         data,
         nonce,
-        gasPrice: '1000000000',
+        gasPrice: FOREIGN_TEST_TX_GAS_PRICE,
         amount: '0',
         gasLimit,
         to: ERC20_TOKEN_ADDRESS,

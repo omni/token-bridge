@@ -277,10 +277,10 @@ When running the processes, the following commands can be used to test functiona
 | `USER_ADDRESS_PRIVATE_KEY` | A private key belonging to the account. |
 | `HOME_BRIDGE_ADDRESS` | Address of the bridge in the Home network to send transactions. |
 | `HOME_MIN_AMOUNT_PER_TX` | Value (in _eth_ or tokens) to be sent in one transaction for the Home network. |
+| `HOME_TEST_TX_GAS_PRICE` | The gas price (in Wei) that is used to send transactions in the Home network . |
 | `FOREIGN_BRIDGE_ADDRESS` | Address of the bridge in the Foreign network to send transactions. |
 | `FOREIGN_MIN_AMOUNT_PER_TX` | Value (in _eth_ or tokens) to be sent in one transaction for the Foreign network. |
-| `ERC20_TOKEN_ADDRESS` |  An address of the token deployed on the Home side for `ERC20-to-ERC20` mode. |
-| `BRIDGEABLE_TOKEN_ADDRESS` | An address of the token deployed on the Home side for `Native-to-ERC20` mode or on the Foreign side for `ERC20-to-ERC20`. |
+| `FOREIGN_TEST_TX_GAS_PRICE` | The gas price (in Wei) that is used to send transactions in the Foreign network . |
 
 ## Contributing
 

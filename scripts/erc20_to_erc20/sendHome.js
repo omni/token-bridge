@@ -11,7 +11,8 @@ const {
   USER_ADDRESS,
   USER_ADDRESS_PRIVATE_KEY,
   HOME_BRIDGE_ADDRESS,
-  HOME_MIN_AMOUNT_PER_TX
+  HOME_MIN_AMOUNT_PER_TX,
+  HOME_TEST_TX_GAS_PRICE
 } = process.env
 
 const NUMBER_OF_WITHDRAWALS_TO_SEND =
@@ -83,7 +84,7 @@ async function main() {
         privateKey: USER_ADDRESS_PRIVATE_KEY,
         data,
         nonce,
-        gasPrice: '1000000000',
+        gasPrice: HOME_TEST_TX_GAS_PRICE,
         amount: '0',
         gasLimit,
         to: BRIDGEABLE_TOKEN_ADDRESS,
