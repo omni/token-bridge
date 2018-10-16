@@ -99,7 +99,7 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
       const gasLimit = addExtraGas(job.gasEstimate, EXTRA_GAS_PERCENTAGE)
 
       try {
-        logger.debug(`Sendint transaction with nonce ${nonce}`)
+        logger.debug(`Sending transaction with nonce ${nonce}`)
         const txHash = await sendTx({
           chain: config.id,
           data: job.data,
@@ -159,7 +159,7 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
 
     if (insufficientFunds) {
       logger.warn(
-        'Insufficient funds. Stop sendint transactions until the account has the minimum balance'
+        'Insufficient funds. Stop sending transactions until the account has the minimum balance'
       )
       channel.close()
       waitForFunds(web3Instance, VALIDATOR_ADDRESS, minimumBalance, resume)
