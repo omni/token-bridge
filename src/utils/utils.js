@@ -65,7 +65,9 @@ function add0xPrefix(s) {
 }
 
 function privateKeyToAddress(privateKey) {
-  return new Web3().eth.accounts.privateKeyToAccount(add0xPrefix(privateKey)).address
+  return privateKey
+    ? new Web3().eth.accounts.privateKeyToAccount(add0xPrefix(privateKey)).address
+    : null
 }
 
 module.exports = {
