@@ -7,7 +7,7 @@ const { redis } = require('./services/redisClient')
 const logger = require('./services/logger')
 const rpcUrlsManager = require('./services/getRpcUrlsManager')
 const { getRequiredBlockConfirmations, getEvents } = require('./tx/web3')
-const { checkHTTPS } = require('./utils/utils')
+const { checkHTTPS, watchdog } = require('./utils/utils')
 
 if (process.argv.length < 3) {
   logger.error('Please check the number of arguments, config file was not provided')
@@ -30,6 +30,8 @@ const eventContract = new web3Instance.eth.Contract(config.eventAbi, config.even
 const lastBlockRedisKey = `${config.id}:lastProcessedBlock`
 let lastProcessedBlock = BN.max(config.startBlock.sub(ONE), ZERO)
 
+const maxProcessingTime = process.env.MAX_PROCESSING_TIME
+
 async function initialize() {
   try {
     const checkHttps = checkHTTPS(process.env.ALLOW_HTTP)
@@ -51,7 +53,11 @@ async function initialize() {
 async function runMain({ sendToQueue }) {
   try {
     if (connection.isConnected() && redis.status === 'ready') {
-      await main({ sendToQueue })
+      if (maxProcessingTime) {
+        await watchdog(() => main({ sendToQueue }), maxProcessingTime, () => process.exit(11))
+      } else {
+        await main({ sendToQueue })
+      }
     }
   } catch (e) {
     logger.error(e)
