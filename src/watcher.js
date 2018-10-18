@@ -55,9 +55,10 @@ async function runMain({ sendToQueue }) {
   try {
     if (connection.isConnected() && redis.status === 'ready') {
       if (maxProcessingTime) {
-        await watchdog(() => main({ sendToQueue }), maxProcessingTime, () =>
+        await watchdog(() => main({ sendToQueue }), maxProcessingTime, () => {
+          logger.fatal('Max processing time reached')
           process.exit(EXIT_CODES.MAX_TIME_REACHED)
-        )
+        })
       } else {
         await main({ sendToQueue })
       }
