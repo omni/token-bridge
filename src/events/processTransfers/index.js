@@ -9,7 +9,7 @@ const {
   AlreadySignedError,
   InvalidValidatorError
 } = require('../../utils/errors')
-const { MAX_CONCURRENT_EVENTS } = require('../../utils/constants')
+const { EXIT_CODES, MAX_CONCURRENT_EVENTS } = require('../../utils/constants')
 const estimateGas = require('../processAffirmationRequests/estimateGas')
 
 const { VALIDATOR_ADDRESS } = process.env
@@ -51,7 +51,7 @@ function processTransfersBuilder(config) {
             )
           } else if (e instanceof InvalidValidatorError) {
             logger.fatal({ address: VALIDATOR_ADDRESS }, 'Invalid validator')
-            process.exit(10)
+            process.exit(EXIT_CODES.INCOMPATIBILITY)
           } else if (e instanceof AlreadySignedError) {
             logger.info(
               { eventTransactionHash: transfer.transactionHash },

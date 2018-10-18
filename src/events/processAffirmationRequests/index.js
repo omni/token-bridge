@@ -3,7 +3,7 @@ const logger = require('../../services/logger')
 const { web3Home } = require('../../services/web3')
 const promiseLimit = require('promise-limit')
 const bridgeValidatorsABI = require('../../../abis/BridgeValidators.abi')
-const { MAX_CONCURRENT_EVENTS } = require('../../utils/constants')
+const { EXIT_CODES, MAX_CONCURRENT_EVENTS } = require('../../utils/constants')
 const estimateGas = require('./estimateGas')
 const {
   AlreadyProcessedError,
@@ -56,7 +56,7 @@ function processAffirmationRequestsBuilder(config) {
             )
           } else if (e instanceof InvalidValidatorError) {
             logger.fatal({ address: VALIDATOR_ADDRESS }, 'Invalid validator')
-            process.exit(10)
+            process.exit(EXIT_CODES.INCOMPATIBILITY)
           } else if (e instanceof AlreadySignedError) {
             logger.info(
               { eventTransactionHash: affirmationRequest.transactionHash },

@@ -11,7 +11,7 @@ const {
   AlreadySignedError,
   InvalidValidatorError
 } = require('../../utils/errors')
-const { MAX_CONCURRENT_EVENTS } = require('../../utils/constants')
+const { EXIT_CODES, MAX_CONCURRENT_EVENTS } = require('../../utils/constants')
 
 const { VALIDATOR_ADDRESS, VALIDATOR_ADDRESS_PRIVATE_KEY } = process.env
 
@@ -71,7 +71,7 @@ function processSignatureRequestsBuilder(config) {
             )
           } else if (e instanceof InvalidValidatorError) {
             logger.fatal({ address: VALIDATOR_ADDRESS }, 'Invalid validator')
-            process.exit(10)
+            process.exit(EXIT_CODES.INCOMPATIBILITY)
           } else if (e instanceof AlreadySignedError) {
             logger.info(
               { eventTransactionHash: signatureRequest.transactionHash },
