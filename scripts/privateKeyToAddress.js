@@ -1,9 +1,13 @@
+const path = require('path')
+require('dotenv').config({
+  path: path.join(__dirname, '..', '.env')
+})
 const { privateKeyToAddress } = require('../src/utils/utils')
 
-const privateKey = process.argv[2]
+const privateKey = process.env.VALIDATOR_ADDRESS_PRIVATE_KEY
 
 if (!privateKey) {
-  console.error('Usage: node privateKeyToAddress.js <private-key>')
+  console.error('Environment variable VALIDATOR_ADDRESS_PRIVATE_KEY is not set')
   process.exit(1)
 }
 
