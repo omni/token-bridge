@@ -162,7 +162,7 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
       await sendToQueue(failedTx)
     }
     ackMsg(msg)
-    logger.info(`Finished processing msg`)
+    logger.debug(`Finished processing msg`)
 
     if (insufficientFunds) {
       logger.warn(
