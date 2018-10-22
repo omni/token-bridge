@@ -105,7 +105,6 @@ async function getLastBlockToProcess() {
 
 async function main({ sendToQueue }) {
   try {
-    logger.debug('Getting last block')
     const lastBlockToProcess = await getLastBlockToProcess()
 
     if (lastBlockToProcess.lte(lastProcessedBlock)) {
@@ -116,7 +115,6 @@ async function main({ sendToQueue }) {
     const fromBlock = lastProcessedBlock.add(ONE)
     const toBlock = lastBlockToProcess
 
-    logger.debug(`Getting events between block ${fromBlock} and ${toBlock}`)
     const events = await getEvents({
       contract: eventContract,
       event: config.event,
