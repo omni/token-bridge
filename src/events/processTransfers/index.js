@@ -39,6 +39,8 @@ function processTransfersBuilder(config) {
           eventTransactionHash: transfer.transactionHash
         })
 
+        logger.info({ from, value }, `Processing transfer ${transfer.transactionHash}`)
+
         let gasEstimate
         try {
           gasEstimate = await estimateGas({
