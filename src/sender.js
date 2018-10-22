@@ -60,12 +60,20 @@ function resume(newBalance) {
 }
 
 async function readNonce(forceUpdate) {
+  logger.debug('Reading nonce')
   if (forceUpdate) {
+    logger.debug('Forcing update of nonce')
     return getNonce(web3Instance, VALIDATOR_ADDRESS)
   }
 
-  const result = await redis.get(nonceKey)
-  return result ? Number(result) : getNonce(web3Instance, VALIDATOR_ADDRESS)
+  const nonce = await redis.get(nonceKey)
+  if (nonce) {
+    logger.debug({ nonce }, 'Nonce found in the DB')
+    return Number(nonce)
+  } else {
+    logger.debug("Nonce wasn't found in the DB")
+    return getNonce(web3Instance, VALIDATOR_ADDRESS)
+  }
 }
 
 function updateNonce(nonce) {
@@ -88,7 +96,6 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
     logger.debug('Acquiring lock')
     const lock = await redlock.lock(nonceLock, ttl)
 
-    logger.debug('Reading nonce')
     let nonce = await readNonce()
     let insufficientFunds = false
     let minimumBalance = null
