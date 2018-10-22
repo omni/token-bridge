@@ -133,7 +133,7 @@ async function main({ sendToQueue }) {
       }
     }
 
-    logger.debug('Updating last processed block')
+    logger.debug({ lastProcessedBlock: lastBlockToProcess }, 'Updating last processed block')
     await updateLastProcessedBlock(lastBlockToProcess)
   } catch (e) {
     logger.error(e)
