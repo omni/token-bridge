@@ -22,7 +22,7 @@ async function sendTx({
       to,
       data,
       value: Web3Utils.toWei(amount),
-      gasPrice: Web3Utils.toWei(gasPrice, 'gwei'),
+      gasPrice,
       gas: gasLimit
     },
     `0x${privateKey}`

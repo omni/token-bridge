@@ -7,10 +7,19 @@ const logger = require('./services/logger')
 const rpcUrlsManager = require('./services/getRpcUrlsManager')
 const { sendTx } = require('./tx/sendTx')
 const { getNonce, getChainId } = require('./tx/web3')
-const { addExtraGas, checkHTTPS, syncForEach, waitForFunds, watchdog } = require('./utils/utils')
+const {
+  addExtraGas,
+  checkHTTPS,
+  privateKeyToAddress,
+  syncForEach,
+  waitForFunds,
+  watchdog
+} = require('./utils/utils')
 const { EXIT_CODES, EXTRA_GAS_PERCENTAGE } = require('./utils/constants')
 
-const { VALIDATOR_ADDRESS, VALIDATOR_ADDRESS_PRIVATE_KEY, REDIS_LOCK_TTL } = process.env
+const { VALIDATOR_ADDRESS_PRIVATE_KEY, REDIS_LOCK_TTL } = process.env
+
+const VALIDATOR_ADDRESS = privateKeyToAddress(VALIDATOR_ADDRESS_PRIVATE_KEY)
 
 if (process.argv.length < 3) {
   logger.error('Please check the number of arguments, config file was not provided')
@@ -28,7 +37,7 @@ const maxProcessingTime = process.env.MAX_PROCESSING_TIME
 
 async function initialize() {
   try {
-    const checkHttps = checkHTTPS(process.env.ALLOW_HTTP)
+    const checkHttps = checkHTTPS(process.env.ALLOW_HTTP, logger)
 
     rpcUrlsManager.homeUrls.forEach(checkHttps('home'))
     rpcUrlsManager.foreignUrls.forEach(checkHttps('foreign'))
@@ -63,12 +72,20 @@ function resume(newBalance) {
 }
 
 async function readNonce(forceUpdate) {
+  logger.debug('Reading nonce')
   if (forceUpdate) {
+    logger.debug('Forcing update of nonce')
     return getNonce(web3Instance, VALIDATOR_ADDRESS)
   }
 
-  const result = await redis.get(nonceKey)
-  return result ? Number(result) : getNonce(web3Instance, VALIDATOR_ADDRESS)
+  const nonce = await redis.get(nonceKey)
+  if (nonce) {
+    logger.debug({ nonce }, 'Nonce found in the DB')
+    return Number(nonce)
+  } else {
+    logger.debug("Nonce wasn't found in the DB")
+    return getNonce(web3Instance, VALIDATOR_ADDRESS)
+  }
 }
 
 function updateNonce(nonce) {
@@ -84,9 +101,11 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
 
     const txArray = JSON.parse(msg.content)
     logger.info(`Msg received with ${txArray.length} Tx to send`)
-    const gasPrice = await GasPrice.getPrice()
+    const gasPrice = GasPrice.getPrice()
 
     const ttl = REDIS_LOCK_TTL * txArray.length
+
+    logger.debug('Acquiring lock')
     const lock = await redlock.lock(nonceLock, ttl)
 
     let nonce = await readNonce()
@@ -94,10 +113,12 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
     let minimumBalance = null
     const failedTx = []
 
+    logger.debug(`Sending ${txArray.length} transactions`)
     await syncForEach(txArray, async job => {
       const gasLimit = addExtraGas(job.gasEstimate, EXTRA_GAS_PERCENTAGE)
 
       try {
+        logger.debug(`Sending transaction with nonce ${nonce}`)
         const txHash = await sendTx({
           chain: config.id,
           data: job.data,
@@ -142,7 +163,10 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
       }
     })
 
+    logger.debug('Updating nonce')
     await updateNonce(nonce)
+
+    logger.debug('Releasing lock')
     await lock.unlock()
 
     if (failedTx.length) {
@@ -150,16 +174,21 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
       await sendToQueue(failedTx)
     }
     ackMsg(msg)
-    logger.info(`Finished processing msg`)
+    logger.debug(`Finished processing msg`)
 
     if (insufficientFunds) {
+      logger.warn(
+        'Insufficient funds. Stop sending transactions until the account has the minimum balance'
+      )
       channel.close()
-      waitForFunds(web3Instance, VALIDATOR_ADDRESS, minimumBalance, resume)
+      waitForFunds(web3Instance, VALIDATOR_ADDRESS, minimumBalance, resume, logger)
     }
   } catch (e) {
     logger.error(e)
     nackMsg(msg)
   }
+
+  logger.debug('Finished')
 }
 
 initialize()

@@ -3,6 +3,7 @@ const path = require('path')
 require('dotenv').config({
   path: path.join(__dirname, '../.env')
 })
+const { id } = require('../config/base.config')
 
 const redis = new Redis(process.env.REDIS_URL)
 
@@ -25,9 +26,7 @@ function logError(message) {
 }
 
 function getRedisKey(name) {
-  const isErcToErc = process.env.BRIDGE_MODE && process.env.BRIDGE_MODE === 'ERC_TO_ERC'
-  const prefix = isErcToErc ? 'erc-' : ''
-  return `${prefix}${name}:lastProcessedBlock`
+  return `${id}-${name}:lastProcessedBlock`
 }
 
 async function main() {

@@ -2,24 +2,56 @@ require('dotenv').config()
 
 const { toBN } = require('web3').utils
 const { web3Home, web3Foreign } = require('../src/services/web3')
+const { privateKeyToAddress } = require('../src/utils/utils')
 
-const homeNativeAbi = require('../abis/HomeBridgeNativeToErc.abi')
-const foreignNativeAbi = require('../abis/ForeignBridgeNativeToErc.abi')
+const homeNativeErcAbi = require('../abis/HomeBridgeNativeToErc.abi')
+const foreignNativeErcAbi = require('../abis/ForeignBridgeNativeToErc.abi')
 
-const homeErcAbi = require('../abis/HomeBridgeErcToErc.abi')
-const foreignErcAbi = require('../abis/ForeignBridgeErcToErc.abi')
+const homeErcErcAbi = require('../abis/HomeBridgeErcToErc.abi')
+const foreignErcErcAbi = require('../abis/ForeignBridgeErcToErc.abi')
 
-const isErcToErc = process.env.BRIDGE_MODE && process.env.BRIDGE_MODE === 'ERC_TO_ERC'
+const homeErcNativeAbi = require('../abis/HomeBridgeErcToNative.abi')
+const foreignErcNativeAbi = require('../abis/ForeignBridgeErcToNative.abi')
 
-const homeAbi = isErcToErc ? homeErcAbi : homeNativeAbi
-const foreignAbi = isErcToErc ? foreignErcAbi : foreignNativeAbi
+const { VALIDATOR_ADDRESS, VALIDATOR_ADDRESS_PRIVATE_KEY } = process.env
+
+let homeAbi
+let foreignAbi
+let id
+
+switch (process.env.BRIDGE_MODE) {
+  case 'NATIVE_TO_ERC':
+    homeAbi = homeNativeErcAbi
+    foreignAbi = foreignNativeErcAbi
+    id = 'native-erc'
+    break
+  case 'ERC_TO_ERC':
+    homeAbi = homeErcErcAbi
+    foreignAbi = foreignErcErcAbi
+    id = 'erc-erc'
+    break
+  case 'ERC_TO_NATIVE':
+    homeAbi = homeErcNativeAbi
+    foreignAbi = foreignErcNativeAbi
+    id = 'erc-native'
+    break
+  default:
+    if (process.env.NODE_ENV !== 'test') {
+      throw new Error(`Bridge Mode: ${process.env.BRIDGE_MODE} not supported.`)
+    } else {
+      homeAbi = homeErcNativeAbi
+      foreignAbi = foreignErcNativeAbi
+      id = 'erc-native'
+    }
+}
 
 const bridgeConfig = {
   homeBridgeAddress: process.env.HOME_BRIDGE_ADDRESS,
   homeBridgeAbi: homeAbi,
   foreignBridgeAddress: process.env.FOREIGN_BRIDGE_ADDRESS,
   foreignBridgeAbi: foreignAbi,
-  eventFilter: {}
+  eventFilter: {},
+  validatorAddress: VALIDATOR_ADDRESS || privateKeyToAddress(VALIDATOR_ADDRESS_PRIVATE_KEY)
 }
 
 const homeConfig = {
@@ -46,5 +78,5 @@ module.exports = {
   bridgeConfig,
   homeConfig,
   foreignConfig,
-  isErcToErc
+  id
 }

@@ -35,7 +35,7 @@ const maxProcessingTime = process.env.MAX_PROCESSING_TIME
 
 async function initialize() {
   try {
-    const checkHttps = checkHTTPS(process.env.ALLOW_HTTP)
+    const checkHttps = checkHTTPS(process.env.ALLOW_HTTP, logger)
 
     rpcUrlsManager.homeUrls.forEach(checkHttps('home'))
     rpcUrlsManager.foreignUrls.forEach(checkHttps('foreign'))
@@ -84,15 +84,18 @@ function updateLastProcessedBlock(lastBlockNumber) {
 
 function processEvents(events) {
   switch (config.id) {
-    case 'signature-request':
-    case 'erc-signature-request':
+    case 'native-erc-signature-request':
+    case 'erc-erc-signature-request':
+    case 'erc-native-signature-request':
       return processSignatureRequests(events)
-    case 'collected-signatures':
-    case 'erc-collected-signatures':
+    case 'native-erc-collected-signatures':
+    case 'erc-erc-collected-signatures':
+    case 'erc-native-collected-signatures':
       return processCollectedSignatures(events)
-    case 'affirmation-request':
+    case 'native-erc-affirmation-request':
       return processAffirmationRequests(events)
-    case 'erc-affirmation-request':
+    case 'erc-erc-affirmation-request':
+    case 'erc-native-affirmation-request':
       return processTransfers(events)
     default:
       return []
@@ -113,8 +116,9 @@ async function getLastBlockToProcess() {
 async function main({ sendToQueue }) {
   try {
     const lastBlockToProcess = await getLastBlockToProcess()
+
     if (lastBlockToProcess.lte(lastProcessedBlock)) {
-      logger.info('All blocks already processed')
+      logger.debug('All blocks already processed')
       return
     }
 
@@ -139,10 +143,13 @@ async function main({ sendToQueue }) {
       }
     }
 
+    logger.debug({ lastProcessedBlock: lastBlockToProcess }, 'Updating last processed block')
     await updateLastProcessedBlock(lastBlockToProcess)
   } catch (e) {
     logger.error(e)
   }
+
+  logger.debug('Finished')
 }
 
 initialize()
