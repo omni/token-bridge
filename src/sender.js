@@ -89,7 +89,7 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
 
     const txArray = JSON.parse(msg.content)
     logger.info(`Msg received with ${txArray.length} Tx to send`)
-    const gasPrice = await GasPrice.getPrice()
+    const gasPrice = GasPrice.getPrice()
 
     const ttl = REDIS_LOCK_TTL * txArray.length
 

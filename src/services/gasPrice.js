@@ -91,7 +91,7 @@ async function start(chainId) {
   }, updateInterval)
 }
 
-async function getPrice() {
+function getPrice() {
   return cachedGasPrice
 }
 
