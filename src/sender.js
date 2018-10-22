@@ -169,7 +169,7 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
         'Insufficient funds. Stop sending transactions until the account has the minimum balance'
       )
       channel.close()
-      waitForFunds(web3Instance, VALIDATOR_ADDRESS, minimumBalance, resume)
+      waitForFunds(web3Instance, VALIDATOR_ADDRESS, minimumBalance, resume, logger)
     }
   } catch (e) {
     logger.error(e)

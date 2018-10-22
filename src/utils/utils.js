@@ -24,13 +24,22 @@ function checkHTTPS(ALLOW_HTTP, logger) {
   }
 }
 
-async function waitForFunds(web3, address, minimumBalance, cb) {
+async function waitForFunds(web3, address, minimumBalance, cb, logger) {
   promiseRetry(
     async retry => {
+      logger.debug('Getting balance of validator account')
       const newBalance = web3.utils.toBN(await web3.eth.getBalance(address))
       if (newBalance.gte(minimumBalance)) {
+        logger.debug(
+          { balance: newBalance, minimumBalance },
+          'Validator has minimum necessary balance'
+        )
         cb(newBalance)
       } else {
+        logger.debug(
+          { balance: newBalance, minimumBalance },
+          'Balance of validator is still less than the minimum'
+        )
         retry()
       }
     },
