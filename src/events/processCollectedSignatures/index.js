@@ -63,7 +63,9 @@ function processCollectedSignaturesBuilder(config) {
           requiredSignatures.fill(0)
 
           const [v, r, s] = [[], [], []]
+          logger.debug('Getting message signatures')
           const signaturePromises = requiredSignatures.map(async (el, index) => {
+            logger.debug({ index }, 'Getting message signature')
             const signature = await homeBridge.methods.signature(messageHash, index).call()
             const recover = signatureToVRS(signature)
             v.push(recover.v)
