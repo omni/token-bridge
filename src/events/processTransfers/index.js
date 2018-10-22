@@ -23,7 +23,10 @@ function processTransfersBuilder(config) {
     const txToSend = []
 
     if (validatorContract === null) {
+      rootLogger.debug('Getting validator contract address')
       const validatorContractAddress = await homeBridge.methods.validatorContract().call()
+      rootLogger.debug({ validatorContractAddress }, 'Validator contract address obtained')
+
       validatorContract = new web3Home.eth.Contract(bridgeValidatorsABI, validatorContractAddress)
     }
 
