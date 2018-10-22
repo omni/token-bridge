@@ -7,8 +7,8 @@ const logger = require('./services/logger')
 const rpcUrlsManager = require('./services/getRpcUrlsManager')
 const { sendTx } = require('./tx/sendTx')
 const { getNonce, getChainId } = require('./tx/web3')
-const { addExtraGas, checkHTTPS, syncForEach, waitForFunds } = require('./utils/utils')
-const { EXTRA_GAS_PERCENTAGE } = require('./utils/constants')
+const { addExtraGas, checkHTTPS, syncForEach, waitForFunds, watchdog } = require('./utils/utils')
+const { EXIT_CODES, EXTRA_GAS_PERCENTAGE } = require('./utils/constants')
 
 const { VALIDATOR_ADDRESS, VALIDATOR_ADDRESS_PRIVATE_KEY, REDIS_LOCK_TTL } = process.env
 
@@ -24,6 +24,8 @@ const nonceLock = `lock:${config.id}:nonce`
 const nonceKey = `${config.id}:nonce`
 let chainId = 0
 
+const maxProcessingTime = process.env.MAX_PROCESSING_TIME
+
 async function initialize() {
   try {
     const checkHttps = checkHTTPS(process.env.ALLOW_HTTP)
@@ -36,7 +38,16 @@ async function initialize() {
     chainId = await getChainId(web3Instance)
     connectSenderToQueue({
       queueName: config.queue,
-      cb: main
+      cb: options => {
+        if (maxProcessingTime) {
+          return watchdog(() => main(options), maxProcessingTime, () => {
+            logger.fatal('Max processing time reached')
+            process.exit(EXIT_CODES.MAX_TIME_REACHED)
+          })
+        }
+
+        return main(options)
+      }
     })
   } catch (e) {
     logger.error(e.message)
