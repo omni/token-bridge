@@ -43,6 +43,7 @@ function processTransfersBuilder(config) {
 
         let gasEstimate
         try {
+          logger.debug('Estimate gas')
           gasEstimate = await estimateGas({
             web3: web3Home,
             homeBridge,
@@ -52,6 +53,7 @@ function processTransfersBuilder(config) {
             txHash: transfer.transactionHash,
             address: config.validatorAddress
           })
+          logger.debug({ gasEstimate }, 'Gas estimated')
         } catch (e) {
           if (e instanceof HttpListProviderError) {
             throw new Error(

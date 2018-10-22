@@ -4,6 +4,9 @@ const {
   AlreadySignedError,
   InvalidValidatorError
 } = require('../../utils/errors')
+const logger = require('../../services/logger').child({
+  module: 'processAffirmationRequests:estimateGas'
+})
 
 async function estimateGas({
   web3,
@@ -31,6 +34,7 @@ async function estimateGas({
     const senderHash = web3.utils.soliditySha3(address, messageHash)
 
     // Check if minimum number of validations was already reached
+    logger.debug('Check if minimum number of validations was already reached')
     const numAffirmationsSigned = await homeBridge.methods.numAffirmationsSigned(messageHash).call()
     const alreadyProcessed = await homeBridge.methods
       .isAlreadyProcessed(numAffirmationsSigned)
@@ -41,6 +45,7 @@ async function estimateGas({
     }
 
     // Check if the message was already signed by this validator
+    logger.debug('Check if the message was already signed')
     const alreadySigned = await homeBridge.methods.affirmationsSigned(senderHash).call()
 
     if (alreadySigned) {
@@ -48,6 +53,7 @@ async function estimateGas({
     }
 
     // Check if address is validator
+    logger.debug('Check if address is a validator')
     const isValidator = await validatorContract.methods.isValidator(address).call()
 
     if (!isValidator) {
