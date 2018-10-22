@@ -3,7 +3,9 @@ const fetch = require('node-fetch')
 const Web3Utils = require('web3-utils')
 const { web3Home, web3Foreign } = require('../services/web3')
 const { bridgeConfig } = require('../../config/base.config')
-const logger = require('../services/logger')
+const logger = require('../services/logger').child({
+  module: 'gasPrice'
+})
 const { setIntervalAndRun } = require('../utils/utils')
 const { DEFAULT_UPDATE_INTERVAL } = require('../utils/constants')
 
@@ -43,11 +45,13 @@ async function fetchGasPrice({ bridgeContract, oracleFn }) {
   let gasPrice = null
   try {
     gasPrice = await oracleFn()
+    logger.debug({ gasPrice }, 'Gas price updated using the oracle')
   } catch (e) {
     logger.error(`Gas Price API is not available. ${e.message}`)
 
     try {
       gasPrice = await bridgeContract.methods.gasPrice().call()
+      logger.debug({ gasPrice }, 'Gas price updated using the contracts')
     } catch (e) {
       logger.error(`There was a problem getting the gas price from the contract. ${e.message}`)
     }
