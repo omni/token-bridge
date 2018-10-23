@@ -12,7 +12,7 @@ RUN mkdir submodules && \
   mv poa-bridge-contracts submodules && \
   cd submodules/poa-bridge-contracts && \
   git fetch && \
-  git checkout erc20-to-native-#79
+  git checkout develop
 
 RUN npm install --unsafe-perm
 
