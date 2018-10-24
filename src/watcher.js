@@ -12,7 +12,7 @@ const { EXIT_CODES } = require('./utils/constants')
 
 if (process.argv.length < 3) {
   logger.error('Please check the number of arguments, config file was not provided')
-  process.exit(1)
+  process.exit(EXIT_CODES.GENERAL_ERROR)
 }
 
 const config = require(path.join('../config/', process.argv[2]))
@@ -47,7 +47,7 @@ async function initialize() {
     })
   } catch (e) {
     logger.error(e)
-    process.exit(1)
+    process.exit(EXIT_CODES.GENERAL_ERROR)
   }
 }
 
