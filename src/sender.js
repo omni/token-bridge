@@ -33,8 +33,6 @@ const nonceLock = `lock:${config.id}:nonce`
 const nonceKey = `${config.id}:nonce`
 let chainId = 0
 
-const maxProcessingTime = process.env.MAX_PROCESSING_TIME
-
 async function initialize() {
   try {
     const checkHttps = checkHTTPS(process.env.ALLOW_HTTP, logger)
@@ -48,8 +46,8 @@ async function initialize() {
     connectSenderToQueue({
       queueName: config.queue,
       cb: options => {
-        if (maxProcessingTime) {
-          return watchdog(() => main(options), maxProcessingTime, () => {
+        if (config.maxProcessingTime) {
+          return watchdog(() => main(options), config.maxProcessingTime, () => {
             logger.fatal('Max processing time reached')
             process.exit(EXIT_CODES.MAX_TIME_REACHED)
           })

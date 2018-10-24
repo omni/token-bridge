@@ -45,13 +45,24 @@ switch (process.env.BRIDGE_MODE) {
     }
 }
 
+let maxProcessingTime = null
+if (String(process.env.MAX_PROCESSING_TIME) === '0') {
+  maxProcessingTime = 0
+} else if (!process.env.MAX_PROCESSING_TIME) {
+  maxProcessingTime =
+    4 * Math.max(process.env.HOME_POLLING_INTERVAL, process.env.FOREIGN_POLLING_INTERVAL)
+} else {
+  maxProcessingTime = Number(process.env.MAX_PROCESSING_TIME)
+}
+
 const bridgeConfig = {
   homeBridgeAddress: process.env.HOME_BRIDGE_ADDRESS,
   homeBridgeAbi: homeAbi,
   foreignBridgeAddress: process.env.FOREIGN_BRIDGE_ADDRESS,
   foreignBridgeAbi: foreignAbi,
   eventFilter: {},
-  validatorAddress: VALIDATOR_ADDRESS || privateKeyToAddress(VALIDATOR_ADDRESS_PRIVATE_KEY)
+  validatorAddress: VALIDATOR_ADDRESS || privateKeyToAddress(VALIDATOR_ADDRESS_PRIVATE_KEY),
+  maxProcessingTime
 }
 
 const homeConfig = {

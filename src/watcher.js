@@ -31,8 +31,6 @@ const eventContract = new web3Instance.eth.Contract(config.eventAbi, config.even
 const lastBlockRedisKey = `${config.id}:lastProcessedBlock`
 let lastProcessedBlock = BN.max(config.startBlock.sub(ONE), ZERO)
 
-const maxProcessingTime = process.env.MAX_PROCESSING_TIME
-
 async function initialize() {
   try {
     const checkHttps = checkHTTPS(process.env.ALLOW_HTTP, logger)
@@ -54,8 +52,8 @@ async function initialize() {
 async function runMain({ sendToQueue }) {
   try {
     if (connection.isConnected() && redis.status === 'ready') {
-      if (maxProcessingTime) {
-        await watchdog(() => main({ sendToQueue }), maxProcessingTime, () => {
+      if (config.maxProcessingTime) {
+        await watchdog(() => main({ sendToQueue }), config.maxProcessingTime, () => {
           logger.fatal('Max processing time reached')
           process.exit(EXIT_CODES.MAX_TIME_REACHED)
         })
