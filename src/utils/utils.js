@@ -65,6 +65,23 @@ function setIntervalAndRun(f, interval) {
   return handler
 }
 
+/**
+ * Run function `f` and return its result, unless `timeout` milliseconds pass before `f` ends. If that happens, run
+ * `kill` instead.
+ *
+ * @param {Function} f The function to run. It is assumed that it's an async function.
+ * @param {Number} timeout Max time in milliseconds to wait for `f` to finish.
+ * @param {Function} kill Function that will be called if `f` takes more than `timeout` milliseconds.
+ */
+async function watchdog(f, timeout, kill) {
+  const timeoutHandler = setTimeout(kill, timeout)
+
+  const result = await f()
+  clearTimeout(timeoutHandler)
+
+  return result
+}
+
 function add0xPrefix(s) {
   if (s.indexOf('0x') === 0) {
     return s
@@ -85,5 +102,6 @@ module.exports = {
   waitForFunds,
   addExtraGas,
   setIntervalAndRun,
+  watchdog,
   privateKeyToAddress
 }

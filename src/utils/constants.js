@@ -7,5 +7,10 @@ module.exports = {
     maxTimeout: 360000,
     randomize: true
   },
-  DEFAULT_UPDATE_INTERVAL: 600000
+  DEFAULT_UPDATE_INTERVAL: 600000,
+  EXIT_CODES: {
+    GENERAL_ERROR: 1,
+    INCOMPATIBILITY: 10,
+    MAX_TIME_REACHED: 11
+  }
 }

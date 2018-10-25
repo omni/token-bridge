@@ -7,11 +7,12 @@ const { redis } = require('./services/redisClient')
 const logger = require('./services/logger')
 const rpcUrlsManager = require('./services/getRpcUrlsManager')
 const { getRequiredBlockConfirmations, getEvents } = require('./tx/web3')
-const { checkHTTPS } = require('./utils/utils')
+const { checkHTTPS, watchdog } = require('./utils/utils')
+const { EXIT_CODES } = require('./utils/constants')
 
 if (process.argv.length < 3) {
   logger.error('Please check the number of arguments, config file was not provided')
-  process.exit(1)
+  process.exit(EXIT_CODES.GENERAL_ERROR)
 }
 
 const config = require(path.join('../config/', process.argv[2]))
@@ -44,14 +45,21 @@ async function initialize() {
     })
   } catch (e) {
     logger.error(e)
-    process.exit(1)
+    process.exit(EXIT_CODES.GENERAL_ERROR)
   }
 }
 
 async function runMain({ sendToQueue }) {
   try {
     if (connection.isConnected() && redis.status === 'ready') {
-      await main({ sendToQueue })
+      if (config.maxProcessingTime) {
+        await watchdog(() => main({ sendToQueue }), config.maxProcessingTime, () => {
+          logger.fatal('Max processing time reached')
+          process.exit(EXIT_CODES.MAX_TIME_REACHED)
+        })
+      } else {
+        await main({ sendToQueue })
+      }
     }
   } catch (e) {
     logger.error(e)

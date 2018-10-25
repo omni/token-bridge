@@ -10,11 +10,12 @@ const { getNonce, getChainId } = require('./tx/web3')
 const {
   addExtraGas,
   checkHTTPS,
+  privateKeyToAddress,
   syncForEach,
   waitForFunds,
-  privateKeyToAddress
+  watchdog
 } = require('./utils/utils')
-const { EXTRA_GAS_PERCENTAGE } = require('./utils/constants')
+const { EXIT_CODES, EXTRA_GAS_PERCENTAGE } = require('./utils/constants')
 
 const { VALIDATOR_ADDRESS_PRIVATE_KEY, REDIS_LOCK_TTL } = process.env
 
@@ -22,7 +23,7 @@ const VALIDATOR_ADDRESS = privateKeyToAddress(VALIDATOR_ADDRESS_PRIVATE_KEY)
 
 if (process.argv.length < 3) {
   logger.error('Please check the number of arguments, config file was not provided')
-  process.exit(1)
+  process.exit(EXIT_CODES.GENERAL_ERROR)
 }
 
 const config = require(path.join('../config/', process.argv[2]))
@@ -44,11 +45,20 @@ async function initialize() {
     chainId = await getChainId(web3Instance)
     connectSenderToQueue({
       queueName: config.queue,
-      cb: main
+      cb: options => {
+        if (config.maxProcessingTime) {
+          return watchdog(() => main(options), config.maxProcessingTime, () => {
+            logger.fatal('Max processing time reached')
+            process.exit(EXIT_CODES.MAX_TIME_REACHED)
+          })
+        }
+
+        return main(options)
+      }
     })
   } catch (e) {
     logger.error(e.message)
-    process.exit(1)
+    process.exit(EXIT_CODES.GENERAL_ERROR)
   }
 }
 
