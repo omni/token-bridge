@@ -106,7 +106,7 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
       const gasLimit = addExtraGas(job.gasEstimate, EXTRA_GAS_PERCENTAGE)
 
       try {
-        logger.debug(`Sending transaction with nonce ${nonce}`)
+        logger.info(`Sending transaction with nonce ${nonce}`)
         const txHash = await sendTx({
           chain: config.id,
           data: job.data,
