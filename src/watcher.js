@@ -7,11 +7,12 @@ const { redis } = require('./services/redisClient')
 const logger = require('./services/logger')
 const rpcUrlsManager = require('./services/getRpcUrlsManager')
 const { getRequiredBlockConfirmations, getEvents } = require('./tx/web3')
-const { checkHTTPS } = require('./utils/utils')
+const { checkHTTPS, watchdog } = require('./utils/utils')
+const { EXIT_CODES } = require('./utils/constants')
 
 if (process.argv.length < 3) {
   logger.error('Please check the number of arguments, config file was not provided')
-  process.exit(1)
+  process.exit(EXIT_CODES.GENERAL_ERROR)
 }
 
 const config = require(path.join('../config/', process.argv[2]))
@@ -32,7 +33,7 @@ let lastProcessedBlock = BN.max(config.startBlock.sub(ONE), ZERO)
 
 async function initialize() {
   try {
-    const checkHttps = checkHTTPS(process.env.ALLOW_HTTP)
+    const checkHttps = checkHTTPS(process.env.ALLOW_HTTP, logger)
 
     rpcUrlsManager.homeUrls.forEach(checkHttps('home'))
     rpcUrlsManager.foreignUrls.forEach(checkHttps('foreign'))
@@ -44,14 +45,21 @@ async function initialize() {
     })
   } catch (e) {
     logger.error(e)
-    process.exit(1)
+    process.exit(EXIT_CODES.GENERAL_ERROR)
   }
 }
 
 async function runMain({ sendToQueue }) {
   try {
     if (connection.isConnected() && redis.status === 'ready') {
-      await main({ sendToQueue })
+      if (config.maxProcessingTime) {
+        await watchdog(() => main({ sendToQueue }), config.maxProcessingTime, () => {
+          logger.fatal('Max processing time reached')
+          process.exit(EXIT_CODES.MAX_TIME_REACHED)
+        })
+      } else {
+        await main({ sendToQueue })
+      }
     }
   } catch (e) {
     logger.error(e)
@@ -64,6 +72,10 @@ async function runMain({ sendToQueue }) {
 
 async function getLastProcessedBlock() {
   const result = await redis.get(lastBlockRedisKey)
+  logger.debug(
+    { fromRedis: result, fromConfig: lastProcessedBlock.toString() },
+    'Last Processed block obtained'
+  )
   lastProcessedBlock = result ? toBN(result) : lastProcessedBlock
 }
 
@@ -74,15 +86,18 @@ function updateLastProcessedBlock(lastBlockNumber) {
 
 function processEvents(events) {
   switch (config.id) {
-    case 'signature-request':
-    case 'erc-signature-request':
+    case 'native-erc-signature-request':
+    case 'erc-erc-signature-request':
+    case 'erc-native-signature-request':
       return processSignatureRequests(events)
-    case 'collected-signatures':
-    case 'erc-collected-signatures':
+    case 'native-erc-collected-signatures':
+    case 'erc-erc-collected-signatures':
+    case 'erc-native-collected-signatures':
       return processCollectedSignatures(events)
-    case 'affirmation-request':
+    case 'native-erc-affirmation-request':
       return processAffirmationRequests(events)
-    case 'erc-affirmation-request':
+    case 'erc-erc-affirmation-request':
+    case 'erc-native-affirmation-request':
       return processTransfers(events)
     default:
       return []
@@ -103,8 +118,9 @@ async function getLastBlockToProcess() {
 async function main({ sendToQueue }) {
   try {
     const lastBlockToProcess = await getLastBlockToProcess()
+
     if (lastBlockToProcess.lte(lastProcessedBlock)) {
-      logger.info('All blocks already processed')
+      logger.debug('All blocks already processed')
       return
     }
 
@@ -129,10 +145,16 @@ async function main({ sendToQueue }) {
       }
     }
 
+    logger.debug(
+      { lastProcessedBlock: lastBlockToProcess.toString() },
+      'Updating last processed block'
+    )
     await updateLastProcessedBlock(lastBlockToProcess)
   } catch (e) {
     logger.error(e)
   }
+
+  logger.debug('Finished')
 }
 
 initialize()

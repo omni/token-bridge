@@ -10,8 +10,8 @@ const abisDir = path.join(__dirname, '..', 'submodules/poa-bridge-contracts/buil
 const homeWeb3 = new Web3(new Web3.providers.HttpProvider('http://parity1:8545'))
 const foreignWeb3 = new Web3(new Web3.providers.HttpProvider('http://parity2:8545'))
 
-const HOME_BRIDGE_ADDRESS = '0x1feB40aD9420b186F019A717c37f5546165d411E'
-const FOREIGN_BRIDGE_ADDRESS = '0x4a58D6d8D416a5fBCAcf3dC52eb8bE8948E25127'
+const HOME_BRIDGE_ADDRESS = '0x488Af810997eD1730cB3a3918cD83b3216E6eAda'
+const FOREIGN_BRIDGE_ADDRESS = '0x488Af810997eD1730cB3a3918cD83b3216E6eAda'
 
 const { toBN } = foreignWeb3.utils
 
@@ -23,14 +23,11 @@ const erc20Token = new foreignWeb3.eth.Contract(
   tokenAbi,
   '0x3C665A31199694Bf723fD08844AD290207B5797f'
 )
-const erc677Token = new homeWeb3.eth.Contract(
-  tokenAbi,
-  '0x792455a6bCb62Ed4C4362D323E0590654CA4765c'
-)
 
-describe('erc to erc', () => {
-  it('should convert tokens in foreign to tokens in home', async () => {
+describe('erc to native', () => {
+  it('should convert tokens in foreign to coins in home', async () => {
     const balance = await erc20Token.methods.balanceOf(user.address).call()
+    const originalBalanceOnHome = await homeWeb3.eth.getBalance(user.address)
     assert(!toBN(balance).isZero(), 'Account should have tokens')
 
     // send tokens to foreign bridge
@@ -50,29 +47,27 @@ describe('erc to erc', () => {
 
     // check that balance increases
     await promiseRetry(async retry => {
-      const balance = await erc677Token.methods.balanceOf(user.address).call()
-      if (toBN(balance).isZero()) {
+      const balance = await homeWeb3.eth.getBalance(user.address)
+      if (toBN(balance).lte(toBN(originalBalanceOnHome))) {
         retry()
       }
     })
   })
-  it('should convert tokens in home to tokens in foreign', async () => {
+  it('should convert coins in home to tokens in foreign', async () => {
     const originalBalance = await erc20Token.methods.balanceOf(user.address).call()
 
     // check that account has tokens in home chain
-    const balance = await erc677Token.methods.balanceOf(user.address).call()
+    const balance = await homeWeb3.eth.getBalance(user.address)
     assert(!toBN(balance).isZero(), 'Account should have tokens')
 
     // send transaction to home bridge
-    const depositTx = await erc677Token.methods
-      .transferAndCall(HOME_BRIDGE_ADDRESS, homeWeb3.utils.toWei('0.01'), '0x')
-      .send({
-        from: user.address,
-        gas: '1000000'
-      })
-      .catch(e => {
-        console.error(e)
-      })
+    const depositTx = await homeWeb3.eth.sendTransaction({
+      from: user.address,
+      to: HOME_BRIDGE_ADDRESS,
+      gasPrice: '1',
+      gas: '1000000',
+      value: homeWeb3.utils.toWei('0.01')
+    })
 
     // Send a trivial transaction to generate a new block since the watcher
     // is configured to wait 1 confirmation block

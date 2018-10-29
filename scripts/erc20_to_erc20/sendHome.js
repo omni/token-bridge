@@ -1,18 +1,19 @@
 const path = require('path')
 require('dotenv').config({
-  path: path.join(__dirname, '../.env')
+  path: path.join(__dirname, '../../.env')
 })
 const Web3 = require('web3')
 const Web3Utils = require('web3-utils')
-const rpcUrlsManager = require('../src/services/getRpcUrlsManager')
-const { sendTx, sendRawTx } = require('../src/tx/sendTx')
+const rpcUrlsManager = require('../../src/services/getRpcUrlsManager')
+const { sendTx, sendRawTx } = require('../../src/tx/sendTx')
+const { isValidAmount } = require('../utils/utils')
 
 const {
   USER_ADDRESS,
   USER_ADDRESS_PRIVATE_KEY,
   HOME_BRIDGE_ADDRESS,
   HOME_MIN_AMOUNT_PER_TX,
-  BRIDGEABLE_TOKEN_ADDRESS
+  HOME_TEST_TX_GAS_PRICE
 } = process.env
 
 const NUMBER_OF_WITHDRAWALS_TO_SEND =
@@ -48,14 +49,20 @@ const BRIDGEABLE_TOKEN_ABI = [
   }
 ]
 
+const BRIDGE_ABI = require('../../abis/HomeBridgeErcToErc.abi')
+
 const homeRpcUrl = rpcUrlsManager.homeUrls[0]
 const homeProvider = new Web3.providers.HttpProvider(homeRpcUrl)
 const web3Home = new Web3(homeProvider)
 
-const erc677 = new web3Home.eth.Contract(BRIDGEABLE_TOKEN_ABI, BRIDGEABLE_TOKEN_ADDRESS)
-
 async function main() {
+  const bridge = new web3Home.eth.Contract(BRIDGE_ABI, HOME_BRIDGE_ADDRESS)
+  const BRIDGEABLE_TOKEN_ADDRESS = await bridge.methods.erc677token().call()
+  const erc677 = new web3Home.eth.Contract(BRIDGEABLE_TOKEN_ABI, BRIDGEABLE_TOKEN_ADDRESS)
+
   try {
+    await isValidAmount(HOME_MIN_AMOUNT_PER_TX, bridge)
+
     const homeChainId = await sendRawTx({
       chain: 'home',
       params: [],
@@ -80,7 +87,7 @@ async function main() {
         privateKey: USER_ADDRESS_PRIVATE_KEY,
         data,
         nonce,
-        gasPrice: '1',
+        gasPrice: HOME_TEST_TX_GAS_PRICE,
         amount: '0',
         gasLimit,
         to: BRIDGEABLE_TOKEN_ADDRESS,
