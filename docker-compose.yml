@@ -1,12 +1,12 @@
 version: '3'
 services:
   rabbit:
-    environment: [RABBITMQ_NODENAME=node@rabbit]
+    environment: ['RABBITMQ_NODENAME=node@rabbit']
     hostname: rabbit
     image: rabbitmq:3
     networks:
       - net_db
-    restart: always
+    restart: unless-stopped
     volumes: ['~/bridge_data/rabbitmq:/var/lib/rabbitmq/mnesia']
   redis:
     command: [redis-server, --appendonly, 'yes']
@@ -14,13 +14,13 @@ services:
     image: redis:4
     networks:
       - net_db
-    restart: always
+    restart: unless-stopped
     volumes: ['~/bridge_data/redis:/data']
   bridge:
     build: .
     command: 'true'
     env_file: ./.env
-    environment: [NODE_ENV=production, 'QUEUE_URL=amqp://rabbit', 'REDIS_URL=redis://redis']
+    environment: ['NODE_ENV=production', 'QUEUE_URL=amqp://rabbit', 'REDIS_URL=redis://redis']
     restart: on-failure
   bridge_request:
     build: .
@@ -30,9 +30,9 @@ services:
       - NODE_ENV=production
       - QUEUE_URL=amqp://rabbit
       - REDIS_URL=redis://redis
-      - VALIDATOR_ADDRESS=${VALIDATOR_ADDRESS}
-      - VALIDATOR_ADDRESS_PRIVATE_KEY=${VALIDATOR_ADDRESS_PRIVATE_KEY}
-    restart: always
+      - VALIDATOR_ADDRESS=${VALIDATOR_ADDRESS:-"33aa33aa33aa"}
+      - VALIDATOR_ADDRESS_PRIVATE_KEY=${VALIDATOR_ADDRESS_PRIVATE_KEY:-"aaaaaaaaaaaaaaaaaaaaaaaaaaaab"}
+    restart: unless-stopped
     entrypoint: npm run watcher:signature-request
     networks:
       - net_request
@@ -41,8 +41,8 @@ services:
     build: .
     command: 'true'
     env_file: ./.env
-    environment: [NODE_ENV=production, 'QUEUE_URL=amqp://rabbit', 'REDIS_URL=redis://redis']
-    restart: always
+    environment: ['NODE_ENV=production', 'QUEUE_URL=amqp://rabbit', 'REDIS_URL=redis://redis']
+    restart: unless-stopped
     entrypoint: npm run watcher:collected-signatures
     networks:
       - net_collected
@@ -51,8 +51,8 @@ services:
     build: .
     command: 'true'
     env_file: ./.env
-    environment: [NODE_ENV=production, 'QUEUE_URL=amqp://rabbit', 'REDIS_URL=redis://redis']
-    restart: always
+    environment: ['NODE_ENV=production', 'QUEUE_URL=amqp://rabbit', 'REDIS_URL=redis://redis']
+    restart: unless-stopped
     entrypoint: npm run watcher:affirmation-request
     networks:
       - net_affirmation
@@ -61,8 +61,8 @@ services:
     build: .
     command: 'true'
     env_file: ./.env
-    environment: [NODE_ENV=production, 'QUEUE_URL=amqp://rabbit', 'REDIS_URL=redis://redis']
-    restart: always
+    environment: ['NODE_ENV=production', 'QUEUE_URL=amqp://rabbit', 'REDIS_URL=redis://redis']
+    restart: unless-stopped
     entrypoint: npm run sender:home
     networks:
       - net_senderhome
@@ -71,8 +71,8 @@ services:
     build: .
     command: 'true'
     env_file: ./.env
-    environment: [NODE_ENV=production, 'QUEUE_URL=amqp://rabbit', 'REDIS_URL=redis://redis']
-    restart: always
+    environment: ['NODE_ENV=production', 'QUEUE_URL=amqp://rabbit', 'REDIS_URL=redis://redis']
+    restart: unless-stopped
     entrypoint: npm run sender:foreign
     networks:
       - net_senderforeign
