@@ -30,8 +30,8 @@ services:
       - NODE_ENV=production
       - QUEUE_URL=amqp://rabbit
       - REDIS_URL=redis://redis
-      - VALIDATOR_ADDRESS=${VALIDATOR_ADDRESS:-"0x8fd379246834eac74B8419FfdA202CF8051F7A03"}
-      - VALIDATOR_ADDRESS_PRIVATE_KEY=${VALIDATOR_ADDRESS_PRIVATE_KEY:-"aaaaaaaaaaaaaaaaaaaaaaaaaaaab"}
+      - VALIDATOR_ADDRESS=${VALIDATOR_ADDRESS:-0x8fd379246834eac74B8419FfdA202CF8051F7A03}
+      - VALIDATOR_ADDRESS_PRIVATE_KEY=${VALIDATOR_ADDRESS_PRIVATE_KEY:-aaaaaaaaaaaaaaaaaaaaaaaaaaaab}
     restart: unless-stopped
     entrypoint: npm run watcher:signature-request
     networks:
