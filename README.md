@@ -140,7 +140,16 @@ For more information on the Redis/RabbitMQ requirements, see [#90](/../../issues
 
 There are two options to run the nodejs oracle:
 1. Docker containers. This requires [Docker](https://docs.docker.com/install/) and [Docker Compose](https://docs.docker.com/compose/install/) installed. If you are on Linux, it's also recommended that you [create a docker group and add your user to it](https://docs.docker.com/install/linux/linux-postinstall/), so that you can use the CLI without sudo.
-2. NodeJs Package Manager.
+2. NodeJs Package Manager (NPM).
+
+### Docker
+
+  - Start RabbitMQ and Redis: if you are running the bridge containers for the first time use `docker-compose up -d --build` otherwise use `docker-compose up -d` 
+  - `docker-compose run bridge npm run watcher:signature-request`
+  - `docker-compose run bridge npm run watcher:collected-signatures`
+  - `docker-compose run bridge npm run watcher:affirmation-request`
+  - `docker-compose run bridge npm run sender:home`
+  - `docker-compose run bridge npm run sender:foreign`
 
 ### NPM
 
@@ -151,15 +160,6 @@ There are two options to run the nodejs oracle:
   - `npm run watcher:affirmation-request`
   - `npm run sender:home`
   - `npm run sender:foreign`
-
-### Docker
-
-  - Start RabbitMQ and Redis: if you are running the bridge containers for the first time use `docker-compose up -d --build` otherwise use `docker-compose up -d` 
-  - `docker-compose run bridge npm run watcher:signature-request`
-  - `docker-compose run bridge npm run watcher:collected-signatures`
-  - `docker-compose run bridge npm run watcher:affirmation-request`
-  - `docker-compose run bridge npm run sender:home`
-  - `docker-compose run bridge npm run sender:foreign`
 
 ### Bridge UI
 
@@ -278,10 +278,10 @@ When running the processes, the following commands can be used to test functiona
 | `USER_ADDRESS` | An account - the current owner of coins/tokens. |
 | `USER_ADDRESS_PRIVATE_KEY` | A private key belonging to the account. |
 | `HOME_BRIDGE_ADDRESS` | Address of the bridge in the Home network to send transactions. |
-| `HOME_MIN_AMOUNT_PER_TX` | Value (in _eth_ or tokens) to be sent in one transaction for the Home network. |
+| `HOME_MIN_AMOUNT_PER_TX` | Value (in _eth_ or tokens) to be sent in one transaction for the Home network. This should be greater than or equal to the value specified in the `poa-bridge-contracts/deploy/.env` file. The default value in that file is 500000000000000000, which is equivalent to 0.5. |
 | `HOME_TEST_TX_GAS_PRICE` | The gas price (in Wei) that is used to send transactions in the Home network . |
 | `FOREIGN_BRIDGE_ADDRESS` | Address of the bridge in the Foreign network to send transactions. |
-| `FOREIGN_MIN_AMOUNT_PER_TX` | Value (in _eth_ or tokens) to be sent in one transaction for the Foreign network. |
+| `FOREIGN_MIN_AMOUNT_PER_TX` | Value (in _eth_ or tokens) to be sent in one transaction for the Foreign network. This should be greater than or equal to the value specified in the `poa-bridge-contracts/deploy/.env` file. The default value in that file is 500000000000000000, which is equivalent to 0.5. |
 | `FOREIGN_TEST_TX_GAS_PRICE` | The gas price (in Wei) that is used to send transactions in the Foreign network . |
 
 ## Contributing
