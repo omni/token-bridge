@@ -6,6 +6,9 @@ const {
   InvalidValidatorError
 } = require('../../utils/errors')
 const { parseMessage } = require('../../utils/message')
+const logger = require('../../services/logger').child({
+  module: 'processCollectedSignatures:estimateGas'
+})
 
 const web3 = new Web3()
 const { toBN } = Web3.utils
@@ -30,6 +33,7 @@ async function estimateGas({
     }
 
     // check if the message was already processed
+    logger.debug('Check if the message was already processed')
     const { txHash } = parseMessage(message)
     const alreadyProcessed = await foreignBridge.methods.relayedMessages(txHash).call()
     if (alreadyProcessed) {
@@ -37,6 +41,7 @@ async function estimateGas({
     }
 
     // check if the number of signatures is enough
+    logger.debug('Check if number of signatures is enough')
     const requiredSignatures = await validatorContract.methods.requiredSignatures().call()
     if (toBN(requiredSignatures).gt(toBN(numberOfCollectedSignatures))) {
       throw new IncompatibleContractError('The number of collected signatures does not match')
@@ -45,6 +50,7 @@ async function estimateGas({
     // check if all the signatures were made by validators
     for (let i = 0; i < v.length; i++) {
       const address = web3.eth.accounts.recover(message, web3.utils.toHex(v[i]), r[i], s[i])
+      logger.debug({ address }, 'Check that signature is from a validator')
       const isValidator = await validatorContract.methods.isValidator(address).call()
 
       if (!isValidator) {

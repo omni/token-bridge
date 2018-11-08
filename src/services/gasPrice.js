@@ -1,16 +1,16 @@
 require('dotenv').config()
 const fetch = require('node-fetch')
+const Web3Utils = require('web3-utils')
 const { web3Home, web3Foreign } = require('../services/web3')
-const { isErcToErc } = require('../../config/base.config')
-const HomeNativeABI = require('../../abis/HomeBridgeNativeToErc.abi')
-const ForeignNativeABI = require('../../abis/ForeignBridgeNativeToErc.abi')
-const HomeErcABI = require('../../abis/HomeBridgeErcToErc.abi')
-const ForeignErcABI = require('../../abis/ForeignBridgeErcToErc.abi')
-const logger = require('../services/logger')
+const { bridgeConfig } = require('../../config/base.config')
+const logger = require('../services/logger').child({
+  module: 'gasPrice'
+})
 const { setIntervalAndRun } = require('../utils/utils')
+const { DEFAULT_UPDATE_INTERVAL } = require('../utils/constants')
 
-const HomeABI = isErcToErc ? HomeErcABI : HomeNativeABI
-const ForeignABI = isErcToErc ? ForeignNativeABI : ForeignErcABI
+const HomeABI = bridgeConfig.homeBridgeAbi
+const ForeignABI = bridgeConfig.foreignBridgeAbi
 
 const {
   FOREIGN_BRIDGE_ADDRESS,
@@ -38,18 +38,20 @@ async function fetchGasPriceFromOracle(oracleUrl, speedType) {
   if (!gasPrice) {
     throw new Error(`Response from Oracle didn't include gas price for ${speedType} type.`)
   }
-  return gasPrice
+  return Web3Utils.toWei(gasPrice.toString(), 'gwei')
 }
 
 async function fetchGasPrice({ bridgeContract, oracleFn }) {
   let gasPrice = null
   try {
     gasPrice = await oracleFn()
+    logger.debug({ gasPrice }, 'Gas price updated using the oracle')
   } catch (e) {
     logger.error(`Gas Price API is not available. ${e.message}`)
 
     try {
       gasPrice = await bridgeContract.methods.gasPrice().call()
+      logger.debug({ gasPrice }, 'Gas price updated using the contracts')
     } catch (e) {
       logger.error(`There was a problem getting the gas price from the contract. ${e.message}`)
     }
@@ -70,14 +72,14 @@ async function start(chainId) {
     bridgeContract = homeBridge
     oracleUrl = HOME_GAS_PRICE_ORACLE_URL
     speedType = HOME_GAS_PRICE_SPEED_TYPE
-    updateInterval = HOME_GAS_PRICE_UPDATE_INTERVAL
+    updateInterval = HOME_GAS_PRICE_UPDATE_INTERVAL || DEFAULT_UPDATE_INTERVAL
 
     cachedGasPrice = HOME_GAS_PRICE_FALLBACK
   } else if (chainId === 'foreign') {
     bridgeContract = foreignBridge
     oracleUrl = FOREIGN_GAS_PRICE_ORACLE_URL
     speedType = FOREIGN_GAS_PRICE_SPEED_TYPE
-    updateInterval = FOREIGN_GAS_PRICE_UPDATE_INTERVAL
+    updateInterval = FOREIGN_GAS_PRICE_UPDATE_INTERVAL || DEFAULT_UPDATE_INTERVAL
 
     cachedGasPrice = FOREIGN_GAS_PRICE_FALLBACK
   } else {
@@ -93,7 +95,7 @@ async function start(chainId) {
   }, updateInterval)
 }
 
-async function getPrice() {
+function getPrice() {
   return cachedGasPrice
 }
 

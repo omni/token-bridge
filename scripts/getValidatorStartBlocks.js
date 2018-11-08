@@ -3,18 +3,14 @@ require('dotenv').config({
   path: path.join(__dirname, '../.env')
 })
 const Web3 = require('web3')
-const HomeNativeABI = require('../abis/HomeBridgeNativeToErc.abi')
-const ForeignNativeABI = require('../abis/ForeignBridgeNativeToErc.abi')
-const HomeErcABI = require('../abis/HomeBridgeErcToErc.abi')
-const ForeignErcABI = require('../abis/ForeignBridgeErcToErc.abi')
 const bridgeValidatorsABI = require('../abis/BridgeValidators.abi')
 
 const rpcUrlsManager = require('../src/services/getRpcUrlsManager')
 
-const isErcToErc = process.env.BRIDGE_MODE && process.env.BRIDGE_MODE === 'ERC_TO_ERC'
+const { bridgeConfig } = require('../config/base.config')
 
-const homeABI = isErcToErc ? HomeErcABI : HomeNativeABI
-const foreignABI = isErcToErc ? ForeignNativeABI : ForeignErcABI
+const homeABI = bridgeConfig.homeBridgeAbi
+const foreignABI = bridgeConfig.foreignBridgeAbi
 
 async function getStartBlock(rpcUrl, bridgeAddress, bridgeAbi) {
   try {
