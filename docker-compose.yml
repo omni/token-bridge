@@ -45,8 +45,8 @@ services:
     env_file: ./.env
     environment: 
       - NODE_ENV=production 
-      - VALIDATOR_ADDRESS=${VALIDATOR_ADDRESS:-0x8fd379246834eac74B8419FfdA202CF8051F7A03}
-      - VALIDATOR_ADDRESS_PRIVATE_KEY=${VALIDATOR_ADDRESS_PRIVATE_KEY:-aaaaaaaaaaaaaaaaaaaaaaaaaaaab}
+      - VALIDATOR_ADDRESS=${VALIDATOR_ADDRESS}
+      - VALIDATOR_ADDRESS_PRIVATE_KEY=${VALIDATOR_ADDRESS_PRIVATE_KEY}
     restart: unless-stopped
     entrypoint: npm run watcher:signature-request
     networks:
@@ -60,7 +60,7 @@ services:
     env_file: ./.env
     environment: 
       - NODE_ENV=production 
-      - VALIDATOR_ADDRESS=${VALIDATOR_ADDRESS:-0x8fd379246834eac74B8419FfdA202CF8051F7A03}
+      - VALIDATOR_ADDRESS=${VALIDATOR_ADDRESS}
     restart: unless-stopped
     entrypoint: npm run watcher:collected-signatures
     networks:
@@ -74,7 +74,7 @@ services:
     env_file: ./.env
     environment: 
       - NODE_ENV=production 
-      - VALIDATOR_ADDRESS=${VALIDATOR_ADDRESS:-0x8fd379246834eac74B8419FfdA202CF8051F7A03}
+      - VALIDATOR_ADDRESS=${VALIDATOR_ADDRESS}
     restart: unless-stopped
     entrypoint: npm run watcher:affirmation-request
     networks:
@@ -88,8 +88,8 @@ services:
     env_file: ./.env
     environment: 
       - NODE_ENV=production 
-      - VALIDATOR_ADDRESS=${VALIDATOR_ADDRESS:-0x8fd379246834eac74B8419FfdA202CF8051F7A03}
-      - VALIDATOR_ADDRESS_PRIVATE_KEY=${VALIDATOR_ADDRESS_PRIVATE_KEY:-aaaaaaaaaaaaaaaaaaaaaaaaaaaab}
+      - VALIDATOR_ADDRESS=${VALIDATOR_ADDRESS}
+      - VALIDATOR_ADDRESS_PRIVATE_KEY=${VALIDATOR_ADDRESS_PRIVATE_KEY}
     restart: unless-stopped
     entrypoint: npm run sender:home
     networks:
@@ -103,8 +103,8 @@ services:
     env_file: ./.env
     environment: 
       - NODE_ENV=production 
-      - VALIDATOR_ADDRESS=${VALIDATOR_ADDRESS:-0x8fd379246834eac74B8419FfdA202CF8051F7A03}
-      - VALIDATOR_ADDRESS_PRIVATE_KEY=${VALIDATOR_ADDRESS_PRIVATE_KEY:-aaaaaaaaaaaaaaaaaaaaaaaaaaaab}
+      - VALIDATOR_ADDRESS=${VALIDATOR_ADDRESS}
+      - VALIDATOR_ADDRESS_PRIVATE_KEY=${VALIDATOR_ADDRESS_PRIVATE_KEY}
     restart: unless-stopped
     entrypoint: npm run sender:foreign
     networks:
