@@ -9,3 +9,4 @@ e2e
 .git*
 LICENSE
 README.md
+node_modules
