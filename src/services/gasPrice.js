@@ -7,7 +7,7 @@ const logger = require('../services/logger').child({
   module: 'gasPrice'
 })
 const { setIntervalAndRun } = require('../utils/utils')
-const { DEFAULT_UPDATE_INTERVAL } = require('../utils/constants')
+const { DEFAULT_UPDATE_INTERVAL, GAS_PRICE_OPTIONS } = require('../utils/constants')
 
 const HomeABI = bridgeConfig.homeBridgeAbi
 const ForeignABI = bridgeConfig.foreignBridgeAbi
@@ -30,6 +30,7 @@ const homeBridge = new web3Home.eth.Contract(HomeABI, HOME_BRIDGE_ADDRESS)
 const foreignBridge = new web3Foreign.eth.Contract(ForeignABI, FOREIGN_BRIDGE_ADDRESS)
 
 let cachedGasPrice = null
+let cachedGasPriceOracleSpeeds = null
 
 async function fetchGasPriceFromOracle(oracleUrl, speedType) {
   const response = await fetch(oracleUrl)
@@ -38,13 +39,19 @@ async function fetchGasPriceFromOracle(oracleUrl, speedType) {
   if (!gasPrice) {
     throw new Error(`Response from Oracle didn't include gas price for ${speedType} type.`)
   }
-  return Web3Utils.toWei(gasPrice.toString(), 'gwei')
+  return {
+    oracleGasPrice: Web3Utils.toWei(gasPrice.toString(), 'gwei'),
+    oracleResponse: json
+  }
 }
 
 async function fetchGasPrice({ bridgeContract, oracleFn }) {
   let gasPrice = null
+  let oracleGasPriceSpeeds = null
   try {
-    gasPrice = await oracleFn()
+    const { oracleGasPrice, oracleResponse } = await oracleFn()
+    gasPrice = oracleGasPrice
+    oracleGasPriceSpeeds = oracleResponse
     logger.debug({ gasPrice }, 'Gas price updated using the oracle')
   } catch (e) {
     logger.error(`Gas Price API is not available. ${e.message}`)
@@ -56,7 +63,10 @@ async function fetchGasPrice({ bridgeContract, oracleFn }) {
       logger.error(`There was a problem getting the gas price from the contract. ${e.message}`)
     }
   }
-  return gasPrice
+  return {
+    gasPrice,
+    oracleGasPriceSpeeds
+  }
 }
 
 let fetchGasPriceInterval = null
@@ -87,20 +97,35 @@ async function start(chainId) {
   }
 
   fetchGasPriceInterval = setIntervalAndRun(async () => {
-    const gasPrice = await fetchGasPrice({
+    const { gasPrice, oracleGasPriceSpeeds } = await fetchGasPrice({
       bridgeContract,
       oracleFn: () => fetchGasPriceFromOracle(oracleUrl, speedType)
     })
     cachedGasPrice = gasPrice || cachedGasPrice
+    cachedGasPriceOracleSpeeds = oracleGasPriceSpeeds || cachedGasPriceOracleSpeeds
   }, updateInterval)
 }
 
-function getPrice() {
-  return cachedGasPrice
+function getPrice(options) {
+  return processGasPriceOptions({ options, cachedGasPrice, cachedGasPriceOracleSpeeds })
+}
+
+function processGasPriceOptions({ options, cachedGasPrice, cachedGasPriceOracleSpeeds }) {
+  let gasPrice = cachedGasPrice
+  if (options && options.type && options.value) {
+    if (options.type === GAS_PRICE_OPTIONS.GAS_PRICE) {
+      return options.value
+    } else if (options.type === GAS_PRICE_OPTIONS.SPEED) {
+      const speedOption = cachedGasPriceOracleSpeeds[options.value]
+      gasPrice = speedOption ? Web3Utils.toWei(speedOption.toString(), 'gwei') : cachedGasPrice
+    }
+  }
+  return gasPrice
 }
 
 module.exports = {
   start,
   fetchGasPrice,
-  getPrice
+  getPrice,
+  processGasPriceOptions
 }

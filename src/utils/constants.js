@@ -12,5 +12,15 @@ module.exports = {
     GENERAL_ERROR: 1,
     INCOMPATIBILITY: 10,
     MAX_TIME_REACHED: 11
+  },
+  GAS_PRICE_OPTIONS: {
+    GAS_PRICE: 'GAS_PRICE',
+    SPEED: 'SPEED'
+  },
+  ORACLE_GAS_PRICE_SPEEDS: {
+    SLOW: 'slow',
+    STANDARD: 'standard',
+    FAST: 'fast',
+    INSTANT: 'instant'
   }
 }
