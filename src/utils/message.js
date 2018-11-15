@@ -1,5 +1,14 @@
 const assert = require('assert')
 const Web3Utils = require('web3-utils')
+const { InvalidAMBDatatypeError } = require('./errors')
+const { ORACLE_GAS_PRICE_SPEEDS } = require('./constants')
+
+const gasPriceSpeedMapper = {
+  '01': ORACLE_GAS_PRICE_SPEEDS.INSTANT,
+  '02': ORACLE_GAS_PRICE_SPEEDS.FAST,
+  '03': ORACLE_GAS_PRICE_SPEEDS.STANDARD,
+  '04': ORACLE_GAS_PRICE_SPEEDS.SLOW
+}
 
 // strips leading "0x" if present
 function strip0x(input) {
@@ -72,8 +81,56 @@ function signatureToVRS(signature) {
   return { v, r, s }
 }
 
+function addTxHashToData({ encodedData, transactionHash }) {
+  return encodedData.slice(0, 82) + strip0x(transactionHash) + encodedData.slice(82)
+}
+
+function parseAMBMessage(message) {
+  message = strip0x(message)
+
+  const sender = `0x${message.slice(0, 40)}`
+  const executor = `0x${message.slice(40, 80)}`
+  const txHash = `0x${message.slice(80, 144)}`
+  const gasLimit = message.slice(144, 208)
+  const dataType = message.slice(208, 210)
+  let gasPrice = null
+  let gasPriceSpeed = null
+  let dataStart = 210
+
+  switch (dataType) {
+    case '00':
+      break
+    case '01':
+      gasPrice = message.slice(210, 274)
+      dataStart += 64
+      break
+    case '02':
+      gasPriceSpeed = gasPriceSpeedMapper[message.slice(210, 212)]
+      dataStart += 2
+      break
+    default:
+      throw new InvalidAMBDatatypeError(`Invalid message data type ${dataType}`)
+  }
+
+  const data = `0x${message.slice(dataStart, message.length)}`
+
+  return {
+    sender,
+    executor,
+    txHash,
+    gasLimit,
+    dataType,
+    gasPrice,
+    gasPriceSpeed,
+    data
+  }
+}
+
 module.exports = {
   createMessage,
   parseMessage,
-  signatureToVRS
+  signatureToVRS,
+  addTxHashToData,
+  parseAMBMessage,
+  strip0x
 }
