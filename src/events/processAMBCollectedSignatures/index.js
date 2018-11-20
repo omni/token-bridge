@@ -76,6 +76,8 @@ function processCollectedSignaturesBuilder(config) {
 
           await Promise.all(signaturePromises)
 
+          const { dataType, gasPrice, gasPriceSpeed, txHash } = parseAMBMessage(message)
+
           let gasEstimate
           try {
             logger.debug('Estimate gas')
@@ -86,7 +88,8 @@ function processCollectedSignaturesBuilder(config) {
               r,
               s,
               message,
-              numberOfCollectedSignatures: NumberOfCollectedSignatures
+              numberOfCollectedSignatures: NumberOfCollectedSignatures,
+              txHash
             })
             logger.debug({ gasEstimate }, 'Gas estimated')
           } catch (e) {
@@ -109,7 +112,6 @@ function processCollectedSignaturesBuilder(config) {
             }
           }
           const data = await foreignBridge.methods.executeSignatures(message, v, r, s).encodeABI()
-          const { dataType, gasPrice, gasPriceSpeed } = parseAMBMessage(message)
           const gasPriceOptions = generateGasPriceOptions({ dataType, gasPrice, gasPriceSpeed })
           txToSend.push({
             data,

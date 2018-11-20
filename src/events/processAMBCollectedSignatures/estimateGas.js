@@ -20,7 +20,8 @@ async function estimateGas({
   numberOfCollectedSignatures,
   v,
   r,
-  s
+  s,
+  txHash
 }) {
   try {
     const gasEstimate = await foreignBridge.methods
@@ -34,7 +35,6 @@ async function estimateGas({
 
     // check if the message was already processed
     logger.debug('Check if the message was already processed')
-    const { txHash } = parseMessage(message)
     const alreadyProcessed = await foreignBridge.methods.relayedMessages(txHash).call()
     if (alreadyProcessed) {
       throw new AlreadyProcessedError()
