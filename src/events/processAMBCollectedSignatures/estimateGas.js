@@ -5,7 +5,6 @@ const {
   IncompatibleContractError,
   InvalidValidatorError
 } = require('../../utils/errors')
-const { parseMessage } = require('../../utils/message')
 const logger = require('../../services/logger').child({
   module: 'processCollectedSignatures:estimateGas'
 })
