@@ -22,6 +22,7 @@ const processCollectedSignatures = require('./events/processCollectedSignatures'
 const processAffirmationRequests = require('./events/processAffirmationRequests')(config)
 const processTransfers = require('./events/processTransfers')(config)
 const processAMBSignatureRequests = require('./events/processAMBSignatureRequests')(config)
+const processAMBCollectedSignatures = require('./events/processAMBCollectedSignatures')(config)
 
 const ZERO = toBN(0)
 const ONE = toBN(1)
@@ -102,6 +103,8 @@ function processEvents(events) {
       return processTransfers(events)
     case 'amb-signature-request':
       return processAMBSignatureRequests(events)
+    case 'amb-collected-signatures':
+      return processAMBCollectedSignatures(events)
     default:
       return []
   }

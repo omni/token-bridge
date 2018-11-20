@@ -14,8 +14,9 @@ module.exports = {
     MAX_TIME_REACHED: 11
   },
   GAS_PRICE_OPTIONS: {
-    GAS_PRICE: 'GAS_PRICE',
-    SPEED: 'SPEED'
+    UNDEFINED: '00',
+    GAS_PRICE: '01',
+    SPEED: '02'
   },
   ORACLE_GAS_PRICE_SPEEDS: {
     SLOW: 'slow',

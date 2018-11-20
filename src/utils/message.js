@@ -1,7 +1,6 @@
 const assert = require('assert')
 const Web3Utils = require('web3-utils')
-const { InvalidAMBDatatypeError } = require('./errors')
-const { ORACLE_GAS_PRICE_SPEEDS } = require('./constants')
+const { ORACLE_GAS_PRICE_SPEEDS, GAS_PRICE_OPTIONS } = require('./constants')
 
 const gasPriceSpeedMapper = {
   '01': ORACLE_GAS_PRICE_SPEEDS.INSTANT,
@@ -91,25 +90,24 @@ function parseAMBMessage(message) {
   const sender = `0x${message.slice(0, 40)}`
   const executor = `0x${message.slice(40, 80)}`
   const txHash = `0x${message.slice(80, 144)}`
-  const gasLimit = message.slice(144, 208)
+  const gasLimit = Web3Utils.toBN(message.slice(144, 208))
   const dataType = message.slice(208, 210)
   let gasPrice = null
   let gasPriceSpeed = null
   let dataStart = 210
 
   switch (dataType) {
-    case '00':
-      break
-    case '01':
-      gasPrice = message.slice(210, 274)
+    case GAS_PRICE_OPTIONS.GAS_PRICE:
+      gasPrice = Web3Utils.toBN(message.slice(210, 274))
       dataStart += 64
       break
-    case '02':
+    case GAS_PRICE_OPTIONS.SPEED:
       gasPriceSpeed = gasPriceSpeedMapper[message.slice(210, 212)]
       dataStart += 2
       break
+    case GAS_PRICE_OPTIONS.UNDEFINED:
     default:
-      throw new InvalidAMBDatatypeError(`Invalid message data type ${dataType}`)
+      break
   }
 
   const data = `0x${message.slice(dataStart, message.length)}`
