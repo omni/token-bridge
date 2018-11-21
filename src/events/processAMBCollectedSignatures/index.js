@@ -6,7 +6,7 @@ const rootLogger = require('../../services/logger')
 const { web3Home, web3Foreign } = require('../../services/web3')
 const { signatureToVRS, parseAMBMessage } = require('../../utils/message')
 const { generateGasPriceOptions } = require('../../utils/utils')
-const estimateGas = require('../processCollectedSignatures/estimateGas')
+const estimateGas = require('./estimateGas')
 const {
   AlreadyProcessedError,
   IncompatibleContractError,
@@ -89,7 +89,8 @@ function processCollectedSignaturesBuilder(config) {
               s,
               message,
               numberOfCollectedSignatures: NumberOfCollectedSignatures,
-              txHash
+              txHash,
+              address: config.validatorAddress
             })
             logger.debug({ gasEstimate }, 'Gas estimated')
           } catch (e) {

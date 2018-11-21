@@ -20,12 +20,15 @@ async function estimateGas({
   v,
   r,
   s,
-  txHash
+  txHash,
+  address
 }) {
   try {
     const gasEstimate = await foreignBridge.methods
       .executeSignatures(message, v, r, s)
-      .estimateGas()
+      .estimateGas({
+        from: address
+      })
     return gasEstimate
   } catch (e) {
     if (e instanceof HttpListProviderError) {
