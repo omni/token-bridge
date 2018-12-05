@@ -1,29 +1,22 @@
 const path = require('path')
 require('dotenv').config({
-  path: path.join(__dirname, '../../.env')
+  path: path.join(__dirname, '../.env')
 })
 const Web3Utils = require('web3-utils')
-const { web3Home } = require('../../src/services/web3')
-const { sendTx, sendRawTx } = require('../../src/tx/sendTx')
-const { isValidAmount } = require('../utils/utils')
-const BRIDGE_ABI = require('../../abis/HomeBridgeErcToNative.abi')
+const { web3Home } = require('../src/services/web3')
+const { sendTx, sendRawTx } = require('../src/tx/sendTx')
 
 const {
   USER_ADDRESS,
   USER_ADDRESS_PRIVATE_KEY,
   HOME_BRIDGE_ADDRESS,
-  HOME_MIN_AMOUNT_PER_TX,
-  HOME_TEST_TX_GAS_PRICE
+  HOME_MIN_AMOUNT_PER_TX
 } = process.env
 
 const NUMBER_OF_DEPOSITS_TO_SEND = process.argv[2] || 1
 
 async function main() {
-  const bridge = new web3Home.eth.Contract(BRIDGE_ABI, HOME_BRIDGE_ADDRESS)
-
   try {
-    await isValidAmount(HOME_MIN_AMOUNT_PER_TX, bridge)
-
     const homeChaindId = await sendRawTx({
       chain: 'home',
       params: [],
@@ -42,9 +35,9 @@ async function main() {
         privateKey: USER_ADDRESS_PRIVATE_KEY,
         data: '0x',
         nonce,
-        gasPrice: HOME_TEST_TX_GAS_PRICE,
+        gasPrice: '1',
         amount: HOME_MIN_AMOUNT_PER_TX,
-        gasLimit: 100000,
+        gasLimit: 50000,
         to: HOME_BRIDGE_ADDRESS,
         web3: web3Home,
         chainId: homeChaindId

@@ -1,6 +1,6 @@
 const baseConfig = require('./base.config')
 
-const id = `${baseConfig.id}-collected-signatures`
+const id = baseConfig.isErcToErc ? 'erc-collected-signatures' : 'collected-signatures'
 
 module.exports = {
   ...baseConfig.bridgeConfig,
