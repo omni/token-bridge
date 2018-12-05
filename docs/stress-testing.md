@@ -84,3 +84,25 @@ This will generate a block with 1000 transactions that the bridge will process.
 
 After doing all of this, run `node scripts/compute-stats.js`. This will print
 some statistics about the processed transactions.
+
+### Statistics results
+
+**Signature Requests**
+
+Tests |1|2|3|4|5|AVG
+---|---|---|---|---|---|---
+count|1000|1000|1000|1000|1000|1000 
+mean|12112|17714|15377|16468|15745|15483
+median|11968|17925|15518|16994|15931|15667
+min|5584|6423|5803|6121|6090|6004
+max|18685|27554|23844|25310|24198|23918
+
+**Collected Signatures**
+
+Tests |1|2|3|4|5|AVG
+---|---|---|---|---|---|---
+count|1000|1000|1000|1000|1000|1000 
+mean|8564|5399|6653|9684|9605|7981
+median|8771|5971|7295|9854|10056|8389
+min|7301|2783|3003|8331|7165|5716
+max|9156|7453|9492|10889|10687|9535

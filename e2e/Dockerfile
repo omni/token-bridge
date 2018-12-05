@@ -12,7 +12,7 @@ RUN mkdir submodules && \
   mv poa-bridge-contracts submodules && \
   cd submodules/poa-bridge-contracts && \
   git fetch && \
-  git checkout 5d9f5946cda6043d7584b6da49693f7d3391b78d
+  git checkout 2.1.0
 
 RUN npm install --unsafe-perm
 

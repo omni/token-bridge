@@ -2,17 +2,15 @@ require('dotenv').config()
 const promiseLimit = require('promise-limit')
 const { HttpListProviderError } = require('http-list-provider')
 const bridgeValidatorsABI = require('../../../abis/BridgeValidators.abi')
-const logger = require('../../services/logger')
+const rootLogger = require('../../services/logger')
 const { web3Home } = require('../../services/web3')
 const {
   AlreadyProcessedError,
   AlreadySignedError,
   InvalidValidatorError
 } = require('../../utils/errors')
-const { MAX_CONCURRENT_EVENTS } = require('../../utils/constants')
+const { EXIT_CODES, MAX_CONCURRENT_EVENTS } = require('../../utils/constants')
 const estimateGas = require('../processAffirmationRequests/estimateGas')
-
-const { VALIDATOR_ADDRESS } = process.env
 
 const limit = promiseLimit(MAX_CONCURRENT_EVENTS)
 
@@ -25,16 +23,27 @@ function processTransfersBuilder(config) {
     const txToSend = []
 
     if (validatorContract === null) {
+      rootLogger.debug('Getting validator contract address')
       const validatorContractAddress = await homeBridge.methods.validatorContract().call()
+      rootLogger.debug({ validatorContractAddress }, 'Validator contract address obtained')
+
       validatorContract = new web3Home.eth.Contract(bridgeValidatorsABI, validatorContractAddress)
     }
 
+    rootLogger.debug(`Processing ${transfers.length} Transfer events`)
     const callbacks = transfers.map(transfer =>
       limit(async () => {
         const { from, value } = transfer.returnValues
 
+        const logger = rootLogger.child({
+          eventTransactionHash: transfer.transactionHash
+        })
+
+        logger.info({ from, value }, `Processing transfer ${transfer.transactionHash}`)
+
         let gasEstimate
         try {
+          logger.debug('Estimate gas')
           gasEstimate = await estimateGas({
             web3: web3Home,
             homeBridge,
@@ -42,25 +51,22 @@ function processTransfersBuilder(config) {
             recipient: from,
             value,
             txHash: transfer.transactionHash,
-            address: VALIDATOR_ADDRESS
+            address: config.validatorAddress
           })
+          logger.debug({ gasEstimate }, 'Gas estimated')
         } catch (e) {
           if (e instanceof HttpListProviderError) {
             throw new Error(
               'RPC Connection Error: submitSignature Gas Estimate cannot be obtained.'
             )
           } else if (e instanceof InvalidValidatorError) {
-            logger.fatal({ address: VALIDATOR_ADDRESS }, 'Invalid validator')
-            process.exit(10)
+            logger.fatal({ address: config.validatorAddress }, 'Invalid validator')
+            process.exit(EXIT_CODES.INCOMPATIBILITY)
           } else if (e instanceof AlreadySignedError) {
-            logger.info(
-              { eventTransactionHash: transfer.transactionHash },
-              `Already signed transfer ${transfer.transactionHash}`
-            )
+            logger.info(`Already signed transfer ${transfer.transactionHash}`)
             return
           } else if (e instanceof AlreadyProcessedError) {
             logger.info(
-              { eventTransactionHash: transfer.transactionHash },
               `transfer ${transfer.transactionHash} was already processed by other validators`
             )
             return
@@ -72,7 +78,7 @@ function processTransfersBuilder(config) {
 
         const data = await homeBridge.methods
           .executeAffirmation(from, value, transfer.transactionHash)
-          .encodeABI({ from: VALIDATOR_ADDRESS })
+          .encodeABI({ from: config.validatorAddress })
 
         txToSend.push({
           data,
