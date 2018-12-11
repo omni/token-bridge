@@ -45,7 +45,6 @@ services:
     env_file: ./.env
     environment: 
       - NODE_ENV=production 
-      - VALIDATOR_ADDRESS=${VALIDATOR_ADDRESS}
       - VALIDATOR_ADDRESS_PRIVATE_KEY=${VALIDATOR_ADDRESS_PRIVATE_KEY}
     restart: unless-stopped
     entrypoint: npm run watcher:signature-request
@@ -88,7 +87,6 @@ services:
     env_file: ./.env
     environment: 
       - NODE_ENV=production 
-      - VALIDATOR_ADDRESS=${VALIDATOR_ADDRESS}
       - VALIDATOR_ADDRESS_PRIVATE_KEY=${VALIDATOR_ADDRESS_PRIVATE_KEY}
     restart: unless-stopped
     entrypoint: npm run sender:home
@@ -103,7 +101,6 @@ services:
     env_file: ./.env
     environment: 
       - NODE_ENV=production 
-      - VALIDATOR_ADDRESS=${VALIDATOR_ADDRESS}
       - VALIDATOR_ADDRESS_PRIVATE_KEY=${VALIDATOR_ADDRESS_PRIVATE_KEY}
     restart: unless-stopped
     entrypoint: npm run sender:foreign
