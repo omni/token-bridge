@@ -144,12 +144,8 @@ There are two options to run the nodejs oracle:
 
 ### Docker
 
-  - Start RabbitMQ and Redis: if you are running the bridge containers for the first time use `docker-compose up -d --build` otherwise use `docker-compose up -d` 
-  - `docker-compose run bridge npm run watcher:signature-request`
-  - `docker-compose run bridge npm run watcher:collected-signatures`
-  - `docker-compose run bridge npm run watcher:affirmation-request`
-  - `docker-compose run bridge npm run sender:home`
-  - `docker-compose run bridge npm run sender:foreign`
+  - While running the bridge containers for the first time use `VALIDATOR_ADDRESS=<validator address> VALIDATOR_ADDRESS_PRIVATE_KEY=<validator address private key> docker-compose up -d --build` 
+  - For further launches use `VALIDATOR_ADDRESS=<validator address>  VALIDATOR_ADDRESS_PRIVATE_KEY=<validator address private key> docker-compose  up  --detach`
 
 ### NPM
 
