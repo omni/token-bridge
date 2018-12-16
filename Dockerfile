@@ -13,8 +13,4 @@ COPY package-lock.json .
 RUN npm install
 COPY . .
 CMD echo "To start a bridge process run:" \
-  "docker-compose run bridge npm run watcher:signature-request" \
-  "docker-compose run bridge npm run watcher:collected-signatures" \
-  "docker-compose run bridge npm run watcher:affirmation-request" \
-  "docker-compose run bridge npm run sender:home" \
-  "docker-compose run bridge npm run sender:foreign"
+  "VALIDATOR_ADDRESS=<validator address> VALIDATOR_ADDRESS_PRIVATE_KEY=<validator address private key> docker-compose up -d --build"
