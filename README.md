@@ -172,7 +172,7 @@ bash ./reset-lastBlock.sh <watcher> <block num>
 ```
 or
 ```shell
-docker-compose run bridge bash ./reset-lastBlock.sh <watcher> <block num>
+docker-compose exec bridge_affirmation bash ./reset-lastBlock.sh <watcher> <block num>
 ```
 
 where the _watcher_ could be one of:
@@ -248,9 +248,9 @@ See the [E2E README](/e2e) for instructions.
 
 When running the processes, the following commands can be used to test functionality.
 
-- To send deposits to a home contract run `node scripts/native_to_erc20/sendHome.js <tx num>` (or `docker-compose run bridge node scripts/native_to_erc20/sendHome.js <tx num>`), where `<tx num>` is how many tx will be sent out to deposit.
+- To send deposits to a home contract run `node scripts/native_to_erc20/sendHome.js <tx num>` (or `docker-compose exec bridge_affirmation node scripts/native_to_erc20/sendHome.js <tx num>`), where `<tx num>` is how many tx will be sent out to deposit.
 
-- To send withdrawals to a foreign contract run `node scripts/native_to_erc20/sendForeign.js <tx num>` (or `docker-compose run bridge node scripts/native_to_erc20/sendForeign.js <tx num>`), where `<tx num>` is how many tx will be sent out to withdraw.
+- To send withdrawals to a foreign contract run `node scripts/native_to_erc20/sendForeign.js <tx num>` (or `docker-compose exec bridge_affirmation node scripts/native_to_erc20/sendForeign.js <tx num>`), where `<tx num>` is how many tx will be sent out to withdraw.
 
 ### ERC20-to-ERC20 Mode Testing
 
