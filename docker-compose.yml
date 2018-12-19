@@ -28,15 +28,6 @@ services:
       - net_db_bridge_senderforeign
     restart: unless-stopped
     volumes: ['~/bridge_data/redis:/data']
-  bridge:
-    cpus: 0.1
-    mem_limit: 500m
-    build: .
-    command: 'true'
-    env_file: ./.env
-    environment: 
-      - NODE_ENV=production 
-    restart: on-failure
   bridge_request:
     cpus: 0.1
     mem_limit: 500m
