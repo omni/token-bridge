@@ -144,12 +144,9 @@ There are two options to run the nodejs oracle:
 
 ### Docker
 
-  - Start RabbitMQ and Redis: if you are running the bridge containers for the first time use `docker-compose up -d --build` otherwise use `docker-compose up -d` 
-  - `docker-compose run bridge npm run watcher:signature-request`
-  - `docker-compose run bridge npm run watcher:collected-signatures`
-  - `docker-compose run bridge npm run watcher:affirmation-request`
-  - `docker-compose run bridge npm run sender:home`
-  - `docker-compose run bridge npm run sender:foreign`
+  - While running the bridge containers for the first time use `VALIDATOR_ADDRESS=<validator address> VALIDATOR_ADDRESS_PRIVATE_KEY=<validator address private key> docker-compose up -d --build` 
+  - For further launches use `VALIDATOR_ADDRESS=<validator address>  VALIDATOR_ADDRESS_PRIVATE_KEY=<validator address private key> docker-compose  up  --detach`
+  - If you want to use any command from this document, prefix it with `docker-compose exec bridge_affirmation`, if not already prefixed, to execute command inside on of the running docker containers. Make sure bridge service is started before using the commands.
 
 ### NPM
 
@@ -174,12 +171,11 @@ Execute this command in the bridge root directory:
 ```shell
 bash ./reset-lastBlock.sh <watcher> <block num>
 ```
-or
+for NPM installation or
 ```shell
-docker-compose run bridge bash ./reset-lastBlock.sh <watcher> <block num>
+docker-compose exec bridge_affirmation bash ./reset-lastBlock.sh <watcher> <block num>
 ```
-
-where the _watcher_ could be one of:
+for docker installation respectively, where the _watcher_ could be one of:
 
 - `signature-request`
 - `collected-signatures`
@@ -248,13 +244,15 @@ npm test
 
 See the [E2E README](/e2e) for instructions. 
 
+*Notice*: for docker-based installations do not forget to add `docker-compose exec bridge_affirmation` before the test commands listed below.
+
 ### Native-to-ERC20 Mode Testing
 
 When running the processes, the following commands can be used to test functionality.
 
-- To send deposits to a home contract run `node scripts/native_to_erc20/sendHome.js <tx num>` (or `docker-compose run bridge node scripts/native_to_erc20/sendHome.js <tx num>`), where `<tx num>` is how many tx will be sent out to deposit.
+- To send deposits to a home contract run `node scripts/native_to_erc20/sendHome.js <tx num>`, where `<tx num>` is how many tx will be sent out to deposit.
 
-- To send withdrawals to a foreign contract run `node scripts/native_to_erc20/sendForeign.js <tx num>` (or `docker-compose run bridge node scripts/native_to_erc20/sendForeign.js <tx num>`), where `<tx num>` is how many tx will be sent out to withdraw.
+- To send withdrawals to a foreign contract run `node scripts/native_to_erc20/sendForeign.js <tx num>`, where `<tx num>` is how many tx will be sent out to withdraw.
 
 ### ERC20-to-ERC20 Mode Testing
 
@@ -267,7 +265,6 @@ When running the processes, the following commands can be used to test functiona
 - To deposit from a Foreign to a Home contract run `node scripts/erc20_to_native/sendForeign.js <tx num>`.
 
 - To make withdrawal to Home from a Foreign contract run `node scripts/erc20_to_native/sendHome.js <tx num>`.
-
 
 ### Configuration parameters for testing
 
