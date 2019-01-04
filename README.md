@@ -10,10 +10,9 @@ The POA Bridge allows users to transfer assets between two chains in the Ethereu
 
 **Bridge Elements**
 1. An oracle written in NodeJS, contained in this repository.
-2. [Solidity smart contracts](https://github.com/poanetwork/poa-bridge-contracts). Used to manage bridge validators, collect signatures, and confirm asset relay and disposal.
-3. [Bridge UI Application](https://github.com/poanetwork/bridge-ui). A DApp interface to transfer tokens and coins between chains.
-4. [Bridge Monitor](https://github.com/poanetwork/bridge-monitor). A tool for checking balances and unprocessed events in bridged networks.
-5. [Bridge Deployment Playbooks](https://github.com/poanetwork/deployment-bridge). Manages configuration instructions for remote deployments.
+2. [Solidity smart contracts](https://github.com/ColuLocalNetwork/poa-bridge-contracts). Used to manage bridge validators, collect signatures, and confirm asset relay and disposal.
+3. [Bridge UI Application](https://github.com/ColuLocalNetwork/bridge-ui). A DApp interface to transfer tokens and coins between chains.
+4. [Bridge Deployment Playbooks](https://github.com/ColuLocalNetwork/deployment-bridge). Manages configuration instructions for remote deployments.
 
 The bridge oracle is deployed on specified validator nodes (only nodes whose private keys correspond to addresses specified in the smart contracts) in the network. The oracle connects to two chains via a Remote Procedure Call (RPC). It is responsible for:
 - listening to events related to bridge contracts
@@ -160,7 +159,7 @@ There are two options to run the nodejs oracle:
 
 ### Bridge UI
 
-See the [Bridge UI installation instructions](https://github.com/poanetwork/bridge-ui/) to configure and use the optional Bridge UI.
+See the [Bridge UI installation instructions](https://github.com/ColuLocalNetwork/bridge-ui/) to configure and use the optional Bridge UI.
 
 ## Rollback the Last Processed Block in Redis
 
