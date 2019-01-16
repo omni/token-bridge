@@ -21,9 +21,12 @@ let expectedMessageLength = null
 let validatorContract = null
 
 function processSignatureRequestsBuilder(config) {
-  const homeBridge = new web3Home.eth.Contract(config.homeBridgeAbi, config.homeBridgeAddress)
-
-  return async function processSignatureRequests(signatureRequests) {
+  return async function processSignatureRequests(
+    signatureRequests,
+    homeBridgeAddress,
+    foreignBridgeAddress
+  ) {
+    const homeBridge = new web3Home.eth.Contract(config.homeBridgeAbi, homeBridgeAddress)
     const txToSend = []
 
     if (expectedMessageLength === null) {
@@ -56,7 +59,7 @@ function processSignatureRequestsBuilder(config) {
           recipient,
           value,
           transactionHash: signatureRequest.transactionHash,
-          bridgeAddress: config.foreignBridgeAddress,
+          bridgeAddress: foreignBridgeAddress,
           expectedMessageLength
         })
 
@@ -106,7 +109,7 @@ function processSignatureRequestsBuilder(config) {
           data,
           gasEstimate,
           transactionReference: signatureRequest.transactionHash,
-          to: config.homeBridgeAddress
+          to: homeBridgeAddress
         })
       })
     )

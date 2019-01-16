@@ -18,14 +18,18 @@ const limit = promiseLimit(MAX_CONCURRENT_EVENTS)
 let validatorContract = null
 
 function processCollectedSignaturesBuilder(config) {
-  const homeBridge = new web3Home.eth.Contract(config.homeBridgeAbi, config.homeBridgeAddress)
+  return async function processCollectedSignatures(
+    signatures,
+    homeBridgeAddress,
+    foreignBridgeAddress
+  ) {
+    const homeBridge = new web3Home.eth.Contract(config.homeBridgeAbi, homeBridgeAddress)
 
-  const foreignBridge = new web3Foreign.eth.Contract(
-    config.foreignBridgeAbi,
-    config.foreignBridgeAddress
-  )
+    const foreignBridge = new web3Foreign.eth.Contract(
+      config.foreignBridgeAbi,
+      foreignBridgeAddress
+    )
 
-  return async function processCollectedSignatures(signatures) {
     const txToSend = []
 
     if (validatorContract === null) {
@@ -112,7 +116,7 @@ function processCollectedSignaturesBuilder(config) {
             data,
             gasEstimate,
             transactionReference: colSignature.transactionHash,
-            to: config.foreignBridgeAddress
+            to: foreignBridgeAddress
           })
         } else {
           logger.info(
