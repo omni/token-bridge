@@ -97,6 +97,32 @@ services:
       - FOREIGN_POLLING_INTERVAL=500
       - ALLOW_HTTP=yes
     command: "true"
+  bridge-erc-multiple:
+    build: ..
+    environment:
+      - NODE_ENV=production
+      - BRIDGE_MODE=ERC_TO_ERC_MULTIPLE
+      - QUEUE_URL=amqp://rabbit
+      - REDIS_URL=redis://redis
+      - HOME_RPC_URL=http://parity1:8545
+      - FOREIGN_RPC_URL=http://parity2:8545
+      - HOME_BRIDGE_MAPPER_ADDRESS=0x7cF104437Dc33093078D715AC9b50dDbd256685b
+      - VALIDATOR_ADDRESS=0xaaB52d66283F7A1D5978bcFcB55721ACB467384b
+      - VALIDATOR_ADDRESS_PRIVATE_KEY=8e829f695aed89a154550f30262f1529582cc49dc30eff74a6b491359e0230f9
+      - REDIS_LOCK_TTL=1000
+      - HOME_GAS_PRICE_ORACLE_URL=https://gasprice.poa.network/
+      - HOME_GAS_PRICE_SPEED_TYPE=standard
+      - HOME_GAS_PRICE_FALLBACK=1000000000
+      - HOME_GAS_PRICE_UPDATE_INTERVAL=600000
+      - FOREIGN_GAS_PRICE_ORACLE_URL=https://gasprice.poa.network/
+      - FOREIGN_GAS_PRICE_SPEED_TYPE=standard
+      - FOREIGN_GAS_PRICE_FALLBACK=10000000000
+      - FOREIGN_GAS_PRICE_UPDATE_INTERVAL=600000
+      - HOME_BRIDGE_MAPPER_POLLING_INTERVAL=500
+      - HOME_POLLING_INTERVAL=500
+      - FOREIGN_POLLING_INTERVAL=500
+      - ALLOW_HTTP=yes
+    command: "true"
   e2e:
     build: .
     command: "true"
