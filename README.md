@@ -74,11 +74,13 @@ There are two Senders:
 
 Redis is used to store the number of blocks that were already inspected by watchers, and the NOnce (Number of Operation) which was used previously by the sender to send a transaction.
 
-For more information on the Redis/RabbitMQ requirements, see [#90](/../../issues/90)
+For more information on the Redis/RabbitMQ requirements, see [#90](/../../issues/90). We also provide [useful commands for development](#useful-commands-for-development).
 
 # How to Use
 
 ## Installation and Deployment
+
+**Note:** The following steps detail the bridge deployment process for development and testing. For deployment in a production environment we recommend using the [Bridge Deployment Playbooks](https://github.com/poanetwork/deployment-bridge/tree/master/bridge-nodejs). 
 
 #### Deploy the Bridge Contracts
 
@@ -132,17 +134,17 @@ There are two options to run the TokenBridge processes:
 1. Docker containers. This requires [Docker](https://docs.docker.com/install/) and [Docker Compose](https://docs.docker.com/compose/install/). If you are on Linux, it's also recommended that you [create a docker group and add your user to it](https://docs.docker.com/install/linux/linux-postinstall/), so that you can use the CLI without sudo.
 2. NodeJs Package Manager (NPM).
 
-### Docker
+### Docker 
 
   - While running the bridge containers for the first time use `VALIDATOR_ADDRESS=<validator address> VALIDATOR_ADDRESS_PRIVATE_KEY=<validator address private key> docker-compose up -d --build` 
   - For further launches use `VALIDATOR_ADDRESS=<validator address>  VALIDATOR_ADDRESS_PRIVATE_KEY=<validator address private key> docker-compose  up  --detach`
-  - To run additional commands,  use the prefix `docker-compose exec bridge_affirmation` to execute the command inside of the running Docker containers. Make sure the bridge service is started before using the commands. 
 
-     - `docker-compose exec bridge_affirmation npm run watcher:signature-request`
-     - `docker-compose exec bridge_affirmation npm run watcher:collected-signatures`
-     - `docker-compose exec bridge_affirmation npm run watcher:affirmation-request`
-     - `docker-compose exec bridge_affirmation npm run sender:home`
-     - `docker-compose exec bridge_affirmation npm run sender:foreign`
+All [watcher](#watcher) & [sender](#sender) services launch when `docker-compose` is called. 
+
+**Note**: To view the Docker logs:
+* Find the container name: `docker-compose images`
+* [View the logs](https://docs.docker.com/v17.09/edge/engine/reference/commandline/container_logs/#description) : `docker container logs CONTAINER`
+
 
 ### NPM
 
@@ -164,14 +166,15 @@ If the bridge does not handle an event properly (i.e. a transaction stalls due t
 
 Execute this command in the bridge root directory:
 
+for NPM installation:
 ```shell
 bash ./reset-lastBlock.sh <watcher> <block num>
 ```
-for NPM installation or
+for Docker installation:
 ```shell
 docker-compose exec bridge_affirmation bash ./reset-lastBlock.sh <watcher> <block num>
 ```
-for docker installation respectively, where the _watcher_ could be one of:
+where the _watcher_ could be one of:
 
 - `signature-request`
 - `collected-signatures`
@@ -289,4 +292,6 @@ This project is licensed under the GNU Lesser General Public License v3.0. See t
 
 ## References
 
+* [Additional Documentation](https://forum.poa.network/c/tokenbridge)
 * [POA Bridge FAQ](https://poanet.zendesk.com/hc/en-us/categories/360000349273-POA-Bridge)
+
