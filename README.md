@@ -142,8 +142,8 @@ There are two options to run the TokenBridge processes:
 All [watcher](#watcher) & [sender](#sender) services launch when `docker-compose` is called. 
 
 **Note**: To view the Docker logs:
-* Find the container name: `docker-compose images`
-* [View the logs](https://docs.docker.com/v17.09/edge/engine/reference/commandline/container_logs/#description) : `docker container logs CONTAINER`
+* `chdir` to the directory containing the `docker-compose.yml` file used to run the bridge instance
+* [View the logs](https://docs.docker.com/v17.09/compose/reference/logs/) : `docker-compose logs`
 
 
 ### NPM
