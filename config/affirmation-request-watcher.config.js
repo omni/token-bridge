@@ -7,7 +7,7 @@ const id = `${baseConfig.id}-affirmation-request`
 module.exports =
   baseConfig.id === 'erc-erc-multiple'
     ? {
-        ...baseConfig.bridgeConfigBasic,
+        ...baseConfig.bridgeConfigMultipleBasic,
         ...baseConfig.foreignConfigBasic,
         event: 'Transfer',
         eventAbi: erc20Abi,

@@ -70,6 +70,12 @@ const bridgeConfigBasic = {
   maxProcessingTime
 }
 
+const bridgeConfigMultipleBasic = {
+  ...bridgeConfigBasic,
+  deployedBridgesRedisKey: process.env.DEPLOYED_BRIDGES_REDIS_KEY || 'deployed:bridges',
+  concurrency: process.env.MULTIPLE_BRIDGES_CONCURRENCY || 1
+}
+
 const bridgeConfig = {
   ...bridgeConfigBasic,
   homeBridgeAddress: process.env.HOME_BRIDGE_ADDRESS,
@@ -116,6 +122,7 @@ const bridgeMapperConfig = {
 
 module.exports = {
   bridgeConfigBasic,
+  bridgeConfigMultipleBasic,
   bridgeConfig,
   homeConfigBasic,
   homeConfig,

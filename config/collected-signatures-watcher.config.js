@@ -5,7 +5,7 @@ const id = `${baseConfig.id}-collected-signatures`
 module.exports =
   baseConfig.id === 'erc-erc-multiple'
     ? {
-        ...baseConfig.bridgeConfigBasic,
+        ...baseConfig.bridgeConfigMultipleBasic,
         ...baseConfig.homeConfigBasic,
         event: 'CollectedSignatures',
         queue: 'foreign',

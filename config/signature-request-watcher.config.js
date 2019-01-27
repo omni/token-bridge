@@ -5,7 +5,7 @@ const id = `${baseConfig.id}-signature-request`
 module.exports =
   baseConfig.id === 'erc-erc-multiple'
     ? {
-        ...baseConfig.bridgeConfigBasic,
+        ...baseConfig.bridgeConfigMultipleBasic,
         ...baseConfig.homeConfigBasic,
         event: 'UserRequestForSignature',
         queue: 'home',

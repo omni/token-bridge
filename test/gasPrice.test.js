@@ -114,8 +114,7 @@ describe('gasPrice', () => {
       )
     })
 
-    // TODO check why failing
-    it.skip('should call setIntervalAndRun with default interval value on Home', async () => {
+    it('should call setIntervalAndRun with default interval value on Home', async () => {
       // given
       delete process.env.HOME_GAS_PRICE_UPDATE_INTERVAL
       const gasPrice = proxyquire('../src/services/gasPrice', { '../utils/utils': utils })
@@ -128,8 +127,7 @@ describe('gasPrice', () => {
       expect(utils.setIntervalAndRun.args[0][1]).to.equal(DEFAULT_UPDATE_INTERVAL)
     })
 
-    // TODO check why failing
-    it.skip('should call setIntervalAndRun with default interval value on Foreign', async () => {
+    it('should call setIntervalAndRun with default interval value on Foreign', async () => {
       // given
       delete process.env.FOREIGN_GAS_PRICE_UPDATE_INTERVAL
       const gasPrice = proxyquire('../src/services/gasPrice', { '../utils/utils': utils })
