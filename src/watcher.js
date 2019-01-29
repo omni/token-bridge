@@ -260,7 +260,7 @@ async function processErcToErcMultiple(sendToQueue) {
 async function main({ sendToQueue }) {
   try {
     if (config.id.startsWith('erc-erc-multiple')) {
-      processErcToErcMultiple(sendToQueue)
+      await processErcToErcMultiple(sendToQueue)
     } else if (config.id.includes('bridge-deployed')) {
       logger.warn(`watcher '${config.id}' irrelevant for bridge mode '${process.env.BRIDGE_MODE}'`)
       process.exit(EXIT_CODES.IRRELEVANT)
