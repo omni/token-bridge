@@ -23,7 +23,7 @@ const processSignatureRequests = require('./events/processSignatureRequests')(co
 const processCollectedSignatures = require('./events/processCollectedSignatures')(config)
 const processAffirmationRequests = require('./events/processAffirmationRequests')(config)
 const processTransfers = require('./events/processTransfers')(config)
-const processBridgeMappingsAdded = require('./events/processBridgeMappingsAdded')(config)
+const processBridgeMappingsUpdated = require('./events/processBridgeMappingsUpdated')(config)
 
 const ZERO = toBN(0)
 const ONE = toBN(1)
@@ -167,8 +167,8 @@ async function processOne(
 
 async function getDeployedBridges() {
   return redis
-    .smembers(config.deployedBridgesRedisKey)
-    .then(deployedBridges => deployedBridges.map(bridge => JSON.parse(bridge)))
+    .hgetall(config.deployedBridgesRedisKey)
+    .then(deployedBridges => Object.keys(deployedBridges).map(k => JSON.parse(deployedBridges[k])))
 }
 
 async function processErcToErcMultiple(sendToQueue) {
@@ -202,7 +202,7 @@ async function processErcToErcMultiple(sendToQueue) {
           ${eventContract.options.address}`
       )
 
-      await processBridgeMappingsAdded(events)
+      await processBridgeMappingsUpdated(events)
 
       logger.debug(
         { lastProcessedBlock: lastBlockToProcess.toString() },

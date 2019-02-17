@@ -208,7 +208,7 @@
   },
   {
     "type": "event",
-    "name": "BridgeMappingAdded",
+    "name": "BridgeMappingUpdated",
     "inputs": [
       {
         "type": "address",

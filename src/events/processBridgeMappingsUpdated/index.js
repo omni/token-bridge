@@ -3,12 +3,13 @@ const promiseLimit = require('promise-limit')
 const { redis } = require('../../services/redisClient')
 const rootLogger = require('../../services/logger')
 const { MAX_CONCURRENT_EVENTS } = require('../../utils/constants')
+const { toBN } = require('web3').utils
 
 const limit = promiseLimit(MAX_CONCURRENT_EVENTS)
 
-function processBridgeMappingsAddedBuilder(config) {
-  return async function processBridgeMappingsAdded(bridgesMappings) {
-    rootLogger.debug(`Processing ${bridgesMappings.length} BridgeMappingAdded events`)
+function processBridgeMappingsUpdatedBuilder(config) {
+  return async function processBridgeMappingsUpdated(bridgesMappings) {
+    rootLogger.debug(`Processing ${bridgesMappings.length} BridgeMappingUpdated events`)
     const jobs = bridgesMappings.map(bridge =>
       limit(async () => {
         const {
@@ -36,17 +37,22 @@ function processBridgeMappingsAddedBuilder(config) {
           `Processing bridge ${bridge.transactionHash}`
         )
 
-        return redis.sadd(
-          config.deployedBridgesRedisKey,
-          JSON.stringify({
-            homeBridge,
-            foreignBridge,
-            homeToken,
+        if (toBN(homeToken).isZero()) {
+          return redis.hdel(config.deployedBridgesRedisKey, foreignToken)
+        } else {
+          return redis.hset(
+            config.deployedBridgesRedisKey,
             foreignToken,
-            homeStartBlock,
-            foreignStartBlock
-          })
-        )
+            JSON.stringify({
+              homeBridge,
+              foreignBridge,
+              homeToken,
+              foreignToken,
+              homeStartBlock,
+              foreignStartBlock
+            })
+          )
+        }
       })
     )
 
@@ -54,4 +60,4 @@ function processBridgeMappingsAddedBuilder(config) {
   }
 }
 
-module.exports = processBridgeMappingsAddedBuilder
+module.exports = processBridgeMappingsUpdatedBuilder

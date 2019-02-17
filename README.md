@@ -66,7 +66,7 @@ There are four Watchers:
 - **Affirmation Request Watcher**: Depends on the bridge mode.
    - `Native-to-ERC20`: Listens to `UserRequestForAffirmation` raised by the bridge contract.
    - `ERC20-to-ERC20`, `ERC20-to-Native` and `ERC20-to-ERC20-multiple`: Listens to `Transfer` events raised by the token contract.
-- **Bridge Deployed Watcher**: Listens to `BridgeMappingAdded` events on the Home network.
+- **Bridge Deployed Watcher**: Listens to `BridgeMappingUpdated` events on the Home network.
 
 
 ### Sender

@@ -47,7 +47,7 @@ async function deployForeignBridge(erc20Token) {
   })
   const foreignBridgeDeployedEvents = await foreignFactory.getPastEvents('ForeignBridgeDeployed')
   const result = {
-    foreignBridgeAdderss: foreignBridgeDeployedEvents[0].returnValues._foreignBridge,
+    foreignBridgeAddress: foreignBridgeDeployedEvents[0].returnValues._foreignBridge,
     foreignBridgeBlockNumber: foreignBridgeDeployedEvents[0].returnValues._blockNumber
   }
   console.log('\n[Foreign] Deployed foreign bridge:', JSON.stringify(result))
@@ -110,28 +110,28 @@ async function addBridgeMapping(
     privateKey: deploymentPrivateKey,
     url: process.env.HOME_RPC_URL
   })
-  const bridgeMappingAddedEvents = await mapper.getPastEvents('BridgeMappingAdded')
+  const bridgeMappingUpdatedEvents = await mapper.getPastEvents('BridgeMappingUpdated')
   const bridgeMapping = {
-    foreignToken: bridgeMappingAddedEvents[0].returnValues.foreignToken,
-    homeToken: bridgeMappingAddedEvents[0].returnValues.homeToken,
-    foreignBridge: bridgeMappingAddedEvents[0].returnValues.foreignBridge,
-    homeBridge: bridgeMappingAddedEvents[0].returnValues.homeBridge,
-    foreignStartBlock: bridgeMappingAddedEvents[0].returnValues.foreignStartBlock,
-    homeStartBlock: bridgeMappingAddedEvents[0].returnValues.homeStartBlock
+    foreignToken: bridgeMappingUpdatedEvents[0].returnValues.foreignToken,
+    homeToken: bridgeMappingUpdatedEvents[0].returnValues.homeToken,
+    foreignBridge: bridgeMappingUpdatedEvents[0].returnValues.foreignBridge,
+    homeBridge: bridgeMappingUpdatedEvents[0].returnValues.homeBridge,
+    foreignStartBlock: bridgeMappingUpdatedEvents[0].returnValues.foreignStartBlock,
+    homeStartBlock: bridgeMappingUpdatedEvents[0].returnValues.homeStartBlock
   }
-  console.log('\n[Home] bridge mapping added: ', JSON.stringify(bridgeMapping))
+  console.log('\n[Home] bridge mapping updated: ', JSON.stringify(bridgeMapping))
 }
 
 async function addBridgeForToken(index) {
   const token = process.env[`ERC20_TOKEN_ADDRESS_${index}`]
-  const { foreignBridgeAdderss, foreignBridgeBlockNumber } = await deployForeignBridge(token)
+  const { foreignBridgeAddress, foreignBridgeBlockNumber } = await deployForeignBridge(token)
   const { homeBridgeAddress, homeBridgeToken, homeBridgeBlockNumber } = await deployHomeBridge(
     index
   )
   await addBridgeMapping(
     token,
     homeBridgeToken,
-    foreignBridgeAdderss,
+    foreignBridgeAddress,
     homeBridgeAddress,
     foreignBridgeBlockNumber,
     homeBridgeBlockNumber
