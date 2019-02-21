@@ -1,7 +1,7 @@
 const sinon = require('sinon')
 const { expect } = require('chai')
 const proxyquire = require('proxyquire').noPreserveCache()
-const { fetchGasPrice } = require('../src/services/gasPrice')
+const { fetchGasPrice, gasPriceWithinLimits } = require('../src/services/gasPrice')
 const { DEFAULT_UPDATE_INTERVAL } = require('../src/utils/constants')
 
 describe('gasPrice', () => {
@@ -136,6 +136,44 @@ describe('gasPrice', () => {
       // then
       expect(process.env.FOREIGN_GAS_PRICE_UPDATE_INTERVAL).to.equal(undefined)
       expect(utils.setIntervalAndRun.args[0][1]).to.equal(DEFAULT_UPDATE_INTERVAL)
+    })
+  })
+  describe('gasPriceWithinLimits', () => {
+    it('should return true if gas price is between boundaries', () => {
+      // given
+      const minGasPrice = 1
+      const middleGasPrice = 10
+      const maxGasPrice = 250
+
+      // when
+      const minGasPriceWithinLimits = gasPriceWithinLimits(minGasPrice)
+      const middleGasPriceWithinLimits = gasPriceWithinLimits(middleGasPrice)
+      const maxGasPriceWithinLimits = gasPriceWithinLimits(maxGasPrice)
+
+      // then
+      expect(minGasPriceWithinLimits).to.equal(true)
+      expect(middleGasPriceWithinLimits).to.equal(true)
+      expect(maxGasPriceWithinLimits).to.equal(true)
+    })
+    it('should return false if gas price is below min boundary', () => {
+      // Given
+      const gasPrice = 0.5
+
+      // When
+      const isGasPriceWithinLimits = gasPriceWithinLimits(gasPrice)
+
+      // Then
+      expect(isGasPriceWithinLimits).to.equal(false)
+    })
+    it('should return false if gas price is above max boundary', () => {
+      // Given
+      const gasPrice = 260
+
+      // When
+      const isGasPriceWithinLimits = gasPriceWithinLimits(gasPrice)
+
+      // Then
+      expect(isGasPriceWithinLimits).to.equal(false)
     })
   })
 })
