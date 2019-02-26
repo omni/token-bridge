@@ -10,11 +10,11 @@ const abisDir = path.join(__dirname, '..', 'submodules/poa-bridge-contracts/buil
 const homeWeb3 = new Web3(new Web3.providers.HttpProvider('http://parity1:8545'))
 const foreignWeb3 = new Web3(new Web3.providers.HttpProvider('http://parity2:8545'))
 
-const HOME_BRIDGE_ADDRESS_1 = '0x23Bd185ECd604d391DEa93e67084AC1bf636E0ed'
-const FOREIGN_BRIDGE_ADDRESS_1 = '0x23Bd185ECd604d391DEa93e67084AC1bf636E0ed'
+const HOME_BRIDGE_ADDRESS_1 = '0xADfae2358399E8772447302f8326e0ea46C9A94F'
+const FOREIGN_BRIDGE_ADDRESS_1 = '0xADfae2358399E8772447302f8326e0ea46C9A94F'
 
-const HOME_BRIDGE_ADDRESS_2 = '0xa22a1E999770459F2559b8784f6d8bA87a5C6724'
-const FOREIGN_BRIDGE_ADDRESS_2 = '0xBb6cd000ea35c174ADCE75626876644Ee4E6c3cD'
+const HOME_BRIDGE_ADDRESS_2 = '0x965680c7FAe3f757636FC8189d1c2ef8252689E3'
+const FOREIGN_BRIDGE_ADDRESS_2 = '0x596246F2136611b2F46620B85927E62A3a50405F'
 
 const { toBN } = foreignWeb3.utils
 
@@ -25,20 +25,20 @@ const tokenAbi = require(path.join(abisDir, 'ERC677BridgeToken.json')).abi
 
 const erc20Token1 = new foreignWeb3.eth.Contract(
   tokenAbi,
-  '0x7cF104437Dc33093078D715AC9b50dDbd256685b'
+  '0xc26Aa60Ff574f157616D3aEE70e08aAC129E1dFC'
 )
 const erc677Token1 = new homeWeb3.eth.Contract(
   tokenAbi,
-  '0xe0B5C31FD53953a36bF3755044410Ba04CC8856D'
+  '0xA349DCbE3DeF728275535814DC8bFB85707a8dFa'
 )
 
 const erc20Token2 = new foreignWeb3.eth.Contract(
   tokenAbi,
-  '0x8b6B10ad730e43fAF10340dF4b85590610E1865E'
+  '0xc2176B94D8a62c454e8490cdAd9FFDa5094c32F3'
 )
 const erc677Token2 = new homeWeb3.eth.Contract(
   tokenAbi,
-  '0x9a5910C45B52cBe66a7a10e1f4D31D471A9Fa833'
+  '0x7d7678252b927862C8b604ed06f89E76fc9d08c9'
 )
 
 describe('erc to erc (multiple)', () => {
