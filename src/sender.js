@@ -154,7 +154,8 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
           )
         } else if (
           e.message.includes('Transaction nonce is too low') ||
-          e.message.includes('transaction with same nonce in the queue')
+          e.message.includes('transaction with same nonce in the queue') ||
+          e.message.includes('nonce too low')
         ) {
           nonce = await readNonce(true)
         }
