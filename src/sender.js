@@ -142,6 +142,7 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
           e.message
         )
         if (!e.message.includes('Transaction with the same hash was already imported')) {
+          logger.debug(`adding event Tx ${job.transactionReference} to failedTx`)
           failedTx.push(job)
         }
 
@@ -157,7 +158,9 @@ async function main({ msg, ackMsg, nackMsg, sendToQueue, channel }) {
           e.message.includes('transaction with same nonce in the queue') ||
           e.message.includes('nonce too low')
         ) {
+          logger.debug('read nonce with forceUpdate=true')
           nonce = await readNonce(true)
+          logger.debug(`nonce after forceUpdate: ${nonce}`)
         }
       }
     })
