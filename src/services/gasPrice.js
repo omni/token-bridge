@@ -32,20 +32,23 @@ const foreignBridge = new web3Foreign.eth.Contract(ForeignABI, FOREIGN_BRIDGE_AD
 let cachedGasPrice = null
 
 function gasPriceWithinLimits(gasPrice) {
-  return GAS_PRICE_BOUNDARIES.MIN <= gasPrice && gasPrice <= GAS_PRICE_BOUNDARIES.MAX
+  if (gasPrice < GAS_PRICE_BOUNDARIES.MIN) {
+    return GAS_PRICE_BOUNDARIES.MIN
+  } else if (gasPrice > GAS_PRICE_BOUNDARIES.MAX) {
+    return GAS_PRICE_BOUNDARIES.MAX
+  } else {
+    return gasPrice
+  }
 }
 
 async function fetchGasPriceFromOracle(oracleUrl, speedType) {
   const response = await fetch(oracleUrl)
   const json = await response.json()
-  const gasPrice = json[speedType]
-  if (!gasPrice) {
+  const oracleGasPrice = json[speedType]
+  if (!oracleGasPrice) {
     throw new Error(`Response from Oracle didn't include gas price for ${speedType} type.`)
-  } else if (!gasPriceWithinLimits(gasPrice)) {
-    throw new Error(
-      `Response from Oracle included a gas price out of boundaries ${gasPrice} for ${speedType} type.`
-    )
   }
+  const gasPrice = gasPriceWithinLimits(oracleGasPrice)
   return Web3Utils.toWei(gasPrice.toString(), 'gwei')
 }
 
