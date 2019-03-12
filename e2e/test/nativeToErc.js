@@ -38,7 +38,7 @@ describe('native to erc', () => {
       from: user.address,
       to: HOME_BRIDGE_ADDRESS,
       gasPrice: '1',
-      gas: '50000',
+      gas: '1000000',
       value: '1000000000000000000'
     })
 
@@ -112,7 +112,7 @@ describe('native to erc', () => {
       from: user.address,
       to: HOME_BRIDGE_ADDRESS,
       gasPrice: '1',
-      gas: '50000',
+      gas: '1000000',
       value: '1000000000000000000'
     })
 
@@ -169,7 +169,7 @@ describe('native to erc', () => {
       from: user.address,
       to: HOME_BRIDGE_ADDRESS,
       gasPrice: '1',
-      gas: '50000',
+      gas: '1000000',
       value: '1000000000000000000'
     })
 

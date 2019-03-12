@@ -17,9 +17,8 @@ const limit = promiseLimit(MAX_CONCURRENT_EVENTS)
 let validatorContract = null
 
 function processTransfersBuilder(config) {
-  const homeBridge = new web3Home.eth.Contract(config.homeBridgeAbi, config.homeBridgeAddress)
-
-  return async function processTransfers(transfers) {
+  return async function processTransfers(transfers, homeBridgeAddress) {
+    const homeBridge = new web3Home.eth.Contract(config.homeBridgeAbi, homeBridgeAddress)
     const txToSend = []
 
     if (validatorContract === null) {
@@ -84,7 +83,7 @@ function processTransfersBuilder(config) {
           data,
           gasEstimate,
           transactionReference: transfer.transactionHash,
-          to: config.homeBridgeAddress
+          to: homeBridgeAddress
         })
       })
     )

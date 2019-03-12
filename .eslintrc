@@ -11,6 +11,8 @@
     "no-await-in-loop": "off",
     "no-console": "off",
     "no-else-return": "off",
+    "no-nested-ternary": "off",
+    "no-underscore-dangle": "off",
     "no-param-reassign": "off",
     "no-plusplus": "off",
     "no-restricted-syntax": "off",

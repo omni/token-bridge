@@ -49,7 +49,8 @@ async function main() {
         'Error: Process key not found on redis. Please provide one of the following:' +
           '\n  signature-request' +
           '\n  collected-signatures' +
-          '\n  affirmation-request'
+          '\n  affirmation-request' +
+          '\n  bridge-deployed'
       )
     }
 
