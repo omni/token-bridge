@@ -1,8 +1,8 @@
 const sinon = require('sinon')
 const { expect } = require('chai')
 const proxyquire = require('proxyquire').noPreserveCache()
-const { fetchGasPrice } = require('../src/services/gasPrice')
-const { DEFAULT_UPDATE_INTERVAL } = require('../src/utils/constants')
+const { fetchGasPrice, gasPriceWithinLimits } = require('../src/services/gasPrice')
+const { DEFAULT_UPDATE_INTERVAL, GAS_PRICE_BOUNDARIES } = require('../src/utils/constants')
 
 describe('gasPrice', () => {
   describe('fetchGasPrice', () => {
@@ -136,6 +136,44 @@ describe('gasPrice', () => {
       // then
       expect(process.env.FOREIGN_GAS_PRICE_UPDATE_INTERVAL).to.equal(undefined)
       expect(utils.setIntervalAndRun.args[0][1]).to.equal(DEFAULT_UPDATE_INTERVAL)
+    })
+  })
+  describe('gasPriceWithinLimits', () => {
+    it('should return gas price if gas price is between boundaries', () => {
+      // given
+      const minGasPrice = 1
+      const middleGasPrice = 10
+      const maxGasPrice = 250
+
+      // when
+      const minGasPriceWithinLimits = gasPriceWithinLimits(minGasPrice)
+      const middleGasPriceWithinLimits = gasPriceWithinLimits(middleGasPrice)
+      const maxGasPriceWithinLimits = gasPriceWithinLimits(maxGasPrice)
+
+      // then
+      expect(minGasPriceWithinLimits).to.equal(minGasPrice)
+      expect(middleGasPriceWithinLimits).to.equal(middleGasPrice)
+      expect(maxGasPriceWithinLimits).to.equal(maxGasPrice)
+    })
+    it('should return min limit if gas price is below min boundary', () => {
+      // Given
+      const initialGasPrice = 0.5
+
+      // When
+      const gasPrice = gasPriceWithinLimits(initialGasPrice)
+
+      // Then
+      expect(gasPrice).to.equal(GAS_PRICE_BOUNDARIES.MIN)
+    })
+    it('should return max limit if gas price is above max boundary', () => {
+      // Given
+      const initialGasPrice = 260
+
+      // When
+      const gasPrice = gasPriceWithinLimits(initialGasPrice)
+
+      // Then
+      expect(gasPrice).to.equal(GAS_PRICE_BOUNDARIES.MAX)
     })
   })
 })
