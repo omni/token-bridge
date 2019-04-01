@@ -1,48 +1,41 @@
 
-# POA Bridge - NodeJS Oracle
+# POA TokenBridge
 
-[![Build Status](https://travis-ci.org/poanetwork/bridge-nodejs.svg?branch=develop)](https://travis-ci.org/poanetwork/bridge-nodejs)
+[![Build Status](https://travis-ci.org/poanetwork/token-bridge.svg)](https://travis-ci.org/poanetwork/token-bridge)
 [![Gitter](https://badges.gitter.im/poanetwork/poa-bridge.svg)](https://gitter.im/poanetwork/poa-bridge?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-## Bridge Overview
+The TokenBridge is deployed on specified validator nodes (only nodes whose private keys correspond to addresses specified in the smart contracts) in the network. It connects to two chains via a Remote Procedure Call (RPC) and is responsible for:
+- listening to events related to bridge contracts
+- sending transactions to authorize asset transfers
 
-The POA Bridge allows users to transfer assets between two chains in the Ethereum ecosystem. It is composed of several elements which are located in different POA Network repositories:
+Following is an overview of the TokenBridge and [instructions for getting started](#how-to-use).
+
+## POA General Bridge Overview
+
+A POA Bridge allows users to transfer assets between two chains in the Ethereum ecosystem. It is composed of several elements located in different POA Network repositories:
 
 **Bridge Elements**
-1. An oracle written in NodeJS, contained in this repository.
+1. The TokenBridge contained in this repository.
 2. [Solidity smart contracts](https://github.com/poanetwork/poa-bridge-contracts). Used to manage bridge validators, collect signatures, and confirm asset relay and disposal.
 3. [Bridge UI Application](https://github.com/poanetwork/bridge-ui). A DApp interface to transfer tokens and coins between chains.
 4. [Bridge Monitor](https://github.com/poanetwork/bridge-monitor). A tool for checking balances and unprocessed events in bridged networks.
 5. [Bridge Deployment Playbooks](https://github.com/poanetwork/deployment-bridge). Manages configuration instructions for remote deployments.
 
-The bridge oracle is deployed on specified validator nodes (only nodes whose private keys correspond to addresses specified in the smart contracts) in the network. The oracle connects to two chains via a Remote Procedure Call (RPC). It is responsible for:
-- listening to events related to bridge contracts
-- sending transactions to authorize asset transfers
-
-Following is an overview of the NodeJS bridge oracle and [instructions for getting started](#how-to-use) with the POA Bridge.
-
-## Interoperability
-
-Interoperability is the ability to share resources between networks. The POA Bridge is an interoperability protocol where users can transfer value (ERC20 compatible tokens and network coins) between chains in the Ethereum ecosystem.  This creates opportunities to use different chains for different purposes. For example, smart contracts can allocate resource intensive operations to a sidechain where transactions are fast and inexpensive.
-
-## Network Processes 
-
-### Network Definitions
+## Network Definitions
 
  Bridging occurs between two networks.
 
- * **Home** - or Native - is a network with fast and inexpensive operations. All bridge operations to collect validator confirmations are performed on this side of the bridge.
+ * **Home** - or **Native** - is a network with fast and inexpensive operations. All bridge operations to collect validator confirmations are performed on this side of the bridge.
 
-* **Foreign** can be any chain, but generally refers to the Ethereum mainnet. 
+* **Foreign** can be any chain; generally it refers to the Ethereum mainnet. 
 
-### Operational Modes
+## Operational Modes
 
-The POA bridge currently provides two operational modes, with a 3rd mode in development.
+The POA TokenBridge provides three operational modes:
 
-- [x] `Native-to-ERC20` **Coins** on a Home network can be converted to ERC20-compatible **tokens** on a Foreign network. Coins are locked on the Home side and the corresponding amount of ERC20 tokens are minted on the Foreign side. When the operation is reversed, tokens are burnt on the Foreign side and unlocked in the Home network. 
-- [x] `ERC20-to-ERC20` ERC20-compatible tokens on the Foreign network are locked and minted as ERC20-compatible tokens (ERC677 tokens) on the Home network. When transferred from Home to Foreign, they are burnt on the Home side and unlocked in the Foreign network. This can be considered a form of atomic swap when a user swaps the token "X" in network "A" to the token "Y" in network "B".
-- [ ] `ERC20-to-Native`: Currently in development. Pre-existing tokens in the Foreign network are locked and coins are minted in the `Home` network. The Home network consensus engine in this case should support invocation of Parity's Block Reward contract (https://wiki.parity.io/Block-Reward-Contract.html) to mint coins per the bridge contract request.
-
+- [x] `Native-to-ERC20` **Coins** on a Home network can be converted to ERC20-compatible **tokens** on a Foreign network. Coins are locked on the Home side and the corresponding amount of ERC20 tokens are minted on the Foreign side. When the operation is reversed, tokens are burnt on the Foreign side and unlocked in the Home network. **More Information: [POA-to-POA20 Bridge](https://medium.com/poa-network/introducing-poa-bridge-and-poa20-55d8b78058ac)**
+- [x] `ERC20-to-ERC20` ERC20-compatible tokens on the Foreign network are locked and minted as ERC20-compatible tokens (ERC677 tokens) on the Home network. When transferred from Home to Foreign, they are burnt on the Home side and unlocked in the Foreign network. This can be considered a form of atomic swap when a user swaps the token "X" in network "A" to the token "Y" in network "B". **More Information: [ERC20-to-ERC20](https://medium.com/poa-network/introducing-the-erc20-to-erc20-tokenbridge-ce266cc1a2d0)**
+- [x] `ERC20-to-Native`: Pre-existing **tokens** in the Foreign network are locked and **coins** are minted in the `Home` network. In this mode, the Home network consensus engine invokes [Parity's Block Reward contract](https://wiki.parity.io/Block-Reward-Contract.html) to mint coins per the bridge contract request. **More Information: [xDai Chain](https://medium.com/poa-network/poa-network-partners-with-makerdao-on-xdai-chain-the-first-ever-usd-stable-blockchain-65a078c41e6a)**
 
 ## Architecture
 
@@ -50,16 +43,14 @@ The POA bridge currently provides two operational modes, with a 3rd mode in deve
 
 ![Native-to-ERC](Native-to-ERC.png)
 
-### ERC20-to-ERC20
+### ERC20-to-ERC20 and ERC20-to-Native
 
 ![ERC-to-ERC](ERC-to-ERC.png)
-
 
 ### Watcher
 A watcher listens for a certain event and creates proper jobs in the queue. These jobs contain the transaction data (without the nonce) and the transaction hash for the related event. The watcher runs on a given frequency, keeping track of the last processed block.
 
 If the watcher observes that the transaction data cannot be prepared, which generally means that the corresponding method of the bridge contract cannot be invoked, it inspects the contract state to identify the potential reason for failure and records this in the logs. 
-
 
 There are three Watchers:
 - **Signature Request Watcher**: Listens to `UserRequestForSignature` events on the Home network.
@@ -68,33 +59,34 @@ There are three Watchers:
    - `Native-to-ERC20`: Listens to `UserRequestForAffirmation` raised by the bridge contract.
    - `ERC20-to-ERC20` and `ERC20-to-Native`: Listens to `Transfer` events raised by the token contract.
 
-
 ### Sender
 A sender subscribes to the queue and keeps track of the nonce. It takes jobs from the queue, extracts transaction data, adds the proper nonce, and sends it to the network.
 
 There are two Senders:
-- **Home Sender**: Sends transaction to the `Home` network.
-- **Foreign Sender**: Sends transaction to the `Foreign` network.
+- **Home Sender**: Sends a transaction to the `Home` network.
+- **Foreign Sender**: Sends a transaction to the `Foreign` network.
 
 ### RabbitMQ
 
-[RabbitMQ](https://www.rabbitmq.com/) is used to send jobs from watchers to senders.
+[RabbitMQ](https://www.rabbitmq.com/) is used to transmit jobs from watchers to senders.
 
 ### Redis DB
 
-Redis is used to store the number of blocks that were already inspected by watchers, and the NOnce (Number of Operation) which was used by the sender last time to send a transaction.
+Redis is used to store the number of blocks that were already inspected by watchers, and the NOnce (Number of Operation) which was used previously by the sender to send a transaction.
 
-For more information on the Redis/RabbitMQ requirements, see [#90](/../../issues/90)
+For more information on the Redis/RabbitMQ requirements, see [#90](/../../issues/90). We also provide [useful commands for development](#useful-commands-for-development).
 
 # How to Use
 
 ## Installation and Deployment
 
+**Note:** The following steps detail the bridge deployment process for development and testing. For deployment in a production environment we recommend using the [Bridge Deployment Playbooks](https://github.com/poanetwork/deployment-bridge/tree/master/bridge-nodejs). 
+
 #### Deploy the Bridge Contracts
 
 1. [Deploy the bridge contracts](https://github.com/poanetwork/poa-bridge-contracts/blob/master/deploy/README.md)
 
-2. Open `bridgeDeploymentResults.json` generated by the bridge contract deployment process.
+2. Open `bridgeDeploymentResults.json` or copy the JSON output generated by the bridge contract deployment process.
   
    `Native-to-ERC20` mode example:
    ```json
@@ -134,19 +126,25 @@ For more information on the Redis/RabbitMQ requirements, see [#90](/../../issues
 
 1. Create a `.env` file: `cp .env.example .env`
 
-2. Fill in the required information using the output data from `bridgeDeploymentResults.json`. Check the tables with the [set of parameters](#configuration-parameters) below to see their explanation.
+2. Fill in the required information using the JSON output data. Check the tables with the [set of parameters](#configuration-parameters) below to see their explanation. 
 
 ## Run the Processes
 
-There are two options to run the nodejs oracle:
-1. Docker containers. This requires [Docker](https://docs.docker.com/install/) and [Docker Compose](https://docs.docker.com/compose/install/) installed. If you are on Linux, it's also recommended that you [create a docker group and add your user to it](https://docs.docker.com/install/linux/linux-postinstall/), so that you can use the CLI without sudo.
+There are two options to run the TokenBridge processes:
+1. Docker containers. This requires [Docker](https://docs.docker.com/install/) and [Docker Compose](https://docs.docker.com/compose/install/). If you are on Linux, it's also recommended that you [create a docker group and add your user to it](https://docs.docker.com/install/linux/linux-postinstall/), so that you can use the CLI without sudo.
 2. NodeJs Package Manager (NPM).
 
-### Docker
+### Docker 
 
   - While running the bridge containers for the first time use `VALIDATOR_ADDRESS=<validator address> VALIDATOR_ADDRESS_PRIVATE_KEY=<validator address private key> docker-compose up -d --build` 
   - For further launches use `VALIDATOR_ADDRESS=<validator address>  VALIDATOR_ADDRESS_PRIVATE_KEY=<validator address private key> docker-compose  up  --detach`
-  - If you want to use any command from this document, prefix it with `docker-compose exec bridge_affirmation`, if not already prefixed, to execute command inside on of the running docker containers. Make sure bridge service is started before using the commands.
+
+All [watcher](#watcher) & [sender](#sender) services launch when `docker-compose` is called. 
+
+**Note**: To view the Docker logs:
+* `chdir` to the directory containing the `docker-compose.yml` file used to run the bridge instance
+* [View the logs](https://docs.docker.com/v17.09/compose/reference/logs/) : `docker-compose logs`
+
 
 ### NPM
 
@@ -168,20 +166,21 @@ If the bridge does not handle an event properly (i.e. a transaction stalls due t
 
 Execute this command in the bridge root directory:
 
+for NPM installation:
 ```shell
 bash ./reset-lastBlock.sh <watcher> <block num>
 ```
-for NPM installation or
+for Docker installation:
 ```shell
 docker-compose exec bridge_affirmation bash ./reset-lastBlock.sh <watcher> <block num>
 ```
-for docker installation respectively, where the _watcher_ could be one of:
+where the _watcher_ could be one of:
 
 - `signature-request`
 - `collected-signatures`
 - `affirmation-request`
 
-### Configuration parameters
+## Configuration parameters
 
 | Variable | Description | Values |
 |-------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------|
@@ -211,9 +210,9 @@ for docker installation respectively, where the _watcher_ could be one of:
 | `LOG_LEVEL` | Set the level of details in the logs. | `trace` / `debug` / `info` / `warn` / `error` / `fatal` |
 | `MAX_PROCESSING_TIME` | The workers processes will be killed if this amount of time (in milliseconds) is ellapsed before they finish processing. It is recommended to set this value to 4 times the value of the longest polling time (set with the `HOME_POLLING_INTERVAL` and `FOREIGN_POLLING_INTERVAL` variables). To disable this, set the time to 0. | integer |
 
-### Useful Commands for Development
+## Useful Commands for Development
 
-#### RabbitMQ
+### RabbitMQ
 Command | Description
 --- | ---
 `rabbitmqctl list_queues` | List all queues
@@ -221,7 +220,7 @@ Command | Description
 `rabbitmqctl status` | check if rabbitmq server is currently running  
 `rabbitmq-server`    | start rabbitMQ server  
 
-#### Redis
+### Redis
 Use `redis-cli`
 
 Command | Description
@@ -293,4 +292,6 @@ This project is licensed under the GNU Lesser General Public License v3.0. See t
 
 ## References
 
+* [Additional Documentation](https://forum.poa.network/c/tokenbridge)
 * [POA Bridge FAQ](https://poanet.zendesk.com/hc/en-us/categories/360000349273-POA-Bridge)
+

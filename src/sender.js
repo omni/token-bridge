@@ -42,7 +42,7 @@ async function initialize() {
 
     GasPrice.start(config.id)
 
-    chainId = await getChainId(web3Instance)
+    chainId = await getChainId(config.id)
     connectSenderToQueue({
       queueName: config.queue,
       cb: options => {

@@ -1,6 +1,8 @@
 const logger = require('../services/logger').child({
   module: 'web3'
 })
+const { sendRawTx } = require('./sendTx')
+const { hexToNumber } = require('web3-utils')
 
 async function getNonce(web3, address) {
   try {
@@ -24,10 +26,15 @@ async function getBlockNumber(web3) {
   }
 }
 
-async function getChainId(web3) {
+async function getChainId(chain) {
   try {
     logger.debug('Getting chain id')
-    const chainId = await web3.eth.net.getId()
+    const chainIdHex = await sendRawTx({
+      chain,
+      method: 'eth_chainId',
+      params: []
+    })
+    const chainId = hexToNumber(chainIdHex)
     logger.debug({ chainId }, 'Chain id obtained')
     return chainId
   } catch (e) {
