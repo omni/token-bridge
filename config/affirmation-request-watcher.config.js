@@ -4,6 +4,11 @@ const erc20Abi = require('../abis/ERC20.abi')
 const { ERC_TYPES } = require('../src/utils/constants')
 
 const initialChecksJson = process.argv[3]
+
+if (!initialChecksJson) {
+  throw new Error('initial check parameter was not provided.')
+}
+
 let initialChecks
 try {
   initialChecks = JSON.parse(initialChecksJson)
