@@ -16,5 +16,9 @@ module.exports = {
   GAS_PRICE_BOUNDARIES: {
     MIN: 1,
     MAX: 250
+  },
+  ERC_TYPES: {
+    ERC20: 'ERC20',
+    ERC677: 'ERC677'
   }
 }

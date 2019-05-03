@@ -8,7 +8,7 @@ const homeNativeErcAbi = require('../abis/HomeBridgeNativeToErc.abi')
 const foreignNativeErcAbi = require('../abis/ForeignBridgeNativeToErc.abi')
 
 const homeErcErcAbi = require('../abis/HomeBridgeErcToErc.abi')
-const foreignErcErcAbi = require('../abis/ForeignBridgeErcToErc.abi')
+const foreignErc677Erc677Abi = require('../abis/ForeignBridgeErc677ToErc677.abi')
 
 const homeErcNativeAbi = require('../abis/HomeBridgeErcToNative.abi')
 const foreignErcNativeAbi = require('../abis/ForeignBridgeErcToNative.abi')
@@ -27,7 +27,7 @@ switch (process.env.BRIDGE_MODE) {
     break
   case 'ERC_TO_ERC':
     homeAbi = homeErcErcAbi
-    foreignAbi = foreignErcErcAbi
+    foreignAbi = foreignErc677Erc677Abi
     id = 'erc-erc'
     break
   case 'ERC_TO_NATIVE':
