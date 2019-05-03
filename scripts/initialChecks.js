@@ -10,7 +10,7 @@ async function initialChecks() {
   const { ERC20_TOKEN_ADDRESS, BRIDGE_MODE, FOREIGN_RPC_URL, FOREIGN_BRIDGE_ADDRESS } = process.env
   const result = {}
 
-  if (BRIDGE_MODE === 'ERC_TO_ERC' && process.argv[2].includes('affirmation-request-watcher')) {
+  if (BRIDGE_MODE === 'ERC_TO_ERC') {
     const foreignWeb3 = new Web3(new Web3.providers.HttpProvider(FOREIGN_RPC_URL))
     const tokenContract = new foreignWeb3.eth.Contract(ERC677BridgeTokenABI, ERC20_TOKEN_ADDRESS)
     try {

@@ -9,7 +9,7 @@ WORKER="${WORKERS_DIR}${1}.js"
 CONFIG="${2}.config.js"
 LOG="${LOGS_DIR}${2}.txt"
 
-CHECKS=$(node scripts/initialChecks.js "${CONFIG}")
+CHECKS=$(node scripts/initialChecks.js)
 
 if [ "${NODE_ENV}" = "production" ]; then
   exec node "${WORKER}" "${CONFIG}" "$CHECKS"
