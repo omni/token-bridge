@@ -7,8 +7,7 @@ const readFile = (...paths) => {
   const a = []
   const filename = path.join(...paths)
   return new Promise(resolve => {
-    fs
-      .createReadStream(filename)
+    fs.createReadStream(filename)
       .pipe(ndjson.parse())
       .on('data', obj => a.push(obj))
       .on('end', () => resolve(a))
@@ -17,10 +16,12 @@ const readFile = (...paths) => {
 
 function computeSignatureRequestStats(signatureRequests, senderHome) {
   const processingLogs = signatureRequests.filter(x => x.eventTransactionHash)
-  const txSentMap = senderHome.filter(x => x.eventTransactionHash).reduce((acc, x) => {
-    acc[x.eventTransactionHash] = x
-    return acc
-  }, {})
+  const txSentMap = senderHome
+    .filter(x => x.eventTransactionHash)
+    .reduce((acc, x) => {
+      acc[x.eventTransactionHash] = x
+      return acc
+    }, {})
 
   const times = processingLogs.map(x => txSentMap[x.eventTransactionHash].time - x.time)
 
@@ -35,10 +36,12 @@ function computeSignatureRequestStats(signatureRequests, senderHome) {
 
 function computeCollectedSignaturesStats(collectedSignatures, senderForeign) {
   const processingLogs = collectedSignatures.filter(x => x.eventTransactionHash)
-  const txSentMap = senderForeign.filter(x => x.eventTransactionHash).reduce((acc, x) => {
-    acc[x.eventTransactionHash] = x
-    return acc
-  }, {})
+  const txSentMap = senderForeign
+    .filter(x => x.eventTransactionHash)
+    .reduce((acc, x) => {
+      acc[x.eventTransactionHash] = x
+      return acc
+    }, {})
 
   const times = processingLogs.map(x => txSentMap[x.eventTransactionHash].time - x.time)
 

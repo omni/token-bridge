@@ -7,7 +7,7 @@ const logger = require('../services/logger').child({
   module: 'gasPrice'
 })
 const { setIntervalAndRun } = require('../utils/utils')
-const { DEFAULT_UPDATE_INTERVAL, GAS_PRICE_OPTIONS } = require('../utils/constants')
+const { DEFAULT_UPDATE_INTERVAL, GAS_PRICE_BOUNDARIES, GAS_PRICE_OPTIONS } = require('../utils/constants')
 
 const HomeABI = bridgeConfig.homeBridgeAbi
 const ForeignABI = bridgeConfig.foreignBridgeAbi
@@ -32,13 +32,24 @@ const foreignBridge = new web3Foreign.eth.Contract(ForeignABI, FOREIGN_BRIDGE_AD
 let cachedGasPrice = null
 let cachedGasPriceOracleSpeeds = null
 
+function gasPriceWithinLimits(gasPrice) {
+  if (gasPrice < GAS_PRICE_BOUNDARIES.MIN) {
+    return GAS_PRICE_BOUNDARIES.MIN
+  } else if (gasPrice > GAS_PRICE_BOUNDARIES.MAX) {
+    return GAS_PRICE_BOUNDARIES.MAX
+  } else {
+    return gasPrice
+  }
+}
+
 async function fetchGasPriceFromOracle(oracleUrl, speedType) {
   const response = await fetch(oracleUrl)
   const json = await response.json()
-  const gasPrice = json[speedType]
-  if (!gasPrice) {
+  const oracleGasPrice = json[speedType]
+  if (!oracleGasPrice) {
     throw new Error(`Response from Oracle didn't include gas price for ${speedType} type.`)
   }
+  const gasPrice = gasPriceWithinLimits(oracleGasPrice)
   return {
     oracleGasPrice: Web3Utils.toWei(gasPrice.toString(), 'gwei'),
     oracleResponse: json
@@ -127,5 +138,6 @@ module.exports = {
   start,
   fetchGasPrice,
   getPrice,
-  processGasPriceOptions
+  processGasPriceOptions,
+  gasPriceWithinLimits
 }

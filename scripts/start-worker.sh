@@ -9,8 +9,10 @@ WORKER="${WORKERS_DIR}${1}.js"
 CONFIG="${2}.config.js"
 LOG="${LOGS_DIR}${2}.txt"
 
+CHECKS=$(node scripts/initialChecks.js)
+
 if [ "${NODE_ENV}" = "production" ]; then
-  exec node "${WORKER}" "${CONFIG}"
+  exec node "${WORKER}" "${CONFIG}" "$CHECKS"
 else
-  node "${WORKER}" "${CONFIG}" | tee -a "${LOG}" | pino-pretty
+  node "${WORKER}" "${CONFIG}" "$CHECKS" | tee -a "${LOG}" | pino-pretty
 fi
