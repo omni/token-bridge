@@ -56,6 +56,39 @@
     "type": "function"
   },
   {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "_fee",
+        "type": "uint256"
+      }
+    ],
+    "name": "setForeignFee",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_txHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "fixedAssets",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "constant": true,
     "inputs": [
       {
@@ -75,6 +108,20 @@
     "type": "function"
   },
   {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "_fee",
+        "type": "uint256"
+      }
+    ],
+    "name": "setHomeFee",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "constant": true,
     "inputs": [],
     "name": "isInitialized",
@@ -86,6 +133,20 @@
     ],
     "payable": false,
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "_dailyLimit",
+        "type": "uint256"
+      }
+    ],
+    "name": "setExecutionDailyLimit",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -132,6 +193,20 @@
   },
   {
     "constant": true,
+    "inputs": [],
+    "name": "executionDailyLimit",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
     "inputs": [
       {
         "name": "_hash",
@@ -150,6 +225,39 @@
     "type": "function"
   },
   {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_day",
+        "type": "uint256"
+      }
+    ],
+    "name": "totalExecutedPerDay",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "_feeManager",
+        "type": "address"
+      }
+    ],
+    "name": "setFeeManagerContract",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "constant": false,
     "inputs": [
       {
@@ -162,6 +270,24 @@
       }
     ],
     "name": "submitSignature",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "txHash",
+        "type": "bytes32"
+      },
+      {
+        "name": "unlockOnForeign",
+        "type": "bool"
+      }
+    ],
+    "name": "fixAssetsAboveLimits",
     "outputs": [],
     "payable": false,
     "stateMutability": "nonpayable",
@@ -239,12 +365,59 @@
   },
   {
     "constant": true,
+    "inputs": [
+      {
+        "name": "_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "withinExecutionLimit",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "executionMaxPerTx",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
     "inputs": [],
     "name": "requiredSignatures",
     "outputs": [
       {
         "name": "",
         "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
       }
     ],
     "payable": false,
@@ -264,6 +437,20 @@
       {
         "name": "",
         "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getHomeFee",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
       }
     ],
     "payable": false,
@@ -310,6 +497,42 @@
     "constant": true,
     "inputs": [],
     "name": "deployedAtBlock",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getBridgeInterfacesVersion",
+    "outputs": [
+      {
+        "name": "major",
+        "type": "uint64"
+      },
+      {
+        "name": "minor",
+        "type": "uint64"
+      },
+      {
+        "name": "patch",
+        "type": "uint64"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "outOfLimitAmount",
     "outputs": [
       {
         "name": "",
@@ -420,6 +643,34 @@
   {
     "constant": true,
     "inputs": [],
+    "name": "feeManagerContract",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "upgradeabilityAdmin",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
     "name": "minPerTx",
     "outputs": [
       {
@@ -448,6 +699,48 @@
     ],
     "payable": false,
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "_maxPerTx",
+        "type": "uint256"
+      }
+    ],
+    "name": "setExecutionMaxPerTx",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getFeeManagerMode",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes4"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -498,9 +791,79 @@
     "type": "function"
   },
   {
+    "constant": true,
+    "inputs": [],
+    "name": "getForeignFee",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
     "payable": false,
-    "stateMutability": "nonpayable",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "payable": true,
+    "stateMutability": "payable",
     "type": "fallback"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "recipient",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "value",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "name": "transactionHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "AmountLimitExceeded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "feeAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "name": "transactionHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "FeeDistributedFromAffirmation",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "feeAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "name": "transactionHash",
+        "type": "bytes32"
+      }
+    ],
+    "name": "FeeDistributedFromSignatures",
+    "type": "event"
   },
   {
     "anonymous": false,
@@ -634,6 +997,35 @@
     "type": "event"
   },
   {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "newLimit",
+        "type": "uint256"
+      }
+    ],
+    "name": "ExecutionDailyLimitChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
     "constant": false,
     "inputs": [
       {
@@ -663,6 +1055,18 @@
       {
         "name": "_erc677token",
         "type": "address"
+      },
+      {
+        "name": "_foreignDailyLimit",
+        "type": "uint256"
+      },
+      {
+        "name": "_foreignMaxPerTx",
+        "type": "uint256"
+      },
+      {
+        "name": "_owner",
+        "type": "address"
       }
     ],
     "name": "initialize",
@@ -674,6 +1078,87 @@
     ],
     "payable": false,
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "_validatorContract",
+        "type": "address"
+      },
+      {
+        "name": "_dailyLimit",
+        "type": "uint256"
+      },
+      {
+        "name": "_maxPerTx",
+        "type": "uint256"
+      },
+      {
+        "name": "_minPerTx",
+        "type": "uint256"
+      },
+      {
+        "name": "_homeGasPrice",
+        "type": "uint256"
+      },
+      {
+        "name": "_requiredBlockConfirmations",
+        "type": "uint256"
+      },
+      {
+        "name": "_erc677token",
+        "type": "address"
+      },
+      {
+        "name": "_foreignDailyLimit",
+        "type": "uint256"
+      },
+      {
+        "name": "_foreignMaxPerTx",
+        "type": "uint256"
+      },
+      {
+        "name": "_owner",
+        "type": "address"
+      },
+      {
+        "name": "_feeManager",
+        "type": "address"
+      },
+      {
+        "name": "_homeFee",
+        "type": "uint256"
+      },
+      {
+        "name": "_foreignFee",
+        "type": "uint256"
+      }
+    ],
+    "name": "rewardableInitialize",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getBridgeMode",
+    "outputs": [
+      {
+        "name": "_data",
+        "type": "bytes4"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "pure",
     "type": "function"
   }
 ]
