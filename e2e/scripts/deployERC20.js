@@ -6,7 +6,8 @@ require('dotenv').config({
 
 const {
   deployContract,
-  sendRawTx
+  sendRawTx,
+  privateKeyToAddress
 } = require('../submodules/poa-bridge-contracts/deploy/src/deploymentUtils')
 const {
   web3Foreign,
@@ -15,7 +16,8 @@ const {
 const POA20 = require('../submodules/poa-bridge-contracts/build/contracts/ERC677BridgeToken.json')
 const { user } = require('../constants.json')
 
-const { DEPLOYMENT_ACCOUNT_ADDRESS } = process.env
+const { DEPLOYMENT_ACCOUNT_PRIVATE_KEY } = process.env
+const DEPLOYMENT_ACCOUNT_ADDRESS = privateKeyToAddress(DEPLOYMENT_ACCOUNT_PRIVATE_KEY)
 
 async function deployErc20() {
   try {
