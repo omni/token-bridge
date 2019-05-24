@@ -7,7 +7,11 @@ const logger = require('../services/logger').child({
   module: 'gasPrice'
 })
 const { setIntervalAndRun } = require('../utils/utils')
-const { DEFAULT_UPDATE_INTERVAL, GAS_PRICE_BOUNDARIES, GAS_PRICE_OPTIONS } = require('../utils/constants')
+const {
+  DEFAULT_UPDATE_INTERVAL,
+  GAS_PRICE_BOUNDARIES,
+  GAS_PRICE_OPTIONS
+} = require('../utils/constants')
 
 const HomeABI = bridgeConfig.homeBridgeAbi
 const ForeignABI = bridgeConfig.foreignBridgeAbi
