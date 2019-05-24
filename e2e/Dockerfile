@@ -20,6 +20,7 @@ RUN cd submodules/poa-bridge-contracts && \
   npm install && \
   ./node_modules/.bin/truffle compile && \
   cd deploy && \
+  rm package-lock.json && \
   npm install
 
 ADD . .
