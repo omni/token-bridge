@@ -13,4 +13,4 @@ What does it mean for you? If you would like
   * to find if a new version of the UI is ready in the monorepo, visit [the releases tab](https://github.com/poanetwork/tokenbridge/releases).
   * to get access to the last changes made in this repo, check the release [`1.3.1`](https://github.com/poanetwork/token-bridge/releases/tag/1.3.1) or the [`master`](https://github.com/poanetwork/token-bridge/tree/master) branch.
 
-If you still have no clear understanding what you need to do, please visit [the TokenBridge forum](https://forum.poa.network/c/tokenbridge) and raise your question there.
+If you still have no clear understanding what you need to do, please visit [the TokenBridge forum](https://forum.poa.network/c/tokenbridge) and raise your question there..
