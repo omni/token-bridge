@@ -78,6 +78,20 @@
     "type": "function"
   },
   {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "_dailyLimit",
+        "type": "uint256"
+      }
+    ],
+    "name": "setExecutionDailyLimit",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "constant": true,
     "inputs": [],
     "name": "getCurrentDay",
@@ -108,7 +122,73 @@
   {
     "constant": true,
     "inputs": [],
+    "name": "executionDailyLimit",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_day",
+        "type": "uint256"
+      }
+    ],
+    "name": "totalExecutedPerDay",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
     "name": "dailyLimit",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "withinExecutionLimit",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "executionMaxPerTx",
     "outputs": [
       {
         "name": "",
@@ -127,6 +207,20 @@
       {
         "name": "",
         "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
       }
     ],
     "payable": false,
@@ -180,7 +274,7 @@
       }
     ],
     "payable": false,
-    "stateMutability": "view",
+    "stateMutability": "pure",
     "type": "function"
   },
   {
@@ -256,6 +350,20 @@
   {
     "constant": true,
     "inputs": [],
+    "name": "upgradeabilityAdmin",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
     "name": "minPerTx",
     "outputs": [
       {
@@ -284,6 +392,34 @@
     ],
     "payable": false,
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "_maxPerTx",
+        "type": "uint256"
+      }
+    ],
+    "name": "setExecutionMaxPerTx",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -373,6 +509,35 @@
     "type": "event"
   },
   {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "newLimit",
+        "type": "uint256"
+      }
+    ],
+    "name": "ExecutionDailyLimitChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
     "constant": false,
     "inputs": [
       {
@@ -390,6 +555,22 @@
       {
         "name": "_gasPrice",
         "type": "uint256"
+      },
+      {
+        "name": "_maxPerTx",
+        "type": "uint256"
+      },
+      {
+        "name": "_homeDailyLimit",
+        "type": "uint256"
+      },
+      {
+        "name": "_homeMaxPerTx",
+        "type": "uint256"
+      },
+      {
+        "name": "_owner",
+        "type": "address"
       }
     ],
     "name": "initialize",
